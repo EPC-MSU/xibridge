@@ -1,0 +1,6 @@
+[submodule "vendor/bindy"]
+	path = vendor/bindy
+	url = https://github.com/EPC-MSU/Bindy
+[submodule "vendor/zf_log"]
+	path = vendor/zf_log
+	url = https://github.com/wonder-mice/zf_log.git
