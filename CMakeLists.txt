@@ -38,6 +38,10 @@ SET(SOURCES
         common/utils.cpp
          )
 	 
+#add_custom_target(tests) # Note: without 'ALL'
+ADD_EXECUTABLE(test  test/test_proto.cpp ${SOURCES}) # Note: without 'ALL'
+TARGET_LINK_LIBRARIES(test bindy zf_log)
+#add_dependencies(tests test_executable)
 ADD_LIBRARY(xibridge STATIC ${SOURCES})
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
 

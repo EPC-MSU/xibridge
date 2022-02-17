@@ -57,8 +57,20 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl)
 	return conn;
 }
 
+void  Bindy_helper::disconnect(conn_id_t conn_id)
+{
+	bindy::Bindy *pb = instance_bindy();
+	if (pb == nullptr || conn_id == conn_id_invalid) return;
+	pb->disconnect(conn_id);
+	_map_mutex.lock();
+	if (_map.find(conn_id) != _map.cend())
+		_map.erase(conn_id);
+	_map_mutex.unlock();
+}
+
 bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 {
+	bindy::Bindy *pb = instance_bindy();
 	try
 	{
 		_pbindy -> send_data(conn_id, data);
@@ -104,6 +116,13 @@ void Bindy_helper::on_bindy_disconnect(conn_id_t conn_id)
 		_map.erase(conn_id);
 	}
 	_map_mutex.unlock();
+}
 
-
+bool Bindy_helper::is_connected(conn_id_t conn_id) const
+{
+	bool ret;
+	_map_mutex.lock();
+	ret = _map.find(conn_id) != _map.cend();
+	_map_mutex.unlock();
+	return ret;
 }

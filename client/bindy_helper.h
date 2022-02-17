@@ -21,9 +21,9 @@ public:
 	static void set_keyfile(const char *keyfile) { _keyfile = keyfile; }
 	static void shutdown_bindy(){ bindy::Bindy::shutdown_network(); delete _pbindy; _pbindy = nullptr; }
 	static Bindy_helper *instance() { return &_bhelper; }
-	
+	bool is_connected(conn_id_t conn_id) const;
 	bool send_bindy_data(conn_id_t conn_id, bvector data);
-
+	void disconnect(conn_id_t conn_id);
 private:
 	static void callback_data_bindy(conn_id_t conn_id, std::vector<uint8_t> data);
 	static void on_bindy_disconnect(conn_id_t conn_id);

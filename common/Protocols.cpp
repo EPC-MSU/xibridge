@@ -5,30 +5,32 @@
 // staic data init
 cmd_schema Protocol1::_cmd_shemas[9]=
 {
-{ pkt1_raw, "v_p_0_" },
-{ pkt1_open_req, "v_p_0_"},
-{ pkt1_open_resp, "v_p_0_"},
-{ pkt1_close_req, "v_p_0" },
-{ pkt1_close_resp, "v_p_0_" },
-{ pkt1_enum_req, "v_p_0_"},
-{ pkt1_enum_resp, "v_p_0_" },
-{ pkt1_error_ntf , "v_p_"},
+{ pkt1_raw, "v_p_0_d_0_0_x" },
+{ pkt1_open_req, "v_p_0_d_0_0" },
+{ pkt1_open_resp, "v_p_0_d_0_0_b" },
+{ pkt1_close_req, "v_p_0_d_0_0" },
+{ pkt1_close_resp, "v_p_0_d_0_0_b" },
+{ pkt1_enum_req, "v_p_0_0_0_0_0"},
+{ pkt1_enum_resp, "v_p_0_u_x" },
+{ pkt1_error_ntf , "v_p_0_d_0_0"},
 { pkt1_raw, nullptr}
 };
 
 cmd_schema  Protocol2 ::_cmd_shemas[7] =
-								 {
-								 { pkt2_cmd_req, "v_p_0_" },
-								 { pkt2_cmd_resp, "v_p_0_" },
-								 { pkt2_open_req, "v_p_0_" },
-								 { pkt2_open_resp, "v_p_0_" },
-								 { pkt2_close_req, "v_p_0" },
-								 { pkt2_close_resp, "v_p_0_" },
+{
+{ pkt2_cmd_req, "v_p_0_d_0_0_x" },
+								 { pkt2_cmd_resp, "v_p_0_d_0_0_x" },
+								 { pkt2_open_req, "v_p_0_d_0_0" },
+								 { pkt2_open_resp, "v_p_0_d_0_0_b" },
+								 { pkt2_close_req, "v_p_0_d_0_0" },
+								 { pkt2_close_resp, "v_p_0_d_0_0_b" },
 								 { pkt2_cmd_req, nullptr }
 };
 
-cmd_schema Protocol3::_cmd_shemas[7] =
+cmd_schema Protocol3::_cmd_shemas[9] =
 {
+{ pkt3_ver_req, "v_p_u_0_0_0" },
+{ pkt3_ver_resp, "v_p_u_0_0_0_b_v" },
 { pkt3_cmd_req, "v_p_0_" },
 { pkt3_cmd_resp, "v_p_0_" },
 { pkt3_open_req, "v_p_0_" },
@@ -39,15 +41,26 @@ cmd_schema Protocol3::_cmd_shemas[7] =
 };
 
 
+const cmd_schema &cmd_schema::get_schema(uint32 pckt, const cmd_schema *_ss)
+{
+	int i;
+	for (i = 0; _ss[i].schema != nullptr; i++)
+	{
+		if (_ss[i].pkt_type == pckt) break; 
+	}
+	return _ss[i];
+}
 
+// structure to connect packet type and command schema
+//  command schema ia a string like this "v_p_0_d_0_0_x"
 //  v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
-//  b - 32 - bit length + byte array of thislength
-bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_num)
+//   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit numver
+bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_num) const
 {
 	MBuf mbuf(data, len);
 	Hex32 hex32;
-
-	for (auto ch: schema )
+	std::string sc(schema);
+	for (auto ch: sc)
 	{
 		if (ch == '_') continue;
 		switch (ch)
@@ -70,17 +83,24 @@ bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_n
 			if (hex32 != dev_num) return false;
 			break;
 		case 'x':
-			if (mbuf.restOfSize(mbuf.realSize()) <= 0) return false;
+			if (mbuf.restOfSize(-1) < 0) return false;
+			break;
+		case 'l':
+			mbuf >> hex32;
+			if (mbuf.restOfSize(-1) != (int)hex32) return false;
 			break;
 		case 'b':
 			mbuf >> hex32;
-			if (mbuf.restOfSize(mbuf.realSize()) != (int)hex32) return false;
+			if ((uint32)hex32 != 0 && (uint32)hex32 != 1) return false;
+			break;
+		case 'u':
+			mbuf >> hex32;
 			break;
 		default:
 			return false;
 		}
-		return !mbuf.wasBroken();
 	}
+	return !mbuf.wasBroken();
 }
 
 
@@ -160,6 +180,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
+						 grey_data = mbuf.to_vector(true);
 						 return true;
 		}
 		case pkt1_open_resp:
@@ -172,7 +193,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
-						 green_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+						 green_data = mbuf.to_vector(true);
 					     return true;
 		}
 		case pkt1_enum_resp:
@@ -184,7 +205,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
-						 grey_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+						 grey_data = mbuf.to_vector(true);
 					     return true;
 					    
 		}
@@ -223,11 +244,11 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		}
 		case pkt2_open_req:
 		{
-							  return true;
+					     return true;
 		}
 		case pkt2_close_req:
 		{
-							   return true;
+					     return true;
 		}
 		default:
 			_is_inv_pckt = true;
@@ -247,6 +268,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
+						 grey_data = mbuf.to_vector(true);
 						 return true;
 		}
 		case pkt2_open_resp:
@@ -259,7 +281,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 									_is_inv_pcktfmt = true;
 									return false;
 								}
-								green_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+								green_data = mbuf.to_vector(true);
 								return true;
 		}
 		
@@ -291,7 +313,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								 _is_inv_pcktfmt = true;
 								 return false;
 							 }
-							 grey_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+							 grey_data = mbuf.to_vector(true);
 
 							 return true;
 		}
@@ -319,7 +341,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								  _is_inv_pcktfmt = true;
 								  return false;
 							  }
-							  grey_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+							  grey_data = mbuf.to_vector(true);
 		}
 		case pkt3_open_resp:
 		case pkt3_close_resp:
@@ -334,7 +356,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								  _is_inv_pcktfmt = true;
 								  return false;
 							  }
-							  green_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+							  green_data = mbuf.to_vector(true);
 							  return true;
 
 		}
@@ -342,13 +364,11 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 		{
 
 							   mbuf.mseek(8);
-							   int len = mbuf.restOfSize(-1);
-							   if (len != sizeof (uint32))
-							   {
-								   _is_inv_pcktfmt = true;
-								   return false;
-							   }
-							   green_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+							   mbuf >> size;
+							   green_data.assign(mbuf.cur_data(), mbuf.cur_data() + size * sizeof(uint32));
+							   mbuf >> size;
+							   if (mbuf.restOfSize(-1) != (int)size) return false;
+							   grey_data = mbuf.to_vector(true);
 							   return true;
 
 		}
@@ -359,22 +379,22 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 	}
 }
 
-bvector Protocol1::create_client_request(uint32 pckt, uint32 /*tmout*/, uint32 serial, const bvector *data)
+bvector Protocol1::create_client_request(uint32 pckt, uint32 serial, uint32 /*tmout*/, const bvector *data)
 {
-	bvector ret;
-	MBuf mbuf(64 + (data == nullptr) ? 0 : data->size());
-	mbuf << Hex32(version()) << Hex32((uint32)pckt) << Hex32((uint32)0x0) << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0); return mbuf.to_vector();
+	MBuf mbuf(64 + (data == nullptr ? 0 : data->size()));
+	mbuf << Hex32(version()) << Hex32((uint32)pckt) << Hex32((uint32)0x0) << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
 	if (pckt == pkt1_raw)
 	{
 		if (data != nullptr) mbuf.memwrite(data->data(), data->size());
 	}
+	else if (pckt == pkt1_enum_req)
+		mbuf << Hex32((uint32)0x00);
 	return mbuf.to_vector();
 }
 
 bvector Protocol2::create_client_request(uint32 pckt, uint32 serial, uint32 /*tmout*/, const bvector * data)
 {
-	bvector ret;
-	MBuf mbuf(64 + (data == nullptr) ? 0 : data->size());
+	MBuf mbuf(64 + (data == nullptr ? 0 : data->size()));
 	mbuf << Hex32(version()) << Hex32((uint32)pckt) <<Hex32((uint32)0x0) << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
 	if (pckt == pkt2_cmd_req)
 	{
@@ -385,13 +405,11 @@ bvector Protocol2::create_client_request(uint32 pckt, uint32 serial, uint32 /*tm
 
 bvector Protocol3::create_client_request(uint32 pckt,  uint32 serial, uint32 tmout, const bvector * data)
 {
-	bvector ret;
-	MBuf mbuf(64 + (data == nullptr) ? 0 : data -> size());
+	MBuf mbuf(64 + (data == nullptr ? 0 : data -> size()));
 	mbuf << Hex32(version()) << Hex32(pckt) << Hex32(tmout);
 	uint32 _serial = 0;
 	if (pckt == pkt3_close_req || pckt == pkt3_open_req || pckt == pkt3_cmd_req)
 		_serial = serial;
-
 	mbuf << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
 	if (pckt == pkt3_cmd_req)
 	{
@@ -401,10 +419,39 @@ bvector Protocol3::create_client_request(uint32 pckt,  uint32 serial, uint32 tmo
 	return mbuf.to_vector();
 }
 
-AProtocol *create_appropriate_protocol(uint32 version)
+bool Protocol1::translate_response(uint32 pckt, const bvector& green)
+{
+	if (pckt == pkt1_error_ntf)
+	{
+		_is_device_broken = true;
+		return false;
+	}
+	if (green.size() > 0) return green[0] != 0;
+	return  true;
+}
+
+bool Protocol2::translate_response(uint32 pckt, const bvector& green)
+{
+    if (green.size() > 0 && pckt == pkt2_open_resp) return green[0] != 0;
+	return  true;
+}
+
+bool Protocol3::translate_response(uint32 pckt, const bvector& green)
+{
+	if (pckt == pkt3_error_resp)
+	{
+		_is_device_broken = true;
+		// to do error codes !!!
+		return false;
+	}
+	if (green.size() > 0 && pckt == pkt3_open_resp) return true;
+	return  false;
+}
+
+AProtocol *create_appropriate_protocol(int version_number)
 {
 	AProtocol * p = nullptr;
-	switch (version)
+	switch (version_number)
 	{
 	case 1:
 		p = new Protocol1(false);

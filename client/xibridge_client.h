@@ -36,6 +36,22 @@ class Xibridge_client
 {
 	friend class Bindy_helper;
 public:
+
+	/* *
+	* Функция запроса версии xibridge
+	*/
+	static int xibridge_major_version()
+	{
+		return 1;
+	};
+
+	/* *
+	* Функция запроса версии протокола
+	*/
+	static int xibridge_protocol_version()
+	{
+		return 3;
+	}
 	
 	/* This constructor to create Xibridge_client with defined addr, device number and version number
 	 *@param addr - xibridge server address
@@ -50,30 +66,34 @@ public:
 	   * Multiple clients can be created then
 	*/
 
+
 	void set_protocol_version(uint32 v) { _server_protocol_version = v; };
-	bool detect_protocol_version();
 
+	/**
+	* This static member function to recognize server protocol version
+	*/
+	static uint32  xibridge_detect_protocol_version(uint32 timeout_1,  uint32 timeout_all);
 
+	/**
+	* *This static member function to setup network and bindy - once per application
+	*/
 	static bool xibridge_init(const char *key_file_path);
 	
 	/**
-	   * This static member function shutdown all connectons
+	   * This static member function shutdown network and bindy - once per application
 	   * Must be called once per this lib usage 
 	*/
 	static void xibridge_shutdown();
-
-	/**
-	 * *This static member function to get server protocol version
-	*/
-	static uint32 xibridge_recognize_proto_version();
-
+	
 	bool open_connection_device();
 
 	bool is_connected();
 
+	void disconnect();
+	
 	bool close_connection_device();
 
-	bool send_data_and_receive();
+	bvector  send_data_and_receive(bvector data);
 	/*
 	*
 	*@param [out] extra_enum_data - extra data for enumerated device, = nullptr if extra info is not desired

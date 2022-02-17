@@ -356,7 +356,7 @@ bvector MBuf::to_vector(bool rest) const
 	else
 	{
 		if (pdata > origin_data)
-		   ret.assign(origin_data, pdata - 1);
+		   ret.assign(origin_data, pdata);
 	}
 	return ret;
 }
