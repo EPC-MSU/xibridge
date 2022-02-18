@@ -27,16 +27,19 @@ cmd_schema  Protocol2 ::_cmd_shemas[7] =
 								 { pkt2_cmd_req, nullptr }
 };
 
-cmd_schema Protocol3::_cmd_shemas[9] =
+cmd_schema Protocol3::_cmd_shemas[12] =
 {
 { pkt3_ver_req, "v_p_u_0_0_0" },
-{ pkt3_ver_resp, "v_p_u_0_0_0_b_v" },
-{ pkt3_cmd_req, "v_p_0_" },
-{ pkt3_cmd_resp, "v_p_0_" },
-{ pkt3_open_req, "v_p_0_" },
-{ pkt3_open_resp, "v_p_0_" },
-{ pkt3_close_req, "v_p_0" },
-{ pkt3_close_resp, "v_p_0_" },
+{ pkt3_ver_resp, "v_p_u_0_0_0_d" },
+{ pkt3_cmd_req, "v_p_u_d_0_0_l_u" },
+{ pkt3_cmd_resp, "v_p_u_d_0_0_l" },
+{ pkt3_open_req, "v_p_u_d_0_0" },
+{ pkt3_open_resp, "v_p_u_d_0_0_b" },
+{ pkt3_close_req, "v_p_u_d_0_0" },
+{ pkt3_close_resp, "v_p_u_d_0_0_b" },
+{ pkt3_enum_req, "v_p_u_0_0_0" },
+{ pkt3_enum_resp, "v_p_u_0_0_0_x" },
+{ pkt3_error_resp, "v_p_u_d_0_0_u" },
 { pkt3_error_resp, nullptr }
 };
 
@@ -87,7 +90,7 @@ bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_n
 			break;
 		case 'l':
 			mbuf >> hex32;
-			if (mbuf.restOfSize(-1) != (int)hex32) return false;
+			mbuf.mseek((int)hex32);
 			break;
 		case 'b':
 			mbuf >> hex32;
@@ -415,6 +418,8 @@ bvector Protocol3::create_client_request(uint32 pckt,  uint32 serial, uint32 tmo
 	{
 		mbuf << Hex32((data == nullptr) ? 0 : data->size());
 		if (data != nullptr) mbuf.memwrite(data->data(), data->size());
+		// to do !!!
+		mbuf << Hex32((uint32)0x0);
 	}
 	return mbuf.to_vector();
 }

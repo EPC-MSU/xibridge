@@ -206,6 +206,12 @@ public:
 	{
 		return create_client_request(pkt3_cmd_req, serial, tmout, data);
 	}
+
+	virtual bvector create_enum_request(uint32 tmout)
+	{
+		return create_client_request(pkt3_enum_req, 0, tmout);
+	};
+
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
 	virtual bool translate_response(uint32 pckt, const bvector& green);
@@ -237,7 +243,7 @@ private:
 		pkt3_error_resp = 0xFA
 	};
 
-	static cmd_schema _cmd_shemas[9];
+	static cmd_schema _cmd_shemas[12];
 	
 };
 
