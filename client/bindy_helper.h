@@ -25,6 +25,8 @@ public:
 	bool send_bindy_data(conn_id_t conn_id, bvector data);
 	void disconnect(conn_id_t conn_id);
 private:
+	static std::mutex _global_mutex;  // mutex of  global resource initialization
+
 	static void callback_data_bindy(conn_id_t conn_id, std::vector<uint8_t> data);
 	static void on_bindy_disconnect(conn_id_t conn_id);
 

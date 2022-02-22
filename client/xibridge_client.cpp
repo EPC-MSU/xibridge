@@ -7,14 +7,38 @@
 
 bool Xibridge_client::xibridge_init(const char *key_file_path)
 {
+	bindy::Bindy *_ex = nullptr;
+	Bindy_helper::_global_mutex.lock();
 	Bindy_helper::set_keyfile(key_file_path);
-	return Bindy_helper::instance_bindy() != nullptr;
+	_ex = Bindy_helper::instance_bindy();
+	Bindy_helper::_global_mutex.unlock();
+	return _ex != nullptr;
 }
 
 
 void Xibridge_client::xibridge_shutdown()
 {
+	Bindy_helper::_global_mutex.lock();
 	Bindy_helper::shutdown_bindy();
+	Bindy_helper::_global_mutex.unlock();
+}
+
+void Xibridge_client::xibridge_set_server_protocol(unsigned int conn_id, unsigned int proto)
+{
+	std::unique_lock<std::mutex> lock(Bindy_helper::_map_mutex);
+	if (Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend()) 
+		return;
+	Xibridge_client * cl = Bindy_helper::_map.at((conn_id_t)conn_id);
+	cl -> set_server_protocol_version(proto);
+}
+
+unsigned int Xibridge_client::xibridge_get_server_protocol(unsigned int conn_id)
+{
+	std::unique_lock<std::mutex> lock(Bindy_helper::_map_mutex);
+	if (Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend())
+		return 0;
+	Xibridge_client * cl = Bindy_helper::_map.at((conn_id_t)conn_id);
+	return (unsigned int) cl -> get_server_protocol_version();
 }
 
 
@@ -24,13 +48,16 @@ std::vector<uint32> Xibridge_client::enumerate_dev_numbers(uint8 *extra_enum_dat
 }
 
 
-Xibridge_client::Xibridge_client(const char *addr, uint32 serial, uint32 version, uint32 send_tmout, uint32 recv_tmout) :
-_server_protocol_version(version),
-_dev_num(serial),
+Xibridge_client::Xibridge_client(const char *addr, unsigned int serial, 
+	                                               unsigned int proto_version, 
+												   unsigned int send_tmout, 
+												   unsigned int recv_tmout) :
+_server_protocol_version((uint32)proto_version),
+_dev_num((uint32)serial),
 _last_client_error(0),
 _last_server_error(0),
-_send_tmout(send_tmout),
-_recv_tmout(recv_tmout),
+_send_tmout((uint32)send_tmout),
+_recv_tmout((uint32)recv_tmout),
 _conn_id(conn_id_invalid)
 {
    //bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
@@ -104,7 +131,7 @@ bool Xibridge_client::open_connection_device()
 		_last_client_error = ERR_NO_PROTOCOL;
 		return false;
 	}
-
+	_conn_id = conn;
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
@@ -208,8 +235,17 @@ bool Xibridge_client::close_connection_device()
 	
 }
 
+void Xibridge_client::xibridge_close_connection_device(unsigned int conn_id)
+{
+	if ((conn_id_t)conn_id == conn_id_invalid) return;
+
+	if (Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend())
+		return;
+	Xibridge_client *pcl = Bindy_helper::_map.at((conn_id_t)conn_id);
+	pcl->disconnect();
+} 
+
 void Xibridge_client::disconnect()
 {
-	Bindy_helper::instance()->disconnect(_conn_id);
-	_conn_id = conn_id_invalid;
+	Bindy_helper::instance() -> disconnect(_conn_id);
 }

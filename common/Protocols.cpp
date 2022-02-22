@@ -115,7 +115,7 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 {
 	grey_data.clear(); green_data.clear();
     Hex32 skip_prt, skip_tout, sr, pckt;
-	cmd >> skip_prt >> skip_tout >> sr >> pckt;
+	cmd >> skip_prt >> pckt >> skip_tout >> sr;
 	
 	if (cmd.wasBroken())
 	{
@@ -437,7 +437,7 @@ bool Protocol1::translate_response(uint32 pckt, const bvector& green)
 
 bool Protocol2::translate_response(uint32 pckt, const bvector& green)
 {
-    if (green.size() > 0 && pckt == pkt2_open_resp) return green[0] != 0;
+    if (green.size() > 3 && pckt == pkt2_open_resp) return green[3] != 0;
 	return  true;
 }
 

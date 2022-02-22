@@ -53,12 +53,31 @@ public:
 		return 3;
 	}
 	
+	/*
+	 Функция установки весрии протокола сервера для данного подключения
+    */
+	static void xibridge_set_server_protocol(unsigned int conn_id, unsigned int proto);
+
+	/*
+	* Функция получения версии протокола сервера для данного подключения
+	*/
+	static unsigned int xibridge_get_server_protocol(unsigned int conn_id);
+
+	/*
+	* Функция закрытия данного подключения
+	*/
+	static void xibridge_close_connection_device(unsigned int conn_id);
+
 	/* This constructor to create Xibridge_client with defined addr, device number and version number
 	 *@param addr - xibridge server address
 	 *@param dev_num - device number (COM-port or slot)
 	 *@param version - protocol version
 	*/
-	Xibridge_client(const char *addr, uint32 serial, uint32 protocol_version = 0, uint32 send_tmout = 5000, uint32 recv_tmout = 5000);
+	Xibridge_client(const char *addr, 
+		            unsigned int serial,  
+		            unsigned int proto_ver = 0, 
+				    unsigned int send_tmout = 5000, 
+					unsigned int recv_tmout = 5000);
 
 	/**
 	   * This static member function sets up connecton-specific data
@@ -67,7 +86,7 @@ public:
 	*/
 
 
-	void set_protocol_version(uint32 v) { _server_protocol_version = v; };
+	void set_server_protocol_version(uint32 v) { _server_protocol_version = v; };
 
 	/**
 	* This static member function to recognize server protocol version
@@ -92,6 +111,8 @@ public:
 	void disconnect();
 	
 	bool close_connection_device();
+
+	conn_id_t conn_id() const { return _conn_id; }
 
 	bvector  send_data_and_receive(bvector data);
 	/*
@@ -118,7 +139,7 @@ public:
 	const char *get_last_server_error_expl() const { return ""; }
 
 private:
-
+	
 	bool _send_and_receive(bvector &req);
 
 	uint32 _dev_num;    // device number in xibridge server enumeration

@@ -8,6 +8,8 @@ bindy::Bindy *Bindy_helper::_pbindy = nullptr;
 const char *Bindy_helper::_keyfile = nullptr;
 bmap Bindy_helper::_map;
 std::mutex Bindy_helper::_map_mutex;
+std::mutex Bindy_helper::_global_mutex;
+
 
 Bindy_helper Bindy_helper::_bhelper;
 
@@ -113,6 +115,7 @@ void Bindy_helper::on_bindy_disconnect(conn_id_t conn_id)
 		pcl->_mutex_recv.unlock();
 		*/
 		pcl->_conn_id = conn_id_invalid;
+		delete pcl;
 		_map.erase(conn_id);
 	}
 	_map_mutex.unlock();

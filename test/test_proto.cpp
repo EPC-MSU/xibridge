@@ -185,6 +185,8 @@ static bool test_request_proto3()
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
+extern  bool test_connect_2();
+
 int main(int argc, char *argv[])
 {
 	zf_log_set_output_level(ZF_LOG_DEBUG);
@@ -195,6 +197,8 @@ int main(int argc, char *argv[])
 		ret = false;
 	if (!test_request_proto3())
 		ret = false;
+
+	test_connect_2();
 
 	return ret == true ? 0 : 1;
 }
