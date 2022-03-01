@@ -131,6 +131,23 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	return true;
 }
 
+bvector AProtocol::create_cmd_request(uint32 serial, uint32 tmout, const bvector *data , uint32 resp_length)
+{
+	bvector data_and_length;
+	if (data != nullptr) data_and_length = *data;
+	add_uint32_2_bvector(data_and_length, resp_length);
+	return create_cmd_req_proxy(serial, tmout, data_and_length);
+}
+
+bvector Protocol3::create_cmd_request(uint32 serial, uint32 tmout, const bvector *data, uint32 resp_length)
+{
+	bvector data_and_length;
+	add_uint32_2_bvector(data_and_length, data == nullptr ? 0: data -> size());
+	if (data != nullptr) data_and_length.insert(data_and_length.end(), data -> cbegin(), data -> cend());
+	add_uint32_2_bvector(data_and_length, resp_length);
+	return create_cmd_req_proxy(serial, tmout, data_and_length);
+}
+
 bool Protocol1::get_spec_data(MBuf&  mbuf,
 	bvector &green_data,
 	bvector &grey_data,
@@ -406,7 +423,7 @@ bvector Protocol2::create_client_request(uint32 pckt, uint32 serial, uint32 /*tm
 	return mbuf.to_vector();
 }
 
-bvector Protocol3::create_client_request(uint32 pckt,  uint32 serial, uint32 tmout, const bvector * data)
+bvector Protocol3::create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector * data)
 {
 	MBuf mbuf(64 + (data == nullptr ? 0 : data -> size()));
 	mbuf << Hex32(version()) << Hex32(pckt) << Hex32(tmout);
@@ -416,10 +433,7 @@ bvector Protocol3::create_client_request(uint32 pckt,  uint32 serial, uint32 tmo
 	mbuf << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
 	if (pckt == pkt3_cmd_req)
 	{
-		mbuf << Hex32((data == nullptr) ? 0 : data->size());
 		if (data != nullptr) mbuf.memwrite(data->data(), data->size());
-		// to do !!!
-		mbuf << Hex32((uint32)0x0);
 	}
 	return mbuf.to_vector();
 }

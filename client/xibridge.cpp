@@ -41,6 +41,7 @@ unsigned int xibridge_open_device_connection(const char *addr,
 	{
 
 		cl->disconnect();
+		delete cl;
 		return 0;
 	}
 	else
@@ -53,4 +54,9 @@ unsigned int xibridge_open_device_connection(const char *addr,
 extern void xibridge_close_device_connection(unsigned int conn_id)
 {
 	Xibridge_client::xibridge_close_connection_device(conn_id);
+}
+
+extern unsigned int  xibridge_detect_protocol_version(const char *addr)
+{
+	return Xibridge_client::xibridge_detect_protocol_version(addr, 5000, 15000);
 }

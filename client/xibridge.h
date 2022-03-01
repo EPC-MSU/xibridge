@@ -42,4 +42,9 @@ extern unsigned int xibridge_open_device_connection(const char *addr,
 */
 extern void xibridge_close_device_connection(unsigned int conn_id);
 
+/*
+Функция создания подключения к серверу (xi-net, xibridge)
+*/
+extern unsigned int xibridge_detect_protocol_version(const char *addr);
+
 #endif

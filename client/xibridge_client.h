@@ -91,7 +91,7 @@ public:
 	/**
 	* This static member function to recognize server protocol version
 	*/
-	static uint32  xibridge_detect_protocol_version(uint32 timeout_1,  uint32 timeout_all);
+	static uint32  xibridge_detect_protocol_version(const char *addr, uint32 timeout_1, uint32 timeout_all);
 
 	/**
 	* *This static member function to setup network and bindy - once per application
@@ -137,6 +137,14 @@ public:
 	const char *get_last_client_error_expl() const { return ""; }
 
 	const char *get_last_server_error_expl() const { return ""; }
+
+	uint32 get_dev_num() const {
+		return _dev_num;
+	}
+
+	uint32 get_resv_tmout() const { return _recv_tmout; }
+
+	uint32 get_proto_version_of_the_recv_message() const { return AProtocol::get_version_of_cmd(_recv_message); }
 
 private:
 	

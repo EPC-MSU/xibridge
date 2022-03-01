@@ -140,4 +140,6 @@ protected:
 	bool _rdon;
 };
 
+extern bvector &add_uint32_2_bvector(bvector & bv, uint32 val);
+
 #endif // 

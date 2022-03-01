@@ -237,15 +237,70 @@ bool Xibridge_client::close_connection_device()
 
 void Xibridge_client::xibridge_close_connection_device(unsigned int conn_id)
 {
-	if ((conn_id_t)conn_id == conn_id_invalid) return;
+	if ((conn_id_t)conn_id != conn_id_invalid) return;
 
 	if (Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend())
 		return;
 	Xibridge_client *pcl = Bindy_helper::_map.at((conn_id_t)conn_id);
-	pcl->disconnect();
+	pcl -> close_connection_device();
+	delete pcl;
 } 
 
 void Xibridge_client::disconnect()
 {
 	Bindy_helper::instance() -> disconnect(_conn_id);
+	_conn_id = conn_id_invalid;
+}
+
+uint32  Xibridge_client::xibridge_detect_protocol_version(const char *addr, uint32 timeout_1, uint32 timeout_all)
+{
+	/* *
+	* Create temporary client  with Protocol 2  and some serial 2 - to be a static func
+	*/
+
+	Xibridge_client * xl = new Xibridge_client(addr, 3, 2);
+	auto conn = Bindy_helper::instance()->connect(addr, xl);
+	if (conn == conn_id_invalid)
+	{
+		return 0;
+	}
+
+	AProtocol *proto = create_appropriate_protocol(2);  // Protocol 2
+	bvector req = proto->create_open_request(xl->get_dev_num(), xl->get_resv_tmout());
+	if (req.size() == 0)
+	{
+		return 0;
+	}
+
+	xl -> _conn_id = conn;
+
+	uint32 version = 0;
+	if (xl -> _send_and_receive(req))
+	{
+		version = xl -> get_proto_version_of_the_recv_message();
+		if (version == 2) // resolved 
+		{
+			// check if there is a xibridge server
+			//xl -> set_server_protocol_version(3);
+			// send special version command
+			bvector req = create_appropriate_protocol(3)->create_version_request(xl->get_resv_tmout());
+			if (req.size() == 0)
+			{
+				return 0;
+			}
+			if (xl->_send_and_receive(req))
+			{
+				if (xl->get_proto_version_of_the_recv_message() == 3)
+					version == 3; // resolved to unknown proto version
+
+			}
+			//
+
+			xl -> close_connection_device(); // if any device really opened
+			delete xl;
+			return version;
+		}
+
+		
+	}
 }

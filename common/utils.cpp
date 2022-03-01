@@ -360,3 +360,13 @@ bvector MBuf::to_vector(bool rest) const
 	}
 	return ret;
 }
+
+
+bvector &add_uint32_2_bvector(bvector & bv, uint32 val)
+{
+	for (int i = 0; i < sizeof(uint32); i++)
+	{
+		bv.push_back((uint8)(val >> 24 - 8 * i));
+	}
+	return bv;
+}

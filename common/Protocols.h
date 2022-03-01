@@ -10,7 +10,7 @@
 /* * structure to connect packet type and command schema
  *   command schema ia a string like this "v_p_0_d_0_0_x"
  *   v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
- *   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit numver
+ *   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit number
 */
 typedef struct _sm
 {
@@ -50,13 +50,15 @@ public:
 		uint32 &pckt_type,
 		uint32 &serial);
 
+	static uint32 get_version_of_cmd(const bvector& cmd) { return (uint32)(cmd.size() > 3 ? cmd[3] : 0); }
+
 	virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data = nullptr) = 0;
 	virtual bvector create_open_request(uint32 serial, uint32 tmout) = 0;
 	virtual bvector create_close_request(uint32 serial, uint32 tmout) = 0;
 	virtual bvector create_version_request(uint32 tmout) { return bvector(); }
 	virtual bvector create_enum_request(uint32 tmout) { return bvector(); }
-	virtual bvector create_cmd_request(uint32 serial, uint32 tmout, const bvector *data = nullptr) = 0;
-
+	virtual bvector create_cmd_request(uint32 serial, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
+	
 	virtual bool translate_response(uint32 pckt, const bvector& green) = 0;
 
 	virtual uint32 version() = 0;
@@ -68,6 +70,8 @@ protected:
 		bvector &grey_data,
 		uint32 pckt) = 0;
 
+	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 tmout, const bvector & data) = 0;
+	
 	bool _is_server;
 
 	bool _is_inv_pckt; // to send error packet to the other side
@@ -106,10 +110,7 @@ public:
 		return create_client_request(pkt1_enum_req, 0, 0);
 	};
 
-	virtual bvector create_cmd_request(uint32 serial, uint32 /*tmout*/, const bvector *data = nullptr)
-	{
-		return create_client_request(pkt1_raw, serial, 0, data);
-	}
+	
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 	virtual bool translate_response(uint32 pckt, const bvector& green) ;
 protected:
@@ -118,6 +119,10 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
+	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 /*tmout*/, const bvector &data)
+	{
+		return create_client_request(pkt1_raw, serial, 0, &data);
+	}
 private:
 	/**
 	* Ver.1 protocol packets type
@@ -152,10 +157,7 @@ public:
 		return create_client_request(pkt2_close_req, serial, 0);
 	};
 
-	virtual bvector create_cmd_request(uint32 serial, uint32 /*tmout*/, const bvector *data = nullptr)
-	{
-		return create_client_request(pkt2_cmd_req, serial, 0, data);
-	}
+	
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
 	virtual bool translate_response(uint32 pckt, const bvector& green);
@@ -166,7 +168,10 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	
+	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 /*tmout*/, const bvector &data)
+	{
+		return create_client_request(pkt2_cmd_req, serial, 0, &data);
+	}
 private:
 	/**
 	* Ver.2 protocol packets type
@@ -202,11 +207,7 @@ public:
 	{
 		return create_client_request(pkt3_ver_req, 0, tmout);
 	}
-    virtual bvector create_cmd_request(uint32 serial, uint32 tmout, const bvector *data = nullptr)
-	{
-		return create_client_request(pkt3_cmd_req, serial, tmout, data);
-	}
-
+	
 	virtual bvector create_enum_request(uint32 tmout)
 	{
 		return create_client_request(pkt3_enum_req, 0, tmout);
@@ -215,6 +216,8 @@ public:
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
 	virtual bool translate_response(uint32 pckt, const bvector& green);
+
+	virtual bvector create_cmd_request(uint32 serial, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
 protected:
 	
 	virtual uint32 version() { return 3; }
@@ -222,7 +225,10 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-
+	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 /*tmout*/, const bvector &data)
+	{
+		return create_client_request(pkt3_cmd_req, serial, 0, &data);
+	}
 	
 private:
 	/**
