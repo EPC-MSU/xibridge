@@ -291,16 +291,16 @@ uint32  Xibridge_client::xibridge_detect_protocol_version(const char *addr, uint
 			if (xl->_send_and_receive(req))
 			{
 				if (xl->get_proto_version_of_the_recv_message() == 3)
-					version == 3; // resolved to unknown proto version
+					version = 3; // resolved to unknown proto version
 
 			}
 			//
 
 			xl -> close_connection_device(); // if any device really opened
 			delete xl;
-			return version;
+		
 		}
-
 		
 	}
+	return version;
 }

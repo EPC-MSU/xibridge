@@ -36,10 +36,11 @@ SET(SOURCES
 		client/bindy_helper.cpp
         common/protocols.cpp
         common/utils.cpp
+		client/xibridge.cpp
          )
 	 
 #add_custom_target(tests) # Note: without 'ALL'
-ADD_EXECUTABLE(test  test/test_proto.cpp ${SOURCES}) # Note: without 'ALL'
+ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_2.cpp test${SOURCES}) # Note: without 'ALL'
 TARGET_LINK_LIBRARIES(test bindy zf_log)
 #add_dependencies(tests test_executable)
 ADD_LIBRARY(xibridge STATIC ${SOURCES})
