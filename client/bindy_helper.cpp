@@ -46,7 +46,7 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl)
 	bindy::Bindy *pb = instance_bindy();
 	if (pb == nullptr)
 	{
-		pcl -> set_last_client_error(ERR_NO_BINDY);
+		pcl -> _set_last_error(ERR_NO_BINDY);
 		return conn_id_invalid;
 	}
 	conn_id_t conn = instance_bindy() -> connect(addr);

@@ -1,3 +1,4 @@
+#include "xibridge.h"
 #include "../Common/defs.h"
 #include "xibridge_client.h"
 
@@ -49,14 +50,25 @@ unsigned int xibridge_open_device_connection(const char *addr,
 }
 
 /*
-Функция закрытия данного подключения
+* Функция закрытия данного подключения
 */
-extern void xibridge_close_device_connection(unsigned int conn_id)
+void xibridge_close_device_connection(unsigned int conn_id)
 {
 	Xibridge_client::xibridge_close_connection_device(conn_id);
 }
 
-extern unsigned int  xibridge_detect_protocol_version(const char *addr)
+unsigned int  xibridge_detect_protocol_version(const char *addr)
 {
 	return Xibridge_client::xibridge_detect_protocol_version(addr, 5000, 15000);
+}
+
+/*
+* Функция выполнения запроса
+* To do timeout ???
+*/
+bool xibridge_device_request_response(unsigned int conn_id, const unsigned char *req, int req_len, unsigned char *resp, int resp_len)
+{
+	return Xibridge_client::xibridge_request_response(conn_id, req, req_len, resp, resp_len);
+
+
 }

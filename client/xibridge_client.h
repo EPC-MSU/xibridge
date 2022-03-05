@@ -15,19 +15,18 @@
 /*
 * Defines client errors (errors to take place at the client side)
 */
-#define ERR_NO_PROTOCOL -1
-#define ERR_NO_CONNECTION -2
-#define ERR_SEND_TIMEOUT  -3
-#define ERR_NO_BINDY    -4
-#define ERR_SEND_DATA -5
-
-
+#define ERR_NO_PROTOCOL 1
+#define ERR_NO_CONNECTION 2
+#define ERR_SEND_TIMEOUT  3
+#define ERR_NO_BINDY    4
+#define ERR_SEND_DATA 5
 /*
 * Defines protocol and server errors
 */
+#define ERR_RECV_TIMEOUT 6
 
-#define ERR_NO_ANSWER -1
 
+#define TIMEOUT_HISTORICAL 3000
 
 /** 
  * Class to communicate with xibridge-server
@@ -76,8 +75,8 @@ public:
 	Xibridge_client(const char *addr, 
 		            unsigned int serial,  
 		            unsigned int proto_ver = 0, 
-				    unsigned int send_tmout = 5000, 
-					unsigned int recv_tmout = 5000);
+				    unsigned int send_tmout = TIMEOUT_HISTORICAL, 
+					unsigned int recv_tmout = TIMEOUT_HISTORICAL);
 
 	/**
 	   * This static member function sets up connecton-specific data
@@ -94,16 +93,27 @@ public:
 	static uint32  xibridge_detect_protocol_version(const char *addr, uint32 timeout_1, uint32 timeout_all);
 
 	/**
-	* *This static member function to setup network and bindy - once per application
+	* This static member function to setup network and bindy - once per application
 	*/
 	static bool xibridge_init(const char *key_file_path);
 	
 	/**
-	   * This static member function shutdown network and bindy - once per application
-	   * Must be called once per this lib usage 
+	* This static member function shutdown network and bindy - once per application
+	* Must be called once per this lib usage 
 	*/
 	static void xibridge_shutdown();
-	
+
+	/**
+	* This static member function executes response-request to device
+	@param conn_id - connection id
+	@param req - request data
+	@param req_len - request length
+	@param resp - buffer for reponse data
+	@resp_len - response length in bytes
+	*/
+	static bool xibridge_request_response(unsigned int conn_id, const unsigned char *req, int req_len, unsigned char *resp, int resp_len = 0);
+
+
 	bool open_connection_device();
 
 	bool is_connected();
@@ -114,7 +124,7 @@ public:
 
 	conn_id_t conn_id() const { return _conn_id; }
 
-	bvector  send_data_and_receive(bvector data);
+	bvector  send_data_and_receive(bvector data, uint32 resp_length);
 	/*
 	*
 	*@param [out] extra_enum_data - extra data for enumerated device, = nullptr if extra info is not desired
@@ -126,17 +136,11 @@ public:
 
 	static uint32 get_self_protocol_version() { return xibridge_protocol_version(); }
 
-	uint32 get_last_client_error() const { return _last_client_error; };
+	uint32 get_last_error() const { return _last_error; };
 
-	void set_last_client_error(uint32 err) { _last_client_error = err; }
+	void clr_errors() { _last_error = 0; }
 
-	uint32 get_last_server_error() const { return _last_client_error; };
-
-	void clr_errors() { _last_client_error = _last_server_error = 0; }
-
-	const char *get_last_client_error_expl() const { return ""; }
-
-	const char *get_last_server_error_expl() const { return ""; }
+	void get_error_expl(char * s, int len, bool is_russian = false) const;
 
 	uint32 get_dev_num() const {
 		return _dev_num;
@@ -149,6 +153,7 @@ public:
 private:
 	
 	bool _send_and_receive(bvector &req);
+	void _set_last_error(uint32 err) { _last_error = err; }
 
 	uint32 _dev_num;    // device number in xibridge server enumeration
     uint32 _server_protocol_version; // commincation protocol version
@@ -163,8 +168,8 @@ private:
 	bvector _recv_message; // for bindy-callback
 	std::mutex _mutex_message;
 
-	uint32 _last_server_error;  // last error code of protocol
-	uint32 _last_client_error; //  last client side error
+	uint32 _last_error;  // last error 
+	// uint32 _last_client_error; //  last client side error
 	char _host[MAXHOST+1];
 };
 

@@ -4,6 +4,32 @@
 #include "../Common/Protocols.h"
 #include "bindy_helper.h" 
 
+static const char * _err_strings[] =
+{ /*ERR_NO_PROTOCOL*/ "Protocol is undefined: supported versions are 1,2,3.|Протокол не определен: доступны версии 1, 2 или 3.", 
+  /*ERR_NO_CONNECTION*/ "Connection is not created or broken.|Соединение не установлено или разорвано."
+  /*ERR_SEND_TIMEOUT*/ "Send data timeout.|Таймаут отправки данных.",
+  /*ERR_NO_BINDY */    "Network component (bindy) is not initialized properly.|Сетeвой компонент (bindy) не был инициализирован."
+  /* ERR_SEND_DATA */ "Send data error.| Ошибка отправки данных.",
+  /* ERR_RECV_TIMEOUT */ "Receive data timeout.|Таймаут получения данных."
+}; 
+
+void Xibridge_client::get_error_expl(char * s, int len, bool is_russian) const
+{
+	const char *unkn_error = is_russian ? "Фатально: неизвестная ошибка!" : "Fatal: unknown error!";
+	memset(s, 0, len);
+	if ((int)_last_error >= sizeof(_err_strings))
+	{
+		strncpy(s, unkn_error, len);
+	}
+	else if (_last_error > 0)
+	{
+		const char *err_str = _err_strings[(int)_last_error - 1];
+		const char *delim = strchr(err_str, '|');
+		if (delim != nullptr)
+			memcpy(s, is_russian ? delim + 1 : err_str, (is_russian ? strchr(err_str, '0') : delim) -
+			(is_russian ? delim + 1 : err_str));
+	}
+}
 
 bool Xibridge_client::xibridge_init(const char *key_file_path)
 {
@@ -14,7 +40,6 @@ bool Xibridge_client::xibridge_init(const char *key_file_path)
 	Bindy_helper::_global_mutex.unlock();
 	return _ex != nullptr;
 }
-
 
 void Xibridge_client::xibridge_shutdown()
 {
@@ -41,7 +66,6 @@ unsigned int Xibridge_client::xibridge_get_server_protocol(unsigned int conn_id)
 	return (unsigned int) cl -> get_server_protocol_version();
 }
 
-
 std::vector<uint32> Xibridge_client::enumerate_dev_numbers(uint8 *extra_enum_data, uint32& extta_size)
 {
 	return std::vector<uint32>();
@@ -54,13 +78,12 @@ Xibridge_client::Xibridge_client(const char *addr, unsigned int serial,
 												   unsigned int recv_tmout) :
 _server_protocol_version((uint32)proto_version),
 _dev_num((uint32)serial),
-_last_client_error(0),
-_last_server_error(0),
+_last_error(0),
 _send_tmout((uint32)send_tmout),
 _recv_tmout((uint32)recv_tmout),
 _conn_id(conn_id_invalid)
 {
-   //bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
+  // bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
   // client 
    memset(_host, 0, MAXHOST + 1);
    int len = strlen(addr);
@@ -73,7 +96,7 @@ bool Xibridge_client::_send_and_receive(bvector &req)
 	bool is_ok = Bindy_helper::instance() -> send_bindy_data(_conn_id, req);
 	if (!is_ok)
 	{
-		_last_client_error = ERR_SEND_DATA;
+		_last_error = ERR_SEND_DATA;
 		return FALSE;
 	}
 
@@ -91,12 +114,10 @@ bool Xibridge_client::_send_and_receive(bvector &req)
 		return true; 
 	else
 	{
-		_last_server_error = ERR_NO_ANSWER;
+		_last_error = ERR_RECV_TIMEOUT;
 		return FALSE;
 	}
-
 	return TRUE;
-
 }
 
 bool Xibridge_client::is_connected()
@@ -114,7 +135,7 @@ bool Xibridge_client::open_connection_device()
 	auto conn = Bindy_helper::instance() -> connect(_host, this);
 	if (conn == conn_id_invalid)
 	{
-	   _last_client_error = ERR_NO_CONNECTION;
+	   _last_error = ERR_NO_CONNECTION;
 	   return false;
 	}
 
@@ -122,13 +143,13 @@ bool Xibridge_client::open_connection_device()
 
 	if (proto == nullptr) 
 	{
-		_last_client_error = ERR_NO_PROTOCOL;
+		_last_error = ERR_NO_PROTOCOL;
 		return false;
 	}
 	bvector req = proto->create_open_request(_dev_num, _recv_tmout);
 	if (req.size() == 0)
 	{
-		_last_client_error = ERR_NO_PROTOCOL;
+		_last_error = ERR_NO_PROTOCOL;
 		return false;
 	}
 	_conn_id = conn;
@@ -147,16 +168,15 @@ bool Xibridge_client::open_connection_device()
 	{
 		return false;
 	}
-
 }
 
-bvector Xibridge_client::send_data_and_receive(bvector data)
+bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length)
 {
 	clr_errors();
 
 	if (!is_connected())
 	{
-		_last_client_error = ERR_NO_CONNECTION;
+		_last_error = ERR_NO_CONNECTION;
 		return bvector();
 	}
 
@@ -164,14 +184,14 @@ bvector Xibridge_client::send_data_and_receive(bvector data)
 
 	if (proto == nullptr)
 	{
-		_last_client_error = ERR_NO_PROTOCOL;
+		_last_error = ERR_NO_PROTOCOL;
 		return bvector();
 	}
 
-	bvector req = proto->create_cmd_request(_dev_num, _recv_tmout, &data);
+	bvector req = proto->create_cmd_request(_dev_num, _recv_tmout, &data, resp_length);
 	if (req.size() == 0)
 	{
-		_last_client_error = ERR_NO_PROTOCOL;
+		_last_error = ERR_NO_PROTOCOL;
 		return bvector();
 	}
 	if (_send_and_receive(req))
@@ -189,8 +209,37 @@ bvector Xibridge_client::send_data_and_receive(bvector data)
 	{
 		return bvector();
 	}
-
 }
+
+bool Xibridge_client::xibridge_request_response(unsigned int conn_id, const unsigned char *req, int req_len, unsigned char *resp, int resp_len)
+{
+	if ((conn_id_t)conn_id == conn_id_invalid) return false;
+	Xibridge_client *pcl;
+	bool non_connected;
+
+	Bindy_helper::_map_mutex.lock();
+	non_connected = Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend();
+	if (!non_connected)
+		pcl = Bindy_helper::_map.at((conn_id_t)conn_id);
+	Bindy_helper::_map_mutex.unlock();
+
+	if (non_connected)
+	{
+		return false;
+	}
+    MBuf send_data((uint8 *)req, req_len);
+
+	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len);
+	// do not check real resp length because various reponses could be received or nit - error, the situation of timeout and so on
+
+	// but we restrict the size of vector 
+	if (resp != nullptr && resp_len != 0)
+	{
+		memcpy(resp, response.data(), response.size() < resp_len ? response.size() : resp_len );
+	}
+	return pcl->get_last_error() == 0;
+}
+
 
 bool Xibridge_client::close_connection_device()
 {
@@ -198,20 +247,20 @@ bool Xibridge_client::close_connection_device()
 
 	if (!is_connected())
 	{
-		_last_client_error = ERR_NO_CONNECTION;
+		_last_error = ERR_NO_CONNECTION;
 		return false;
 	}
 	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
 	if (proto == nullptr)
 	{
-		_last_client_error = ERR_NO_PROTOCOL;
+		_last_error = ERR_NO_PROTOCOL;
 		return false;
 	}
 
 	bvector req = proto->create_close_request(_dev_num, _recv_tmout);
 	if (req.size() == 0)
 	{
-		_last_client_error = ERR_NO_PROTOCOL;
+		_last_error = ERR_NO_PROTOCOL;
 		return false;
 	}
 	bool ret;
@@ -238,10 +287,13 @@ bool Xibridge_client::close_connection_device()
 void Xibridge_client::xibridge_close_connection_device(unsigned int conn_id)
 {
 	if ((conn_id_t)conn_id != conn_id_invalid) return;
+	bool non_connected;
+	Xibridge_client *pcl;
+	Bindy_helper::_map_mutex.lock();
+	non_connected = Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend();
+	if (!non_connected) pcl = Bindy_helper::_map.at((conn_id_t)conn_id);;
+	Bindy_helper::_map_mutex.unlock();
 
-	if (Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend())
-		return;
-	Xibridge_client *pcl = Bindy_helper::_map.at((conn_id_t)conn_id);
 	pcl -> close_connection_device();
 	delete pcl;
 } 
