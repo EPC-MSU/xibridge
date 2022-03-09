@@ -4,7 +4,6 @@
 #include "urmc-min/urmc_min.h"
 #include "../common/utils.h"
 
-
 bool test_connect_2()
 {
 	if (!xibridge_init("keyfile.sqlite"))
