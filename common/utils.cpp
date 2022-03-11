@@ -353,7 +353,11 @@ bvector MBuf::to_vector(bool rest) const
 		if (dlen != 0)
 		  ret.assign(pdata, pdata + restOfSize(-1));
 	}
-	else
+    else if (_rdon && pdata == origin_data)// non-read buffer all to vector
+    {
+        ret.assign(origin_data, origin_data + dlen);
+    }
+    else
 	{
 		if (pdata > origin_data)
 		   ret.assign(origin_data, pdata);

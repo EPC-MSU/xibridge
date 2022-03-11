@@ -286,14 +286,13 @@ bool Xibridge_client::close_connection_device()
 
 void Xibridge_client::xibridge_close_connection_device(unsigned int conn_id)
 {
-	if ((conn_id_t)conn_id != conn_id_invalid) return;
+	if ((conn_id_t)conn_id == conn_id_invalid) return;
 	bool non_connected;
 	Xibridge_client *pcl;
 	Bindy_helper::_map_mutex.lock();
 	non_connected = Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend();
 	if (!non_connected) pcl = Bindy_helper::_map.at((conn_id_t)conn_id);;
 	Bindy_helper::_map_mutex.unlock();
-
 	pcl -> close_connection_device();
 	delete pcl;
 } 
@@ -344,13 +343,10 @@ uint32  Xibridge_client::xibridge_detect_protocol_version(const char *addr, uint
 			{
 				if (xl->get_proto_version_of_the_recv_message() == 3)
 					version = 3; // resolved to unknown proto version
-
 			}
 			//
-
 			xl -> close_connection_device(); // if any device really opened
 			delete xl;
-		
 		}
 		
 	}

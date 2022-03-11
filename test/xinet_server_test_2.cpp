@@ -37,17 +37,21 @@ bool test_connect_2()
 	output->FirmwareBugfix = pop_uint16_t(&p);
 	output->SerialNumber = pop_uint32_t(&p);
 	*/
-	char man[16];
-	mresp.memread((uint8 *)man, 16, 16);
-	ZF_LOGD("Manufacture: \n", man);
-	
-	char prod_name[16]; 
-	mresp.memread((uint8 *)prod_name, 16, 16);
-	ZF_LOGD("Manufacture: \n", prod_name);
 
-	char contr_name[16];
-	mresp.memread((uint8 *)contr_name, 16, 16);
-	ZF_LOGD("Manufacture: \n", contr_name);
+    Hex32 non;
+    mresp >> non;
+	char man[16 + 1];
+    memset(man, 0, 16 + 1);
+	mresp.memread((uint8 *)man, 16, 16);
+	ZF_LOGD("Manufacture: %s\n", man);
+	
+    memset(man, 0, 16 + 1);
+	mresp.memread((uint8 *)man, 16, 16);
+	ZF_LOGD("Product name: %s\n", man);
+
+    memset(man, 0, 16 + 1);
+	mresp.memread((uint8 *)man, 16, 16);
+	ZF_LOGD("Controller: %s\n", man);
 	
 	xibridge_close_device_connection(connection);
 
