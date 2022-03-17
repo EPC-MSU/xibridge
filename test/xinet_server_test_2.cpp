@@ -4,6 +4,7 @@
 #include "urmc-min/urmc_min.h"
 #include "../common/utils.h"
 
+// to run with urpc-xinet-server
 bool test_connect_2()
 {
 	if (!xibridge_init("keyfile.sqlite"))

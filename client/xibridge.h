@@ -36,7 +36,7 @@ extern unsigned int xibridge_get_server_protocol_version(unsigned int conn_id);
   * To do timeout ? ? ?
 */
 extern unsigned int xibridge_open_device_connection(const char *addr,
-	unsigned int serial, unsigned int proto);
+	unsigned int serial, unsigned int proto, unsigned int* last_errno = nullptr);
 
 /*
  * Функция закрытия данного подключения
@@ -52,6 +52,19 @@ extern unsigned int xibridge_detect_protocol_version(const char *addr);
 * Функция выполнения запроса
 * To do timeout ? ? ?
 */
-extern bool xibridge_device_request_response(unsigned int conn_id, const unsigned char *req, int req_len, unsigned    char *resp, int resp_len = 0);
+extern bool xibridge_device_request_response(unsigned int conn_id, 
+	                                         const unsigned char *req, 
+											 int req_len, unsigned char *resp, 
+											 int resp_len 
+											);
 
+/*
+* Функция формирвания текста ошибки по ее номеру
+*/
+extern void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no);
+
+/*
+* Функция получения номера последней ощибки у данного подключения
+*/
+extern unsigned int xibridge_get_last_err_no(unsigned int conn_id);
 #endif

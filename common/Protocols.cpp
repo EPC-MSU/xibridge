@@ -154,6 +154,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 	uint32 pckt)
 {
 	// 16 bytes has already read from mbuf
+	Hex32 count, devnum;
 
 	if (_is_server)
 	{
@@ -181,6 +182,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 						  return true;
 		}
 		case pkt1_enum_req:
+			              
 			              return true;
 		default:
 			_is_inv_pckt = true;
@@ -218,19 +220,27 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		}
 		case pkt1_enum_resp:
 		{
-                         mbuf.mseek(8);
-						 int len = mbuf.restOfSize(-1);
-						 if (len != sizeof (uint32))
+                         mbuf.mseek(-4);
+						 mbuf >> count;
+						 grey_data = mbuf.to_vector(true);  //all data as is is grey
+						 MBuf gr_buf(sizeof(uint32) * count);
 						 {
+							 for (int i = 0; i < count; i++)
+							 {
+								 mbuf >> devnum;
+								 gr_buf << Hex32(devnum, true); // another order of bytes
+								 mbuf.mseek(180 - 4);
+							 }
+
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
 						 grey_data = mbuf.to_vector(true);
-					     return true;
+						 green_data = gr_buf.to_vector();
+					     return !mbuf.wasBroken() && !gr_buf.wasBroken();
 					    
 		}
-		case pkt1_enum_req:
-			             return true;
+		
 		default:
 			_is_inv_pckt = true;
 			return false;

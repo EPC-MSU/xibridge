@@ -25,9 +25,20 @@
 */
 #define ERR_RECV_TIMEOUT 6
 
-
+/*
+* The wide used tiemout value to use by default
+*/
 #define TIMEOUT_HISTORICAL 3000
 
+/*
+When no answerback data len known this time value is used to control answer arrival
+*/
+//#define TIMEOUT_WAIT_STANDARD 100 
+
+/*
+When no answerback data len known this buffer value is used to control answer data size
+*/
+//#define MAX_ANSWER_LEN 512
 /** 
  * Class to communicate with xibridge-server
  */
@@ -66,6 +77,15 @@ public:
 	* Функция закрытия данного подключения
 	*/
 	static void xibridge_close_connection_device(unsigned int conn_id);
+
+	/*
+	* Функция по получению номеров (компортов, устройств) доступных на xibridge-сервере
+	*/
+	static void xibridge_enumerate_devices(const char *addr, 
+		                                   unsigned int proto, 
+										   unsigned int *result, 
+										   unsigned int *pcount,
+										   unsigned int* last_errno = nullptr);
 
 	/* This constructor to create Xibridge_client with defined addr, device number and version number
 	 *@param addr - xibridge server address
@@ -109,11 +129,25 @@ public:
 	@param req - request data
 	@param req_len - request length
 	@param resp - buffer for reponse data
-	@resp_len - response length in bytes
+	@resp_len - optional response length in bytes
+	@err_no - optional pointer to err number variable
 	*/
-	static bool xibridge_request_response(unsigned int conn_id, const unsigned char *req, int req_len, unsigned char *resp, int resp_len = 0);
+	static bool xibridge_request_response(unsigned int conn_id, 
+		                                  const unsigned char *req, 
+										  int req_len, 
+										  unsigned char *resp, 
+										  int resp_len );
 
+	/*
+	* This static member function returns last error text according to xibridge classification
+	*/
+	static void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no);
 
+	/*
+	* This static member function  returns last err number of the connection conn_id
+	*/
+	static unsigned int xibridge_get_last_err_no(unsigned int conn_id);
+	
 	bool open_connection_device();
 
 	bool is_connected();
