@@ -125,7 +125,7 @@ public:
 
 	// проверка, были ли нарушения
 	bool wasBroken() const { return ovrflow != 0; }
-	int realSize() const { return (pdata - origin_data); }
+	int realSize() const { return (int)(pdata - origin_data); }
 	// вычисление отсавшегося размера, начиная с позиции from_pos
 	int restOfSize(int from_pos) const;
 		

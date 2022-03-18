@@ -272,7 +272,7 @@ bool MBuf::meminsert_start(const uint8 *what, int len)
 	// нужно для удаления на потом 
 	const uint8 * temp_origin = origin_data;
 	// смотрим на смещение 
-	int cur_pos = pdata - origin_data;
+	int cur_pos = (int)(pdata - origin_data);
 	// новый абсолютный размер
 	dlen += len;
 	origin_data = pdata = new uint8[dlen];
@@ -296,7 +296,7 @@ bool MBuf::meminsert_start(uint8 num1, uint8 num2)
 	// нужно для удаления на потом 
 	const uint8 * temp_origin = origin_data;
 	// смотрим на смещение 
-	int cur_pos = pdata - origin_data;
+	int cur_pos = (int)(pdata - origin_data);
 	// новый абсолютный размер
 	dlen += 2;
 	origin_data = pdata = new uint8[dlen];
@@ -340,7 +340,7 @@ bool MBuf::tot_seek(int offset)
 // просто возвр. -1
 int MBuf::restOfSize(int from_pos) const
 {
-	if (from_pos == -1) from_pos = pdata - origin_data;
+	if (from_pos == -1) from_pos = (int)(pdata - origin_data);
 	if (from_pos < 0 || from_pos >= dlen) return -1;
 	return (dlen - from_pos);
 }

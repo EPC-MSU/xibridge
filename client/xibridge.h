@@ -59,9 +59,18 @@ extern bool xibridge_device_request_response(unsigned int conn_id,
 											);
 
 /*
-* Функция формирвания текста ошибки по ее номеру
+* Функция формирования текста ошибки по ее номеру
 */
 extern void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no);
+
+/*
+Функция получения списка номеров доступных устройств 
+*/
+extern void xibridge_enumerate_devices(const char *addr,
+    unsigned int proto,
+    unsigned int *result,
+    unsigned int *pcount,
+    unsigned int* last_errno = nullptr);
 
 /*
 * Функция получения номера последней ощибки у данного подключения

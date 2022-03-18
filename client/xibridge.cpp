@@ -84,3 +84,17 @@ unsigned int xibridge_get_last_err_no(unsigned int conn_id)
 {
 	return  Xibridge_client::xibridge_get_last_err_no(conn_id);
 }
+
+void xibridge_enumerate_devices(const char *addr,
+    unsigned int proto,
+    unsigned int *result,
+    unsigned int *pcount,
+    unsigned int* last_errno)
+{
+
+    Xibridge_client::xibridge_enumerate_devices(addr,
+                                                proto,
+                                                result,
+                                                pcount,
+                                                last_errno);
+}
