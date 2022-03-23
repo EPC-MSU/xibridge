@@ -10,7 +10,7 @@ bmap Bindy_helper::_map;
 std::mutex Bindy_helper::_map_mutex;
 std::mutex Bindy_helper::_global_mutex;
 
-
+ 
 Bindy_helper Bindy_helper::_bhelper;
 
 /*Bindy_helper::Bindy_helper(const char *keyfile)

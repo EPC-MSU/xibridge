@@ -4,6 +4,17 @@
 #include "utils.h"
 
 
+int s;
+uint32 _get_stream1_4(uint8 **ptr)
+{ 
+    uint32 val = 0;
+    uint8 *p = * ptr;
+    if (littleEndian())
+    for (int i = 0; i < s; i++)
+        val += *p * ((0x100) ^ i);
+
+}
+
 // функции формирования значений различных пределов из последовательности байт массива
 void Hex8::_get_stream(uint8 **ptr)
 {
@@ -49,6 +60,20 @@ void Hex24::_get_stream(uint8 ** ptr)
 		value = *(p + 2) + *(p + 1) * 0x100 + *(p)* 0x10000;
 	*ptr += 3;
 }
+
+
+void HexIDev3::_get_stream(MBuf & stream)
+{
+    if (littleEndian())
+    {
+
+
+
+
+    }
+
+}
+
 
 // конструктор простого буфера MBuf
 // pdata может только расти

@@ -10,7 +10,7 @@
 #include <vector>
 
 
-#define MAXHOST 64 
+#define MAXHOST 64  
 
 /*
 * Defines client errors (errors to take place at the client side)

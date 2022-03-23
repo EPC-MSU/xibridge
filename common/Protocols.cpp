@@ -1,7 +1,7 @@
 #include "Protocols.h"
 #include "utils.h"
 #include <string.h> 
-
+ 
 // staic data init
 cmd_schema Protocol1::_cmd_shemas[9]=
 {

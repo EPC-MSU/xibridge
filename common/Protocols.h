@@ -6,7 +6,7 @@
 #include "utils.h"
 
 
-
+  
 /* * structure to connect packet type and command schema
  *   command schema ia a string like this "v_p_0_d_0_0_x"
  *   v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,

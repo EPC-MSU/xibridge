@@ -80,7 +80,7 @@ void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_
 	return Xibridge_client::xibridge_get_err_expl(s, len, is_russian, err_no);
 }
 
-unsigned int xibridge_get_last_err_no(unsigned int conn_id)
+unsigned int xibridge_get_last_err_no(unsigned int conn_id) 
 {
 	return  Xibridge_client::xibridge_get_last_err_no(conn_id);
 }
