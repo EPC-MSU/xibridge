@@ -1,6 +1,8 @@
 #ifndef _XIBRIDGE_H
 #define  _XIBRIDGE_H
 
+#include "../common/ext_dev_id.h" 
+
 /* *
 * Функция запроса версии xibridge
 */
@@ -33,10 +35,20 @@ extern unsigned int xibridge_get_server_protocol_version(unsigned int conn_id);
 
 /*
   * Функция создания подключения к серверу (xi-net, xibridge)
+  *  Реально работает на любом сервере и proto == 1 || proto == 2
   * To do timeout ? ? ?
 */
 extern unsigned int xibridge_open_device_connection(const char *addr,
 	unsigned int serial, unsigned int proto, unsigned int* last_errno = nullptr);
+
+/*
+* Функция создания подключения к серверу  xibridge с указанием расширенного идентификатора устройства
+* To do timeout ? ? ?
+*  Реально работает c сервером xibridge и proto >=3
+*/
+extern unsigned int xibridge_open_device_connection(const char *addr,
+ const ExtDevId *pe_id, unsigned int proto, unsigned int* last_errno = nullptr);
+/*
 
 /*
  * Функция закрытия данного подключения
@@ -64,13 +76,25 @@ extern bool xibridge_device_request_response(unsigned int conn_id,
 extern void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no);
 
 /*
-Функция получения списка номеров доступных устройств 
+* Функция получения списка номеров доступных устройств 
+* Реально работает c сервером ximc и сервером xibridge
 */
 extern void xibridge_enumerate_devices(const char *addr,
     unsigned int proto,
     unsigned int *result,
     unsigned int *pcount,
     unsigned int* last_errno = nullptr);
+
+
+/*
+* Функция получения списка раширенных идентификаторов  доступных устройств
+* Реально работает с сервером xibridge
+*/
+extern void xibridge_enumerate_devices_ext(const char *addr,
+	unsigned int proto,
+	ExtDevId *result,
+	unsigned int *pcount,
+	unsigned int* last_errno = nullptr);
 
 /*
 * Функция получения номера последней ощибки у данного подключения

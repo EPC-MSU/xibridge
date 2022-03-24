@@ -19,27 +19,27 @@ cmd_schema Protocol1::_cmd_shemas[9]=
 cmd_schema  Protocol2 ::_cmd_shemas[7] =
 {
 { pkt2_cmd_req, "v_p_0_d_0_0_x" },
-								 { pkt2_cmd_resp, "v_p_0_d_0_0_x" },
-								 { pkt2_open_req, "v_p_0_d_0_0" },
-								 { pkt2_open_resp, "v_p_0_d_0_0_b" },
-								 { pkt2_close_req, "v_p_0_d_0_0" },
-								 { pkt2_close_resp, "v_p_0_d_0_0_b" },
-								 { pkt2_cmd_req, nullptr }
+{ pkt2_cmd_resp, "v_p_0_d_0_0_x" },
+{ pkt2_open_req, "v_p_0_d_0_0" },
+{ pkt2_open_resp, "v_p_0_d_0_0_b" },
+{ pkt2_close_req, "v_p_0_d_0_0" },
+{ pkt2_close_resp, "v_p_0_d_0_0_b" },
+{ pkt2_cmd_req, nullptr }
 };
 
 cmd_schema Protocol3::_cmd_shemas[12] =
 {
 { pkt3_ver_req, "v_p_u_0_0_0" },
 { pkt3_ver_resp, "v_p_u_0_0_0_d" },
-{ pkt3_cmd_req, "v_p_u_d_0_0_l_u" },
-{ pkt3_cmd_resp, "v_p_u_d_0_0_l" },
-{ pkt3_open_req, "v_p_u_d_0_0" },
-{ pkt3_open_resp, "v_p_u_d_0_0_b" },
-{ pkt3_close_req, "v_p_u_d_0_0" },
-{ pkt3_close_resp, "v_p_u_d_0_0_b" },
+{ pkt3_cmd_req, "v_p_u_I_0_0_l_u" },
+{ pkt3_cmd_resp, "v_p_u_I_0_0_l" },
+{ pkt3_open_req, "v_p_u_I_0_0" },
+{ pkt3_open_resp, "v_p_u_I_0_0_b" },
+{ pkt3_close_req, "v_p_u_I_0_0" },
+{ pkt3_close_resp, "v_p_u_I_0_0_b" },
 { pkt3_enum_req, "v_p_u_0_0_0" },
 { pkt3_enum_resp, "v_p_u_0_0_0_x" },
-{ pkt3_error_resp, "v_p_u_d_0_0_u" },
+{ pkt3_error_resp, "v_p_u_I_0_0_u" },
 { pkt3_error_resp, nullptr }
 };
 
@@ -61,7 +61,7 @@ const cmd_schema &cmd_schema::get_schema(uint32 pckt, const cmd_schema *_ss)
 bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_num) const
 {
 	MBuf mbuf(data, len);
-	Hex32 hex32;
+	Hex32 hex32; HexIDev3 hdev3;
 	std::string sc(schema);
 	for (auto ch: sc)
 	{
@@ -99,6 +99,8 @@ bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_n
 		case 'u':
 			mbuf >> hex32;
 			break;
+		case 'I':
+			mbuf >> hdev3;
 		default:
 			return false;
 		}
@@ -111,11 +113,21 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	bvector &green_data,
 	bvector& grey_data,
 	uint32 &pckt_type,
-	uint32 &serial)
+	DevId & devid)
 {
 	grey_data.clear(); green_data.clear();
-    Hex32 skip_prt, skip_tout, sr, pckt;
-	cmd >> skip_prt >> pckt >> skip_tout >> sr;
+	Hex32 skip_prt, skip_tout, sr, pckt, serial; HexIDev3 hdev;
+	cmd >> skip_prt >> pckt >> skip_tout;
+	if (devid._is_new)
+	{
+		cmd >> serial;
+		devid._dev_id = (uint32)serial;
+	}
+	else
+	{
+		cmd >> hdev;
+		devid._dev_id_new = hdev.toExtDevId();
+	}
 	
 	if (cmd.wasBroken())
 	{
@@ -131,15 +143,15 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	return true;
 }
 
-bvector AProtocol::create_cmd_request(uint32 serial, uint32 tmout, const bvector *data , uint32 resp_length)
+bvector AProtocol::create_cmd_request(DevId devid, uint32 tmout, const bvector *data , uint32 resp_length)
 {
 	bvector data_and_length;
 	if (data != nullptr) data_and_length = *data;
 	add_uint32_2_bvector(data_and_length, resp_length);
-	return create_cmd_req_proxy(serial, tmout, data_and_length);
+	return create_cmd_req_proxy(devid, tmout, data_and_length);
 }
 
-bvector Protocol3::create_cmd_request(uint32 serial, uint32 tmout, const bvector *data, uint32 resp_length)
+bvector Protocol3::create_cmd_request(DevId devid, uint32 tmout, const bvector *data, uint32 resp_length)
 {
 	bvector data_and_length;
 	add_uint32_2_bvector(data_and_length, data == nullptr ? 0: data -> size());

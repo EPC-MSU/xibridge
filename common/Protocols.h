@@ -2,15 +2,38 @@
 #define _PROTOCOLS_H
 #include <vector>
 #include <string>
+#include "ext_dev_id.h"
 #include "defs.h"
 #include "utils.h"
 
+
+/*
+* C++ struct to keep device identifiers of 2 types
+*/
+struct DevId {
+	DevId(uint32 id) :
+	_dev_id(id),
+	_is_new(false)
+	{};
+
+	DevId(const ExtDevId &e_id) :
+		_dev_id_new(e_id),
+		_is_new(true)
+	{};
+
+	DevId(bool is_n = false) : _is_new(is_n){};
+	uint32 _dev_id;
+		
+	ExtDevId _dev_id_new;
+
+	bool _is_new;
+};
 
   
 /* * structure to connect packet type and command schema
  *   command schema ia a string like this "v_p_0_d_0_0_x"
  *   v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
- *   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit number
+ *   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit number, I - extended device identifier
 */
 typedef struct _sm
 {
@@ -48,16 +71,16 @@ public:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 &pckt_type,
-		uint32 &serial);
+		DevId & devid);
 
 	static uint32 get_version_of_cmd(const bvector& cmd) { return (uint32)(cmd.size() > 3 ? cmd[3] : 0); }
 
-	virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data = nullptr) = 0;
-	virtual bvector create_open_request(uint32 serial, uint32 tmout) = 0;
-	virtual bvector create_close_request(uint32 serial, uint32 tmout) = 0;
+	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr) = 0;
+	virtual bvector create_open_request(DevId devid, uint32 tmout) = 0;
+	virtual bvector create_close_request(DevId devid, uint32 tmout) = 0;
 	virtual bvector create_version_request(uint32 tmout) { return bvector(); }
 	virtual bvector create_enum_request(uint32 tmout) { return bvector(); }
-	virtual bvector create_cmd_request(uint32 serial, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
+	virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
 	
 	virtual bool translate_response(uint32 pckt, const bvector& green) = 0;
 
@@ -93,16 +116,16 @@ class Protocol1 : public AProtocol
 {
 public:
 	Protocol1(bool isserver):AProtocol(isserver) {};
-	virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data = nullptr);
+	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr);
 	
-	virtual bvector create_open_request(uint32 serial, uint32 /*tmout*/) 
+	virtual bvector create_open_request(DevId devid, uint32 /*tmout*/)
 	{
-		return create_client_request(pkt1_open_req, serial, 0);
+		return create_client_request(pkt1_open_req, devid, 0);
 	};
 
-	virtual bvector create_close_request(uint32 serial, uint32 tmout)
+	virtual bvector create_close_request(DevId devid, uint32 tmout)
 	{
-		return create_client_request(pkt1_close_req, serial, 0);
+		return create_client_request(pkt1_close_req, devid, 0);
 	};
 
 	virtual bvector create_enum_request(uint32 /*tmout*/)
@@ -119,9 +142,9 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 /*tmout*/, const bvector &data)
+	virtual bvector create_cmd_req_proxy(DevId devid, uint32 /*tmout*/, const bvector &data)
 	{
-		return create_client_request(pkt1_raw, serial, 0, &data);
+		return create_client_request(pkt1_raw, devid, 0, &data);
 	}
 private:
 	/**
@@ -147,14 +170,14 @@ class Protocol2 : public AProtocol
 {
 public:
 	Protocol2(bool isserver) :AProtocol(isserver) {};
-	virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data = nullptr);
-	virtual bvector create_open_request(uint32 serial, uint32 tmout)
+	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr);
+	virtual bvector create_open_request(DevId devid, uint32 tmout)
 	{
-		return create_client_request(pkt2_open_req, serial, 0);
+		return create_client_request(pkt2_open_req, devid, 0);
 	};
-	virtual bvector create_close_request(uint32 serial, uint32 tmout)
+	virtual bvector create_close_request(DevId devid, uint32 tmout)
 	{
-		return create_client_request(pkt2_close_req, serial, 0);
+		return create_client_request(pkt2_close_req, devid, 0);
 	};
 
 	
@@ -168,9 +191,9 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 /*tmout*/, const bvector &data)
+	virtual bvector create_cmd_req_proxy(DevId devid, uint32 /*tmout*/, const bvector &data)
 	{
-		return create_client_request(pkt2_cmd_req, serial, 0, &data);
+		return create_client_request(pkt2_cmd_req, devid, 0, &data);
 	}
 private:
 	/**
@@ -194,14 +217,14 @@ class Protocol3 : public AProtocol
 {
 public:
 	Protocol3(bool isserver) :AProtocol(isserver) {};
-	virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector* data = nullptr);
-	virtual bvector create_open_request(uint32 serial, uint32 tmout)
+	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector* data = nullptr);
+	virtual bvector create_open_request(DevId devid, uint32 tmout)
 	{
-		return create_client_request(pkt3_open_req, serial, tmout);
+		return create_client_request(pkt3_open_req, devid, tmout);
 	};
-	virtual bvector create_close_request(uint32 serial, uint32 tmout)
+	virtual bvector create_close_request(DevId devid, uint32 tmout)
 	{
-		return create_client_request(pkt3_close_req, serial, tmout);
+		return create_client_request(pkt3_close_req, devid, tmout);
 	};
 	virtual bvector create_version_request(uint32 tmout)
 	{
@@ -217,7 +240,7 @@ public:
 
 	virtual bool translate_response(uint32 pckt, const bvector& green);
 
-	virtual bvector create_cmd_request(uint32 serial, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
+	virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
 protected:
 	
 	virtual uint32 version() { return 3; }
@@ -225,9 +248,9 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 /*tmout*/, const bvector &data)
+	virtual bvector create_cmd_req_proxy(DevId devid, uint32 /*tmout*/, const bvector &data)
 	{
-		return create_client_request(pkt3_cmd_req, serial, 0, &data);
+		return create_client_request(pkt3_cmd_req, devid, 0, &data);
 	}
 	
 private:

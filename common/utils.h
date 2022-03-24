@@ -2,6 +2,7 @@
 #define  _UTILS_H
 #include <vector>
 #include "defs.h"
+#include "ext_dev_id.h"
 
 /*
 
@@ -10,13 +11,15 @@
 class AHex
 {
 public :
-    AHex() { _lend = false; }
+    AHex():_lend(false), _tsize(0) {}
     virtual bool littleEndian() const {
         return _lend;
     };
 
 protected:
+	uint32 _get_stream1_4(uint8 **ptr);
     bool _lend;
+	int _tsize;
 };
 
 /* * все числа более байта в протоколах заданы в обратном порядке, поэтому
@@ -26,7 +29,7 @@ protected:
 class Hex32 : public AHex
 {
 public:
-    Hex32(uint32 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; }
+	Hex32(uint32 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 4; }
 
 	Hex32(char *psymbol_name_decimal);
 	operator uint32 () const { return value; }
@@ -40,7 +43,7 @@ private:
 class Hex8 : public AHex
 {
 public:
-	Hex8(uint8 v = 0) :value(v){}
+	Hex8(uint8 v = 0) :value(v){ _tsize = sizeof(uint32); }
 	void _get_stream(uint8 **ptr);
 	operator uint8 () const { return value; }
 	Hex8&  operator+=(uint8 a) { value += a; return *this; }
@@ -53,7 +56,7 @@ private:
 class Hex16 : public AHex
 {
 public:
-    Hex16(uint16 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; }
+	Hex16(uint16 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 1; }
 	void _get_stream(uint8 **ptr);
 	operator uint16 () const { return value; }
 	Hex16& operator=(uint16 v){ value = v; return *this; }
@@ -64,7 +67,7 @@ private:
 class Hex24 : public AHex
 {
 public:
-    Hex24(uint32 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; }
+	Hex24(uint32 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 3; }
     void _get_stream(uint8 **ptr);
     operator uint32 (){ return value; }
     Hex24& operator = (uint32 v){ value = v; return *this; }
@@ -80,17 +83,20 @@ class HexIDev3 : public AHex
 {
 public:
     HexIDev3(uint32 id = 0, uint16 pid = 0, uint16 vid = 0, uint32 reserve = 0, bool lit_end = FALSE) :
-        _id_value(id, lit_end), _id_pid(pid, lit_end), _id_vid(vid, lit_end), _reserve(reserve), _lend(lit_end){}
+		_id_value(id, lit_end), _id_pid(pid, lit_end), _id_vid(vid, lit_end), _reserve(reserve){
+		_lend = lit_end; _tsize = 12;
+	}
     void _get_stream(MBuf& mbuf);
     //operator uint32 (){ return value; }
     //Hex24& operator = (uint32 v){ value = v; return *this; }
     virtual bool littleEndian() const { return _lend; }
+
+	ExtDevId toExtDevId() const; 
+
 private:
     Hex32 _id_value, _reserve;
     Hex16 _id_pid, _id_vid;
-    bool _lend;
-
-};
+ };
 
 /* * Простой класс для хранения данных буфера и контроля длины и текущего указателя;
 * подходит для чтения данных и занесения данных
@@ -126,6 +132,8 @@ public:
 	MBuf& operator >> (Hex16 &v);
 	MBuf& operator << (Hex8 v);
 	MBuf& operator >> (Hex8 &v);
+	MBuf& operator << (HexIDev3 v);
+	MBuf& operator >> (HexIDev3 &v);
     //MBuf& operator << (HexIDev3 v);
     //MBuf& operator >> (HexIDev3 &v);
 	// запись в буфер содержимого другого буфера 

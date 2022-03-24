@@ -4,15 +4,22 @@
 #include "utils.h"
 
 
-int s;
-uint32 _get_stream1_4(uint8 **ptr)
+
+uint32 AHex::_get_stream1_4(uint8 **ptr)
 { 
     uint32 val = 0;
     uint8 *p = * ptr;
-    if (littleEndian())
-    for (int i = 0; i < s; i++)
-        val += *p * ((0x100) ^ i);
-
+	if (littleEndian())
+	{
+		for (int i = 0; i < _tsize; i++)
+			val += *p++ * (0x100 ^ i);
+	}
+	else
+	{
+		for (int i = _tsize-1; i >= 0; i--)
+			val += *(p--) * (0x100 ^ i);
+	}
+	*ptr += _tsize; 
 }
 
 // функции формирования значений различных пределов из последовательности байт массива
@@ -25,40 +32,50 @@ void Hex8::_get_stream(uint8 **ptr)
 
 void Hex32::_get_stream(uint8 **ptr)
 {
+	/*
 	uint8 * p = *ptr;
 	if (littleEndian())
 		value = *(p)+*(p + 1) * 0x100 + *(p + 2) * 0x10000 + *(p + 3) * 0x1000000;
 	else
 		value = *(p + 3) + *(p + 2) * 0x100 + *(p + 1) * 0x10000 + *(p)* 0x1000000;
 	*ptr += 4;
+	*/
+	value = _get_stream1_4(ptr);
 }
 
 // консруирует значение из симворльной десятичной ASCII- cтроки
 // строка должна заканч. нулем
 Hex32::Hex32(char *psymbol_name_decimal) :
-_lend(FALSE)
+AHex()
 {
+	_lend = false;
 	value = atoi(psymbol_name_decimal);
 }
 
 void Hex16::_get_stream(uint8 ** ptr)
 {
+	/*
 	uint8 * p = *ptr;
 	if (littleEndian())
 		value = *(p)+*(p + 1) * 0x100;
 	else
 		value = *(p + 1) + *p * 0x100;
 	*ptr += 2;
+	*/
+	value = _get_stream1_4(ptr);
 }
 
 void Hex24::_get_stream(uint8 ** ptr)
 {
+	/*
 	uint8 * p = *ptr;
 	if (littleEndian())
 		value = *(p)+*(p + 1) * 0x100 + *(p + 2) * 0x10000;
 	else
 		value = *(p + 2) + *(p + 1) * 0x100 + *(p)* 0x10000;
 	*ptr += 3;
+	*/
+	_get_stream1_4(ptr);
 }
 
 
@@ -66,14 +83,24 @@ void HexIDev3::_get_stream(MBuf & stream)
 {
     if (littleEndian())
     {
-
-
-
-
+		stream >> _id_value >> _id_pid >> _id_vid >> _reserve;
     }
+	else
+	{
+		stream >> _reserve >> _id_vid >> _id_pid >> _id_value;
+	}
 
 }
 
+ExtDevId HexIDev3::toExtDevId() const
+{
+	ExtDevId exdevid;
+	exdevid.reserve = _reserve;
+	exdevid.id = (unsigned int)_id_value;
+	exdevid.PID = (unsigned short)_id_pid;
+	exdevid.VID = (unsigned short)_id_vid;
+	return exdevid;
+}
 
 // конструктор простого буфера MBuf
 // pdata может только расти
