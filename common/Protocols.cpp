@@ -43,7 +43,6 @@ cmd_schema Protocol3::_cmd_shemas[12] =
 { pkt3_error_resp, nullptr }
 };
 
-
 const cmd_schema &cmd_schema::get_schema(uint32 pckt, const cmd_schema *_ss)
 {
 	int i;
@@ -157,7 +156,7 @@ bvector Protocol3::create_cmd_request(DevId devid, uint32 tmout, const bvector *
 	add_uint32_2_bvector(data_and_length, data == nullptr ? 0: data -> size());
 	if (data != nullptr) data_and_length.insert(data_and_length.end(), data -> cbegin(), data -> cend());
 	add_uint32_2_bvector(data_and_length, resp_length);
-	return create_cmd_req_proxy(serial, tmout, data_and_length);
+	return create_cmd_req_proxy(devid, tmout, data_and_length);
 }
 
 bool Protocol1::get_spec_data(MBuf&  mbuf,
@@ -265,7 +264,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 	bvector &grey_data,
 	uint32 pckt)
 {
-	// 16 bytes has already read from mbuf
+	// 16 bytes or 16 bytes + 8 (extended identifier) has already read from mbuf
 
 	if (_is_server)
 	{
@@ -445,18 +444,24 @@ bvector Protocol2::create_client_request(uint32 pckt, uint32 serial, uint32 /*tm
 	return mbuf.to_vector();
 }
 
-bvector Protocol3::create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector * data)
+bvector Protocol3::create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector * data)
 {
 	MBuf mbuf(64 + (data == nullptr ? 0 : data -> size()));
 	mbuf << Hex32(version()) << Hex32(pckt) << Hex32(tmout);
-	uint32 _serial = 0;
-	if (pckt == pkt3_close_req || pckt == pkt3_open_req || pckt == pkt3_cmd_req)
-		_serial = serial;
-	mbuf << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
-	if (pckt == pkt3_cmd_req)
-	{
-		if (data != nullptr) mbuf.memwrite(data->data(), data->size());
-	}
+    HexIDev3 _idev(devid._dev_id_new.id, devid._dev_id_new.PID, devid._dev_id_new.VID, devid._dev_id_new.reserve);
+    if (pckt == pkt3_close_req || pckt == pkt3_open_req || pckt == pkt3_cmd_req)
+    {
+
+        mbuf << _idev << Hex32((uint32)0x0) << Hex32((uint32)0x0);
+        if (pckt == pkt3_cmd_req)
+        {
+            if (data != nullptr) mbuf.memwrite(data->data(), data->size());
+        }
+    }
+    else // enumerate and version req
+    {
+        mbuf << Hex32((uint32)0x00) << Hex32((uint32)0x00) << Hex32((uint32)0x00);
+    }
 	return mbuf.to_vector();
 }
 

@@ -93,7 +93,7 @@ protected:
 		bvector &grey_data,
 		uint32 pckt) = 0;
 
-	virtual bvector create_cmd_req_proxy(uint32 serial, uint32 tmout, const bvector & data) = 0;
+	virtual bvector create_cmd_req_proxy(DevId devid, uint32 tmout, const bvector & data) = 0;
 	
 	bool _is_server;
 
@@ -116,7 +116,11 @@ class Protocol1 : public AProtocol
 {
 public:
 	Protocol1(bool isserver):AProtocol(isserver) {};
-	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr);
+    virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr)
+    {
+        if (devid._is_new) return bvector();
+        return create_client_request(pckt, devid._dev_id, tmout, data);
+    }
 	
 	virtual bvector create_open_request(DevId devid, uint32 /*tmout*/)
 	{
@@ -130,7 +134,7 @@ public:
 
 	virtual bvector create_enum_request(uint32 /*tmout*/)
 	{
-		return create_client_request(pkt1_enum_req, 0, 0);
+		return create_client_request(pkt1_enum_req, DevId(), 0);
 	};
 
 	
@@ -163,15 +167,21 @@ private:
 	};
 
 	static cmd_schema _cmd_shemas[9];
-	
+
+    bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data);
 };
 
 class Protocol2 : public AProtocol
 {
 public:
 	Protocol2(bool isserver) :AProtocol(isserver) {};
-	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr);
-	virtual bvector create_open_request(DevId devid, uint32 tmout)
+	virtual bvector create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector *data = nullptr)
+    {
+        if (devid._is_new) return bvector();
+        return create_client_request(pckt, devid._dev_id, tmout, data);
+    }
+	
+    virtual bvector create_open_request(DevId devid, uint32 tmout)
 	{
 		return create_client_request(pkt2_open_req, devid, 0);
 	};
@@ -179,7 +189,6 @@ public:
 	{
 		return create_client_request(pkt2_close_req, devid, 0);
 	};
-
 	
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
@@ -211,6 +220,8 @@ private:
 	};
 
 	static cmd_schema _cmd_shemas[7];
+
+    virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data);
 };
 
 class Protocol3 : public AProtocol
@@ -228,19 +239,21 @@ public:
 	};
 	virtual bvector create_version_request(uint32 tmout)
 	{
-		return create_client_request(pkt3_ver_req, 0, tmout);
+		return create_client_request(pkt3_ver_req, DevId(true), tmout);
 	}
 	
 	virtual bvector create_enum_request(uint32 tmout)
 	{
-		return create_client_request(pkt3_enum_req, 0, tmout);
+		return create_client_request(pkt3_enum_req, DevId(true), tmout);
 	};
 
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
 	virtual bool translate_response(uint32 pckt, const bvector& green);
 
-	virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
+    virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
+    
+
 protected:
 	
 	virtual uint32 version() { return 3; }
@@ -272,6 +285,7 @@ private:
 		pkt3_error_resp = 0xFA
 	};
 
+   
 	static cmd_schema _cmd_shemas[12];
 	
 };
