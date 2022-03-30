@@ -107,14 +107,13 @@ bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_n
 	return !mbuf.wasBroken();
 }
 
-
 bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	bvector &green_data,
 	bvector& grey_data,
 	uint32 &pckt_type,
 	DevId & devid)
 {
-	grey_data.clear(); green_data.clear();
+    grey_data.clear(); green_data.clear(); _res_err = 0;
 	Hex32 skip_prt, skip_tout, sr, pckt, serial; HexIDev3 hdev;
 	cmd >> skip_prt >> pckt >> skip_tout;
 	if (devid._is_new)
@@ -142,21 +141,31 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	return true;
 }
 
-bvector AProtocol::create_cmd_request(DevId devid, uint32 tmout, const bvector *data , uint32 resp_length)
+bvector Protocol1::create_cmd_request(DevId devid, uint32 tmout, const bvector *data, uint32 resp_length)
 {
-	bvector data_and_length;
-	if (data != nullptr) data_and_length = *data;
-	add_uint32_2_bvector(data_and_length, resp_length);
-	return create_cmd_req_proxy(devid, tmout, data_and_length);
+    return create_client_request(pkt1_raw, devid, 0, data);
+}
+
+bvector Protocol2::create_cmd_request(DevId devid, uint32 tmout, const bvector *data, uint32 resp_length)
+{
+    bvector data_and_length;
+    auto data_cbeg = data -> cbegin();
+    if (data != nullptr && data->size() >= URPC_CID_SIZE)
+    {
+        data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + URPC_CID_SIZE - 1);
+        add_uint32_2_bvector(data_and_length, resp_length);
+        data_and_length.insert(data_and_length.end(), data_cbeg + URPC_CID_SIZE, data->cend());
+    }
+    return create_client_request(pkt2_cmd_req, devid._dev_id, 0,  &data_and_length);
 }
 
 bvector Protocol3::create_cmd_request(DevId devid, uint32 tmout, const bvector *data, uint32 resp_length)
 {
 	bvector data_and_length;
-	add_uint32_2_bvector(data_and_length, data == nullptr ? 0: data -> size());
+	add_uint32_2_bvector(data_and_length, data == nullptr ? 0: (uint32)data -> size());
 	if (data != nullptr) data_and_length.insert(data_and_length.end(), data -> cbegin(), data -> cend());
 	add_uint32_2_bvector(data_and_length, resp_length);
-	return create_cmd_req_proxy(devid, tmout, data_and_length);
+    return create_client_request(pkt3_cmd_req, devid, 0, &data_and_length);
 }
 
 bool Protocol1::get_spec_data(MBuf&  mbuf,
@@ -165,7 +174,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 	uint32 pckt)
 {
 	// 16 bytes has already read from mbuf
-	Hex32 count, devnum;
+	Hex32 count, devnum, r;
 
 	if (_is_server)
 	{
@@ -226,7 +235,8 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
-						 green_data = mbuf.to_vector(true);
+                         mbuf >> r;
+						 _res_err = (uint32)r;
 					     return true;
 		}
 		case pkt1_enum_resp:
@@ -236,7 +246,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 						 grey_data = mbuf.to_vector(true);  //all data as is is grey
 						 MBuf gr_buf(sizeof(uint32) * count);
 						 {
-							 for (int i = 0; i < count; i++)
+							 for (int i = 0; i < (int)count; i++)
 							 {
 								 mbuf >> devnum;
 								 gr_buf << Hex32(devnum, true); // another order of bytes
@@ -266,6 +276,8 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 {
 	// 16 bytes or 16 bytes + 8 (extended identifier) has already read from mbuf
 
+
+    Hex32 r;
 	if (_is_server)
 	{
 		switch (pckt)
@@ -273,12 +285,14 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		case pkt2_cmd_req:
 		{
 						 mbuf.mseek(8);
+                         mbuf >> r;
 						 int len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
+                         _res_err = r;
 						 grey_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
 
 						 return true;
@@ -322,7 +336,8 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 									_is_inv_pcktfmt = true;
 									return false;
 								}
-								green_data = mbuf.to_vector(true);
+                                mbuf >> r;
+                                _res_err = r;
 								return true;
 		}
 		
@@ -339,7 +354,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 	uint32 pckt)
 {
 	// 16 bytes has already read from mbuf
-	Hex32 size;
+	Hex32 size, r;
 	if (_is_server)
 	{
 		switch (pckt)
@@ -397,7 +412,8 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								  _is_inv_pcktfmt = true;
 								  return false;
 							  }
-							  green_data = mbuf.to_vector(true);
+                              mbuf >> r;
+							  _res_err = r;
 							  return true;
 
 		}
@@ -422,11 +438,11 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 
 bvector Protocol1::create_client_request(uint32 pckt, uint32 serial, uint32 /*tmout*/, const bvector *data)
 {
-	MBuf mbuf(64 + (data == nullptr ? 0 : data->size()));
+	MBuf mbuf(64 + (data == nullptr ? 0 : (int)data->size()));
 	mbuf << Hex32(version()) << Hex32((uint32)pckt) << Hex32((uint32)0x0) << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
 	if (pckt == pkt1_raw)
 	{
-		if (data != nullptr) mbuf.memwrite(data->data(), data->size());
+		if (data != nullptr) mbuf.memwrite(data->data(), (int)data->size());
 	}
 	else if (pckt == pkt1_enum_req)
 		mbuf << Hex32((uint32)0x00);
@@ -435,18 +451,18 @@ bvector Protocol1::create_client_request(uint32 pckt, uint32 serial, uint32 /*tm
 
 bvector Protocol2::create_client_request(uint32 pckt, uint32 serial, uint32 /*tmout*/, const bvector * data)
 {
-	MBuf mbuf(64 + (data == nullptr ? 0 : data->size()));
+	MBuf mbuf(64 + (data == nullptr ? 0 : (int)data->size()));
 	mbuf << Hex32(version()) << Hex32((uint32)pckt) <<Hex32((uint32)0x0) << Hex32(serial) << Hex32((uint32)0x0) << Hex32((uint32)0x0);
 	if (pckt == pkt2_cmd_req)
 	{
-		if (data != nullptr) mbuf.memwrite(data->data(), data->size());
+       if (data != nullptr) mbuf.memwrite(data->data(), (int)data->size());
 	}
 	return mbuf.to_vector();
 }
 
 bvector Protocol3::create_client_request(uint32 pckt, DevId devid, uint32 tmout, const bvector * data)
 {
-	MBuf mbuf(64 + (data == nullptr ? 0 : data -> size()));
+	MBuf mbuf(64 + (data == nullptr ? 0 : (int)data -> size()));
 	mbuf << Hex32(version()) << Hex32(pckt) << Hex32(tmout);
     HexIDev3 _idev(devid._dev_id_new.id, devid._dev_id_new.PID, devid._dev_id_new.VID, devid._dev_id_new.reserve);
     if (pckt == pkt3_close_req || pckt == pkt3_open_req || pckt == pkt3_cmd_req)
@@ -455,7 +471,7 @@ bvector Protocol3::create_client_request(uint32 pckt, DevId devid, uint32 tmout,
         mbuf << _idev << Hex32((uint32)0x0) << Hex32((uint32)0x0);
         if (pckt == pkt3_cmd_req)
         {
-            if (data != nullptr) mbuf.memwrite(data->data(), data->size());
+            if (data != nullptr) mbuf.memwrite(data->data(), (int)data->size());
         }
     }
     else // enumerate and version req

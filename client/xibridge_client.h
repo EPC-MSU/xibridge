@@ -131,13 +131,13 @@ public:
 	@param req_len - request length
 	@param resp - buffer for reponse data
 	@resp_len - optional response length in bytes
-	@err_no - optional pointer to err number variable
+	@res_err - pointer to result or err number variable
 	*/
 	static bool xibridge_request_response(unsigned int conn_id, 
 		                                  const unsigned char *req, 
 										  int req_len, 
 										  unsigned char *resp, 
-										  int resp_len );
+										  int resp_len, unsigned int *res_err);
 
 	/*
 	* This static member function returns last error text according to xibridge classification
@@ -159,7 +159,7 @@ public:
 
 	conn_id_t conn_id() const { return _conn_id; }
 
-	bvector  send_data_and_receive(bvector data, uint32 resp_length);
+	bvector  send_data_and_receive(bvector data, uint32 resp_length, uint32& res_err);
 	/*
 	*
 	*@param [out] extra_enum_data - extra data for enumerated device, = nullptr if extra info is not desired

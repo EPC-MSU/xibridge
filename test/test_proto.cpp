@@ -32,19 +32,19 @@ static bool test_request_proto1()
 		ret = false;
 	}
 
-	reqw = proto.create_open_request(1, 1000);
+	reqw = proto.create_open_request(DevId(1), 1000);
 	
 	const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_1_OPEN, proto.get_cmd_shema());
-	if (!cm1.is_match(reqw.data(), reqw.size(), 1, 1))
+	if (!cm1.is_match(reqw.data(), (int)reqw.size(), 1, 1))
 	{
 		ZF_LOGE("!Failed create_open_request(1, 1000)");
 		ret = false;
 	}
 
-	reqw = proto.create_close_request(2, 2000);
+	reqw = proto.create_close_request(DevId(2), 2000);
 
 	const cmd_schema & cm2= cmd_schema::get_schema(PROTO_1_CLOSE, proto.get_cmd_shema());
-	if (!cm2.is_match(reqw.data(), reqw.size(), 1, 2))
+    if (!cm2.is_match(reqw.data(), (int)reqw.size(), 1, 2))
 	{
 		ZF_LOGE("!Failed create_close_request(2, 2000)");
 		ret = false;
@@ -54,7 +54,7 @@ static bool test_request_proto1()
 	
 	reqw = proto.create_cmd_request(3, 3000, &data);
 	const cmd_schema & cm3 = cmd_schema::get_schema(PROTO_1_RAW, proto.get_cmd_shema());
-	if (!cm3.is_match(reqw.data(), reqw.size(), 1, 3))
+    if (!cm3.is_match(reqw.data(), (int)reqw.size(), 1, 3))
 	{
 		ZF_LOGE("!Failed create_cmd_request(3, 3000)");
 		ret = false;
@@ -62,7 +62,7 @@ static bool test_request_proto1()
 
 	reqw = proto.create_enum_request(4000);
 	const cmd_schema & cm4 = cmd_schema::get_schema(PROTO_1_ENUM, proto.get_cmd_shema());
-	if (!cm4.is_match(reqw.data(), reqw.size(), 1, 0))
+    if (!cm4.is_match(reqw.data(), (int)reqw.size(), 1, 0))
 	{
 		ZF_LOGE("!Failed create_enum_request(4000)");
 		ret = false;
@@ -86,10 +86,11 @@ static bool test_request_proto2()
 		ret = false;
 	}
 
+
 	reqw = proto.create_open_request(1, 1000);
 
 	const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_2_OPEN, proto.get_cmd_shema());
-	if (!cm1.is_match(reqw.data(), reqw.size(), 2, 1))
+    if (!cm1.is_match(reqw.data(), (int)reqw.size(), 2, 1))
 	{
 		ZF_LOGE("!Failed create_open_request(1, 1000)");
 		ret = false;
@@ -98,7 +99,7 @@ static bool test_request_proto2()
 	reqw = proto.create_close_request(2, 2000);
 
 	const cmd_schema & cm2 = cmd_schema::get_schema(PROTO_2_CLOSE, proto.get_cmd_shema());
-	if (!cm2.is_match(reqw.data(), reqw.size(), 2, 2))
+    if (!cm2.is_match(reqw.data(), (int)reqw.size(), 2, 2))
 	{
 		ZF_LOGE("!Failed create_close_request(2, 2000)");
 		ret = false;
@@ -106,9 +107,10 @@ static bool test_request_proto2()
 
 	bvector data = { 'h', 'a', 'h', 'a', 'h', 'a' , '2' };
 
+
 	reqw = proto.create_cmd_request(3, 3000, &data);
 	const cmd_schema & cm3 = cmd_schema::get_schema(PROTO_2_CMD, proto.get_cmd_shema());
-	if (!cm3.is_match(reqw.data(), reqw.size(), 2, 3))
+    if (!cm3.is_match(reqw.data(), (int)reqw.size(), 2, 3))
 	{
 		ZF_LOGE("!Failed create_cmd_request(3, 3000)");
 		ret = false;
@@ -134,7 +136,7 @@ static bool test_request_proto3()
 	Protocol3 proto(false);
 	bvector reqw = proto.create_version_request(0);
 	const cmd_schema & cm0 = cmd_schema::get_schema(PROTO_3_VER, proto.get_cmd_shema());
-	if (!cm0.is_match(reqw.data(), reqw.size(), 3, 0))
+    if (!cm0.is_match(reqw.data(), (int)reqw.size(), 3, 0))
 	{
 		ZF_LOGE("!Failed create_version_request(0)");
 		ret = false;
@@ -143,7 +145,7 @@ static bool test_request_proto3()
 	reqw = proto.create_open_request(1, 1000);
 
 	const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_OPEN, proto.get_cmd_shema());
-	if (!cm1.is_match(reqw.data(), reqw.size(), 3, 1))
+    if (!cm1.is_match(reqw.data(), (int)reqw.size(), 3, 1))
 	{
 		ZF_LOGE("!Failed create_open_request(1, 1000)");
 		ret = false;
@@ -152,7 +154,7 @@ static bool test_request_proto3()
 	reqw = proto.create_close_request(2, 2000);
 
 	const cmd_schema & cm2 = cmd_schema::get_schema(PROTO_3_CLOSE, proto.get_cmd_shema());
-	if (!cm2.is_match(reqw.data(), reqw.size(), 3, 2))
+    if (!cm2.is_match(reqw.data(), (int)reqw.size(), 3, 2))
 	{
 		ZF_LOGE("!Failed create_close_request(2, 2000)");
 		ret = false;
@@ -162,7 +164,7 @@ static bool test_request_proto3()
 
 	reqw = proto.create_cmd_request(3, 3000, &data);
 	const cmd_schema & cm3 = cmd_schema::get_schema(PROTO_3_CMD, proto.get_cmd_shema());
-	if (!cm3.is_match(reqw.data(), reqw.size(), 3, 3))
+    if (!cm3.is_match(reqw.data(), (int)reqw.size(), 3, 3))
 	{
 		ZF_LOGE("!Failed create_cmd_request(3, 3000)");
 		ret = false;
@@ -170,7 +172,7 @@ static bool test_request_proto3()
 
 	reqw = proto.create_enum_request(4000);
 	const cmd_schema & cm4 = cmd_schema::get_schema(PROTO_3_ENUM, proto.get_cmd_shema());
-	if (!cm4.is_match(reqw.data(), reqw.size(), 3, 0))
+    if (!cm4.is_match(reqw.data(), (int)reqw.size(), 3, 0))
 	{
 		ZF_LOGE("!Failed create_enum_request(4000)");
 		ret = false;

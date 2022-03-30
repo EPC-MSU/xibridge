@@ -15,9 +15,10 @@ public :
     virtual bool littleEndian() const {
         return _lend;
     };
-
+    void put_stream1_4(uint8 **ptr, uint32 val);
 protected:
-	uint32 _get_stream1_4(uint8 **ptr);
+    uint32 _get_stream1_4(uint8 **ptr);
+   
     bool _lend;
 	int _tsize;
 };
@@ -79,6 +80,7 @@ private:
 * Класс для хранения 12-байтных идентификаторов устройств
 */
 
+class MBuf;
 class HexIDev3 : public AHex
 {
 public:
@@ -86,13 +88,14 @@ public:
 		_id_value(id, lit_end), _id_pid(pid, lit_end), _id_vid(vid, lit_end), _reserve(reserve){
 		_lend = lit_end; _tsize = 12;
 	}
-    void _get_stream(MBuf& mbuf);
+    void get_stream(MBuf& mbuf);
+    void put_stream(MBuf& mbuf) const ;
     //operator uint32 (){ return value; }
     //Hex24& operator = (uint32 v){ value = v; return *this; }
     virtual bool littleEndian() const { return _lend; }
 
 	ExtDevId toExtDevId() const; 
-
+    
 private:
     Hex32 _id_value, _reserve;
     Hex16 _id_pid, _id_vid;
@@ -132,7 +135,7 @@ public:
 	MBuf& operator >> (Hex16 &v);
 	MBuf& operator << (Hex8 v);
 	MBuf& operator >> (Hex8 &v);
-	MBuf& operator << (HexIDev3 v);
+	MBuf& operator << (const HexIDev3 &v);
 	MBuf& operator >> (HexIDev3 &v);
     //MBuf& operator << (HexIDev3 v);
     //MBuf& operator >> (HexIDev3 &v);

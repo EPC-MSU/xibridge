@@ -20,7 +20,29 @@ uint32 AHex::_get_stream1_4(uint8 **ptr)
 			val += *(p--) * (0x100 ^ i);
 	}
 	*ptr += _tsize; 
+    return val;
 }
+
+void AHex::put_stream1_4(uint8 **ptr, uint32 val)
+{
+    uint8 *p = *ptr;
+    if (littleEndian())
+    {
+        for (int i = 0; i < _tsize; i++)
+        {
+           *p++ = (uint8)(val >> (i * 8) & 0xFF);
+        }
+    }
+    else
+    {
+        for (int i = _tsize - 1; i >= 0; i--)
+        {
+            *p++ = (uint8)(val >> (i * 8) & 0xFF);
+        }
+         
+    }
+    *ptr += _tsize;
+ }
 
 // функции формирования значений различных пределов из последовательности байт массива
 void Hex8::_get_stream(uint8 **ptr)
@@ -79,7 +101,7 @@ void Hex24::_get_stream(uint8 ** ptr)
 }
 
 
-void HexIDev3::_get_stream(MBuf & stream)
+void HexIDev3::get_stream(MBuf & stream)
 {
     if (littleEndian())
     {
@@ -89,7 +111,18 @@ void HexIDev3::_get_stream(MBuf & stream)
 	{
 		stream >> _reserve >> _id_vid >> _id_pid >> _id_value;
 	}
+}
 
+void HexIDev3::put_stream(MBuf & stream) const
+{
+    if (littleEndian())
+    {
+        stream << _id_value << _id_pid << _id_vid << _reserve;
+    }
+    else
+    {
+        stream << _reserve << _id_vid << _id_pid << _id_value;
+    }
 }
 
 ExtDevId HexIDev3::toExtDevId() const
@@ -140,13 +173,12 @@ MBuf& MBuf::operator << (Hex32 v)
 {
 	if (!_rdon)
 	{
-
-
 		if (dlen - (pdata - origin_data)  < 4) ovrflow++;
 		// места в буфере не хватило
 		else
 		{
 			// хватило Места, разберемся с порядком следования байт в памяти
+            /*
 			if (v.littleEndian())
 			{
 				// порядок здесь little endian
@@ -163,6 +195,8 @@ MBuf& MBuf::operator << (Hex32 v)
 				*pdata++ = (uint8)((v >> 8) & 0xFF);
 				*pdata++ = (uint8)(v & 0xFF);
 			}
+            */
+            v.put_stream1_4(&pdata, v);
 		}
 	}
 	return *this;
@@ -192,7 +226,8 @@ MBuf& MBuf::operator << (Hex24 v)
 		// места в буфере не хватило
 		else
 		{
-			// хватило
+            /*
+            // хватило
 			// порядок здесь 
 			if (v.littleEndian())
 			{
@@ -207,6 +242,8 @@ MBuf& MBuf::operator << (Hex24 v)
 				*pdata++ = (uint8)((v >> 8) & 0xFF);
 				*pdata++ = (uint8)(v & 0xFF);
 			}
+            */
+            v.put_stream1_4(&pdata, v);
 		}
 	}
 	return *this;
@@ -230,12 +267,11 @@ MBuf& MBuf::operator << (Hex16 v)
 {
 	if (!_rdon)
 	{
-
-
 		if (dlen - (pdata - origin_data)  < 2) ovrflow++;
 		// места в буфере не хватило
 		else
 		{
+            /*
 			// хватило
 			// порядок здесь 
 			if (v.littleEndian())
@@ -249,6 +285,8 @@ MBuf& MBuf::operator << (Hex16 v)
 				*pdata++ = (uint8)((v >> 8) & 0xFF);
 				*pdata++ = (uint8)(v & 0xFF);
 			}
+            */
+            v.put_stream1_4(&pdata, v);
 		}
 	}
 	return *this;
@@ -272,8 +310,6 @@ MBuf& MBuf::operator << (Hex8 v)
 {
 	if (!_rdon)
 	{
-
-
 		if (dlen - (pdata - origin_data)  < 1) ovrflow++;
 		// места в буфере не хватило
 		else
@@ -298,6 +334,20 @@ MBuf& MBuf::operator << (const MBuf & src)
 		pdata += _len;
 	}
 	return *this;
+}
+
+// запись в буфер содержимого HexIDev3  
+MBuf& MBuf::operator << (const HexIDev3 &hidev)
+{
+    hidev.put_stream(*this);
+    return *this;
+}
+
+// чтение из буфера содержимого HexIDev3  
+MBuf& MBuf::operator >> (HexIDev3 &hidev)
+{
+    hidev.get_stream(*this);
+    return *this;
 }
 
 // запись данных в буфер объекта

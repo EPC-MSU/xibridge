@@ -13,9 +13,9 @@ int xibridge_protocol_version()
 	return Xibridge_client::xibridge_protocol_version();
 }
 
-bool xibridge_init(const char *key_file_path)
+int xibridge_init(const char *key_file_path)
 {
-	return Xibridge_client::xibridge_init(key_file_path);
+	return Xibridge_client::xibridge_init(key_file_path) == false ? 0 : 1;
 }
 
 void xibridge_shutdown()
@@ -70,14 +70,19 @@ unsigned int  xibridge_detect_protocol_version(const char *addr)
 * Функция выполнения запроса
 * To do timeout ???
 */
-bool xibridge_device_request_response(unsigned int conn_id, const unsigned char *req, int req_len, unsigned char *resp, int resp_len)
+int xibridge_device_request_response(unsigned int conn_id, 
+                                     const unsigned char *req, 
+                                     int req_len, 
+                                     unsigned char *resp, 
+                                     int resp_len,
+                                     unsigned int *res_err)
 {
-	return Xibridge_client::xibridge_request_response(conn_id, req, req_len, resp, resp_len);
+	return Xibridge_client::xibridge_request_response(conn_id, req, req_len, resp, resp_len, res_err) == false ? 0 : 1;
 }
 
-void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no)
+void xibridge_get_err_expl(char * s, int len, int is_russian, unsigned int err_no)
 {
-	return Xibridge_client::xibridge_get_err_expl(s, len, is_russian, err_no);
+	return Xibridge_client::xibridge_get_err_expl(s, len, is_russian == 0 ? false : true, err_no);
 }
 
 unsigned int xibridge_get_last_err_no(unsigned int conn_id) 

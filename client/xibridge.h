@@ -14,8 +14,9 @@ extern int xibridge_major_version();
 extern int xibridge_protocol_version();
 /*
 * Функция инициализации системы xibridge 
+* если резултат 0 - неудача
 */
-extern bool xibridge_init(const char *key_file_path);
+extern int xibridge_init(const char *key_file_path);
 
 /*
 * Функция завершения работы с системой xibridge
@@ -63,17 +64,18 @@ extern unsigned int xibridge_detect_protocol_version(const char *addr);
 /*
 * Функция выполнения запроса
 * To do timeout ? ? ?
+* результат 0 - неудача
 */
-extern bool xibridge_device_request_response(unsigned int conn_id, 
+extern int xibridge_device_request_response(unsigned int conn_id, 
 	                                         const unsigned char *req, 
 											 int req_len, unsigned char *resp, 
-											 int resp_len 
+                                             int resp_len, unsigned int *res_err
 											);
 
 /*
 * Функция формирования текста ошибки по ее номеру
 */
-extern void xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no);
+extern void xibridge_get_err_expl(char * s, int len, int is_russian, unsigned int err_no);
 
 /*
 * Функция получения списка номеров доступных устройств 

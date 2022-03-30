@@ -26,9 +26,10 @@ bool test_connect_1()
 	}
 	unsigned int version = xibridge_detect_protocol_version("127.0.0.1");
 	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version);
-	
+    unsigned int res_err;
+
 	move_settings_calb_t resp_s;
-	bool _ok = xibridge_device_request_response(connection, (const unsigned char *)"XIR", 3, (unsigned char *)&resp_s, sizeof(resp_s));
+	int _ok = xibridge_device_request_response(connection, (const unsigned char *)"XIR", 3, (unsigned char *)&resp_s, sizeof(resp_s), &res_err);
 
 	// разобрать структуру
 	// to do - sync 

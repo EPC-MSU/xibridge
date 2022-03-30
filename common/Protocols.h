@@ -21,9 +21,9 @@ struct DevId {
 		_is_new(true)
 	{};
 
-	DevId(bool is_n = false) : _is_new(is_n){};
+    DevId(): _is_new(true) {}
 	uint32 _dev_id;
-		
+ 
 	ExtDevId _dev_id_new;
 
 	bool _is_new;
@@ -80,12 +80,13 @@ public:
 	virtual bvector create_close_request(DevId devid, uint32 tmout) = 0;
 	virtual bvector create_version_request(uint32 tmout) { return bvector(); }
 	virtual bvector create_enum_request(uint32 tmout) { return bvector(); }
-	virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
+	virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0) = 0;
 	
 	virtual bool translate_response(uint32 pckt, const bvector& green) = 0;
 
 	virtual uint32 version() = 0;
 	virtual const cmd_schema *get_cmd_shema() = 0;  // pure virtual
+    uint32 get_result_error() const { return _res_err; }
 protected:
 	AProtocol(bool is_server): _is_server(is_server), _is_inv_pckt(false), _is_inv_pcktfmt(false) {};
 	virtual bool get_spec_data(MBuf&  mbuf,
@@ -93,7 +94,7 @@ protected:
 		bvector &grey_data,
 		uint32 pckt) = 0;
 
-	virtual bvector create_cmd_req_proxy(DevId devid, uint32 tmout, const bvector & data) = 0;
+	//virtual bvector create_cmd_req_proxy(DevId devid, uint32 tmout, const bvector & data) = 0;
 	
 	bool _is_server;
 
@@ -102,6 +103,8 @@ protected:
 	bool _is_inv_pcktfmt; // to send error packet to the other side
 
 	bool _is_device_broken; 
+
+    uint32 _res_err;   //at response stage the result of an operation or error from other side 
 
 };
 
@@ -134,10 +137,10 @@ public:
 
 	virtual bvector create_enum_request(uint32 /*tmout*/)
 	{
-		return create_client_request(pkt1_enum_req, DevId(), 0);
+		return create_client_request(pkt1_enum_req, DevId(0), 0);
 	};
 
-	
+    virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 	virtual bool translate_response(uint32 pckt, const bvector& green) ;
 protected:
@@ -146,10 +149,7 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	virtual bvector create_cmd_req_proxy(DevId devid, uint32 /*tmout*/, const bvector &data)
-	{
-		return create_client_request(pkt1_raw, devid, 0, &data);
-	}
+
 private:
 	/**
 	* Ver.1 protocol packets type
@@ -193,6 +193,8 @@ public:
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
 	virtual bool translate_response(uint32 pckt, const bvector& green);
+
+    virtual bvector create_cmd_request(DevId devid, uint32 tmout, const bvector *data = nullptr, uint32 resp_length = 0);
 protected:
 	
 	virtual uint32 version() { return 2; }
@@ -200,10 +202,7 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	virtual bvector create_cmd_req_proxy(DevId devid, uint32 /*tmout*/, const bvector &data)
-	{
-		return create_client_request(pkt2_cmd_req, devid, 0, &data);
-	}
+	
 private:
 	/**
 	* Ver.2 protocol packets type
@@ -220,7 +219,7 @@ private:
 	};
 
 	static cmd_schema _cmd_shemas[7];
-
+    const int URPC_CID_SIZE = 4;
     virtual bvector create_client_request(uint32 pckt, uint32 serial, uint32 tmout, const bvector *data);
 };
 
@@ -239,12 +238,12 @@ public:
 	};
 	virtual bvector create_version_request(uint32 tmout)
 	{
-		return create_client_request(pkt3_ver_req, DevId(true), tmout);
+		return create_client_request(pkt3_ver_req, DevId(), tmout);
 	}
 	
 	virtual bvector create_enum_request(uint32 tmout)
 	{
-		return create_client_request(pkt3_enum_req, DevId(true), tmout);
+		return create_client_request(pkt3_enum_req, DevId(), tmout);
 	};
 
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
@@ -261,11 +260,7 @@ protected:
 		bvector &green_data,
 		bvector &grey_data,
 		uint32 pckt);
-	virtual bvector create_cmd_req_proxy(DevId devid, uint32 /*tmout*/, const bvector &data)
-	{
-		return create_client_request(pkt3_cmd_req, devid, 0, &data);
-	}
-	
+		
 private:
 	/**
 	* Ver.3 protocol packets type

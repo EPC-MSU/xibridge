@@ -105,13 +105,13 @@ void Xibridge_client::xibridge_enumerate_devices(const char *addr,
 	if (xl -> _send_and_receive(req))
 	{
 		bvector green, grey;
-		uint32 pckt, serial;
-		MBuf buf(xl -> _recv_message.data(), xl -> _recv_message.size());
-		if (protocol -> get_data_from_bindy_callback(buf, green, grey, pckt, serial) == true)
+        uint32 pckt; DevId devid;
+		MBuf buf(xl -> _recv_message.data(), (int)xl -> _recv_message.size());
+		if (protocol -> get_data_from_bindy_callback(buf, green, grey, pckt, devid) == true)
 		{
 			result = (unsigned int *) malloc(green.size());
 			memcpy(result, green.data(), green.size());
-			*pcount = green.size() / sizeof(unsigned int);
+			*pcount = (unsigned int)green.size() / sizeof(unsigned int);
 			//
 		}
 		else
@@ -154,7 +154,7 @@ _conn_id(conn_id_invalid)
   // bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
   // client 
    memset(_host, 0, MAXHOST + 1);
-   int len = strlen(addr);
+   int len = (int)strlen(addr);
    memcpy(_host, addr, len > MAXHOST ? MAXHOST : len);
 }
 
@@ -224,9 +224,9 @@ bool Xibridge_client::open_connection_device()
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
-		uint32 pckt, serial;
-		MBuf buf(_recv_message.data(), _recv_message.size());
-		if (proto -> get_data_from_bindy_callback(buf, green, grey, pckt, serial) == false)
+        uint32 pckt; DevId devid;
+		MBuf buf(_recv_message.data(), (int)_recv_message.size());
+		if (proto -> get_data_from_bindy_callback(buf, green, grey, pckt, devid) == false)
 		{
 			return false;
 		}
@@ -238,7 +238,7 @@ bool Xibridge_client::open_connection_device()
 	}
 }
 
-bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length)
+bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length, uint32 & res_err)
 {
 	clr_errors();
 
@@ -265,8 +265,8 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length)
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
-		uint32 pckt, serial;
-		MBuf buf(_recv_message.data(), _recv_message.size());
+        uint32 pckt; DevId  serial;
+		MBuf buf(_recv_message.data(), (int)_recv_message.size());
 		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, serial) == false)
 		{
 			return bvector();
@@ -283,7 +283,7 @@ bool Xibridge_client::xibridge_request_response(unsigned int conn_id,
 	                                            const unsigned char *req, 
 												int req_len, 
 												unsigned char *resp, 
-												int resp_len)
+												int resp_len, unsigned int *res_err)
 {
 	if ((conn_id_t)conn_id == conn_id_invalid) return false;
 	Xibridge_client *pcl;
@@ -301,7 +301,7 @@ bool Xibridge_client::xibridge_request_response(unsigned int conn_id,
 	}
     MBuf send_data((uint8 *)req, req_len);
 
-	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len);
+	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len, *res_err);
 	// do not check real resp length because various reponses could be received or nit - error, the situation of timeout and so on
 
 	// but we restrict the size of vector 
@@ -348,9 +348,9 @@ bool Xibridge_client::close_connection_device()
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
-		uint32 pckt, serial;
-		MBuf buf(_recv_message.data(), _recv_message.size());
-		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, serial) == false)
+        uint32 pckt; DevId devid;
+		MBuf buf(_recv_message.data(), (int)_recv_message.size());
+		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, devid) == false)
 		{
 			ret = false;
 		}

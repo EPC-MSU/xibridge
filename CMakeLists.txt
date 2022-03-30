@@ -41,7 +41,7 @@ SET(SOURCES
          )
 	 
 #add_custom_target(tests) # Note: without 'ALL'
-ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
+ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
 TARGET_LINK_LIBRARIES(test bindy zf_log)
 #add_dependencies(tests test_executable)
 ADD_LIBRARY(xibridge STATIC ${SOURCES})
