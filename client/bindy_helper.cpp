@@ -41,7 +41,7 @@ bindy::Bindy *Bindy_helper::instance_bindy()
 }
 
 
-conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl)
+conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr)
 {
 	bindy::Bindy *pb = instance_bindy();
 	if (pb == nullptr)
@@ -49,7 +49,7 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl)
 		pcl -> _set_last_error(ERR_NO_BINDY);
 		return conn_id_invalid;
 	}
-	conn_id_t conn = instance_bindy() -> connect(addr);
+	conn_id_t conn = instance_bindy() -> connect(addr/*, adapter_addr*/);
 	if (conn!= conn_id_invalid)
 	{
 		 _map_mutex.lock();
@@ -107,13 +107,6 @@ void Bindy_helper::on_bindy_disconnect(conn_id_t conn_id)
 	if (_map.find(conn_id) != _map.cend())
 	{
 		Xibridge_client *pcl = _map.at(conn_id);
-		/*
-		pcl->_mutex_recv.lock();
-		pcl->_recv_message.assign(data.cbegin(), data.cend());
-		pcl->_is_really_recv = true;
-		pcl->_is_recv.notify_all();
-		pcl->_mutex_recv.unlock();
-		*/
 		pcl->_conn_id = conn_id_invalid;
 		delete pcl;
 		_map.erase(conn_id);

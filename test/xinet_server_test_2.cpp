@@ -12,10 +12,11 @@ bool test_connect_2()
 		ZF_LOGE("Cannot initalize xibridge system!");
 		return FALSE;
 	}
-	unsigned int version = xibridge_detect_protocol_version("127.0.0.1");
-	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version);
+	unsigned int res_err, last_err;
+	unsigned int version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
+	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT_3000, &last_err);
 	unsigned char resp[72];
-    unsigned int res_err;
+   
 	int ginf_ok = xibridge_device_request_response(connection, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
 
 	// разобрать структуру
@@ -39,7 +40,7 @@ bool test_connect_2()
 	output->FirmwareBugfix = pop_uint16_t(&p);
 	output->SerialNumber = pop_uint32_t(&p);
 	*/
-
+	
     char man[16 + 1];
     memset(man, 0, 16 + 1);
 	mresp.memread((uint8 *)man, 16, 16);

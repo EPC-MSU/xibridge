@@ -24,9 +24,12 @@ bool test_connect_1()
 		ZF_LOGE("Cannot initalize xibridge system!");
 		return FALSE;
 	}
-	unsigned int version = xibridge_detect_protocol_version("127.0.0.1");
-	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version);
-    unsigned int res_err;
+	unsigned int version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
+
+	unsigned int res_err, last_err;
+
+	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT_3000, &last_err);
+    
 
 	move_settings_calb_t resp_s;
 	int _ok = xibridge_device_request_response(connection, (const unsigned char *)"XIR", 3, (unsigned char *)&resp_s, sizeof(resp_s), &res_err);

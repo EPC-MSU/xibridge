@@ -100,6 +100,7 @@ bool cmd_schema::is_match(const uint8 *data, int len, uint32 proto, uint32 dev_n
 			break;
 		case 'I':
 			mbuf >> hdev3;
+			break;
 		default:
 			return false;
 		}
@@ -152,7 +153,7 @@ bvector Protocol2::create_cmd_request(DevId devid, uint32 tmout, const bvector *
     auto data_cbeg = data -> cbegin();
     if (data != nullptr && data->size() >= URPC_CID_SIZE)
     {
-        data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + URPC_CID_SIZE - 1);
+        data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + URPC_CID_SIZE );
         add_uint32_2_bvector(data_and_length, resp_length);
         data_and_length.insert(data_and_length.end(), data_cbeg + URPC_CID_SIZE, data->cend());
     }
@@ -243,7 +244,9 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		{
                          mbuf.mseek(-4);
 						 mbuf >> count;
+						 _res_err = (uint32)count;
 						 grey_data = mbuf.to_vector(true);  //all data as is is grey
+						 /**
 						 MBuf gr_buf(sizeof(uint32) * count);
 						 {
 							 for (int i = 0; i < (int)count; i++)
@@ -256,9 +259,10 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
+						 */
 						 grey_data = mbuf.to_vector(true);
-						 green_data = gr_buf.to_vector();
-					     return !mbuf.wasBroken() && !gr_buf.wasBroken();
+						 //green_data = gr_buf.to_vector();
+					     return !mbuf.wasBroken();
 					    
 		}
 		
@@ -317,12 +321,14 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		case pkt2_cmd_resp:
 		{
 						 mbuf.mseek(8);
+						 mbuf >> r;
 						 int len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
+						 _res_err = r;
 						 grey_data = mbuf.to_vector(true);
 						 return true;
 		}

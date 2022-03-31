@@ -25,11 +25,6 @@
 */
 #define ERR_RECV_TIMEOUT 6
 
-/*
-* The wide used tiemout value to use by default
-*/
-#define TIMEOUT_HISTORICAL 3000
-
 
 /*
 When no answerback data len known this time value is used to control answer arrival
@@ -80,13 +75,25 @@ public:
 	static void xibridge_close_connection_device(unsigned int conn_id);
 
 	/*
-	* Функция по получению номеров (компортов, устройств) доступных на xibridge-сервере
+	* Функция по получению информации об устройствах только по первому протоколу, доступных на xibridge-сервере
 	*/
-	static void xibridge_enumerate_devices(const char *addr, 
-		                                   unsigned int proto, 
-										   unsigned int *result, 
-										   unsigned int *pcount,
+	static bool xibridge_enumerate_adapter_devices(const char *addr, const char *adapter, 
+		                                   unsigned char *result, 
+										   unsigned int *pcount, unsigned int timeout,
 										   unsigned int* last_errno = nullptr);
+
+	/*
+	* Чтение буфера приема подключения, с максимум - size bytes
+	* Возвращает реальное количество прочитанного
+	*/
+	static int xibridge_read_connection_buffer(unsigned int conn_id, unsigned char *buf, int size);
+
+	/*
+	* Просто запись в открытое подключение xibridge
+	*/
+	static int xibridge_write_connection(unsigned int conn_id, const unsigned char *buf, int size);
+
+	/*
 
 	/* This constructor to create Xibridge_client with defined addr, device number and version number
 	 *@param addr - xibridge server address
@@ -95,9 +102,9 @@ public:
 	*/
 	Xibridge_client(const char *addr, 
 		            unsigned int serial,  
-		            unsigned int proto_ver = 0, 
-				    unsigned int send_tmout = TIMEOUT_HISTORICAL, 
-					unsigned int recv_tmout = TIMEOUT_HISTORICAL);
+		            unsigned int proto_ver, 
+				    unsigned int send_tmout, 
+					unsigned int recv_tmout);
 
 	/**
 	   * This static member function sets up connecton-specific data
@@ -111,7 +118,7 @@ public:
 	/**
 	* This static member function to recognize server protocol version
 	*/
-	static uint32  xibridge_detect_protocol_version(const char *addr, uint32 timeout_1, uint32 timeout_all);
+	static uint32  xibridge_detect_protocol_version(const char *addr, uint32 send_timeout, uint32 resv_timeout);
 
 	/**
 	* This static member function to setup network and bindy - once per application
@@ -160,13 +167,7 @@ public:
 	conn_id_t conn_id() const { return _conn_id; }
 
 	bvector  send_data_and_receive(bvector data, uint32 resp_length, uint32& res_err);
-	/*
-	*
-	*@param [out] extra_enum_data - extra data for enumerated device, = nullptr if extra info is not desired
-	*@param [out] extra_size - reference to extra data size
-	*/
-	static std::vector<uint32> enumerate_dev_numbers(uint8 *extra_enum_data, uint32& extra_size);
-
+	
 	uint32 get_server_protocol_version() const {return _server_protocol_version;}
 
 	static uint32 get_self_protocol_version() { return xibridge_protocol_version(); }
@@ -186,7 +187,11 @@ public:
 	uint32 get_proto_version_of_the_recv_message() const { return AProtocol::get_version_of_cmd(_recv_message); }
 
 private:
-	
+	/*
+	 * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
+	*/
+	static Xibridge_client * _get_client_as_free(unsigned int conn_id);
+
 	bool _send_and_receive(bvector &req);
 	void _set_last_error(uint32 err) { _last_error = err; }
 
@@ -201,7 +206,6 @@ private:
 	bool _is_really_recv;
 	std::mutex _mutex_recv;
 	bvector _recv_message; // for bindy-callback
-	std::mutex _mutex_message;
 
 	uint32 _last_error;  // last error 
 	// uint32 _last_client_error; //  last client side error

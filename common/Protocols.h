@@ -11,15 +11,25 @@
 * C++ struct to keep device identifiers of 2 types
 */
 struct DevId {
-	DevId(uint32 id) :
+	DevId(uint32 id, bool is_n = false) :
 	_dev_id(id),
-	_is_new(false)
-	{};
+	_is_new(is_n)
+	{
+		if (is_n)
+		{
+			_dev_id_new.PID = 0;
+			_dev_id_new.VID = 0;
+			_dev_id_new.reserve = 0;
+			_dev_id_new.id = id;
+		}
+	};
 
 	DevId(const ExtDevId &e_id) :
 		_dev_id_new(e_id),
 		_is_new(true)
-	{};
+	{
+		
+	};
 
     DevId(): _is_new(true) {}
 	uint32 _dev_id;
@@ -65,7 +75,7 @@ public:
 	 * @param [out] green_data - data could be interpritited by any of the protocols
 	 * @param [out] grey_data - data direct from a device
 	 * @param [out] pckt_type - packet type in terms of the protocol
-	 * @param [out] serial - serial port or slot number of the device at server side
+	 * @param [out] devid - device identifier of the device at server side
 	 */
 	bool get_data_from_bindy_callback(MBuf &cmd,
 		bvector &green_data,

@@ -17,7 +17,7 @@ public:
 
 	//Bindy_helper(const char *keyfile);
 	static bindy::Bindy * instance_bindy();
-	conn_id_t connect(const char *addr, Xibridge_client *pcl);
+	conn_id_t connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr = nullptr);
 	static void set_keyfile(const char *keyfile) { _keyfile = keyfile; }
 	static void shutdown_bindy(){ bindy::Bindy::shutdown_network(); delete _pbindy; _pbindy = nullptr; }
 	static Bindy_helper *instance() { return &_bhelper; }

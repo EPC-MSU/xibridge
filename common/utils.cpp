@@ -11,13 +11,21 @@ uint32 AHex::_get_stream1_4(uint8 **ptr)
     uint8 *p = * ptr;
 	if (littleEndian())
 	{
+		p += _tsize;
 		for (int i = 0; i < _tsize; i++)
-			val += *p++ * (0x100 ^ i);
+		{
+			val <<= 8;
+			val += *(--p);
+		}
 	}
 	else
 	{
-		for (int i = _tsize-1; i >= 0; i--)
-			val += *(p--) * (0x100 ^ i);
+		
+		for (int i = 0; i < _tsize; i++)
+		{
+			val <<= 8;
+			val += *(p++);
+		}
 	}
 	*ptr += _tsize; 
     return val;
@@ -30,16 +38,16 @@ void AHex::put_stream1_4(uint8 **ptr, uint32 val)
     {
         for (int i = 0; i < _tsize; i++)
         {
-           *p++ = (uint8)(val >> (i * 8) & 0xFF);
+           *p++ = (uint8)((val >> (i * 8)) & 0xFF);
         }
     }
     else
     {
-        for (int i = _tsize - 1; i >= 0; i--)
-        {
-            *p++ = (uint8)(val >> (i * 8) & 0xFF);
-        }
-         
+		for (int i = 0; i < _tsize; i++)
+		{
+			uint8 v = (uint8)((val >> ((_tsize - 1 - 3) * 8)));
+			*p++ = (uint8)((val >> ((_tsize-1-i) * 8)) & 0xFF);
+		}
     }
     *ptr += _tsize;
  }
@@ -50,7 +58,6 @@ void Hex8::_get_stream(uint8 **ptr)
 	value = **ptr;
 	*ptr += 1;
 }
-
 
 void Hex32::_get_stream(uint8 **ptr)
 {
