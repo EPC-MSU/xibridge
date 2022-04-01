@@ -185,7 +185,7 @@ static bool test_request_proto3()
 
 
 
-ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
+//ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
 extern  bool test_connect_2();
 

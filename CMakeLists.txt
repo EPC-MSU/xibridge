@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
+#OPTION(USE_JOINT_ZFLOG_FROM_ROOT_PROJECT1 "If zf_log is included by anyone else" OFF)
+
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 
 macro(use_cxx11)
@@ -25,10 +27,12 @@ ADD_SUBDIRECTORY_BINDY()
 INCLUDE_DIRECTORIES(vendor)
 
 FUNCTION(ADD_SUBDIRECTORY_ZF_LOG)
+IF(NOT HAS_PARENT) 
     SET(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 	add_definitions(-DZF_LOG_EXTERN_GLOBAL_OUTPUT_LEVEL)
     ADD_SUBDIRECTORY(vendor/zf_log)
     remove_definitions(-DZF_LOG_EXTERN_GLOBAL_OUTPUT_LEVEL)
+ENDIF()	
 ENDFUNCTION()
 ADD_SUBDIRECTORY_ZF_LOG()
 
@@ -44,6 +48,6 @@ SET(SOURCES
 ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
 TARGET_LINK_LIBRARIES(test bindy zf_log)
 #add_dependencies(tests test_executable)
-ADD_LIBRARY(xibridge STATIC ${SOURCES})
+ADD_LIBRARY(xibridge SHARED ${SOURCES})
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
 

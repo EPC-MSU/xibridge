@@ -1,7 +1,10 @@
 #include "xibridge.h"
 #include "../Common/defs.h"
 #include "xibridge_client.h"
+#include <zf_log.h>
 
+// to make log level controlled
+ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
 int xibridge_major_version()
 {
@@ -104,7 +107,7 @@ unsigned int xibridge_get_last_err_no(unsigned int conn_id)
 	return  Xibridge_client::xibridge_get_last_err_no(conn_id);
 }
 
-bool xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
+int xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
 	                                    unsigned char *result,
 	                                    unsigned int *pcount, unsigned int timeout,
 	                                    unsigned int* last_errno)
@@ -113,5 +116,5 @@ bool xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
     return Xibridge_client::xibridge_enumerate_adapter_devices(addr, adapter,
                                                 result,
                                                 pcount, timeout,
-                                                last_errno);
+                                                last_errno) == true ? 1 : 0;
 }
