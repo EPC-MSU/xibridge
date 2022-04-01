@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
-#OPTION(USE_JOINT_ZFLOG_FROM_ROOT_PROJECT1 "If zf_log is included by anyone else" OFF)
+OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 
@@ -26,6 +26,7 @@ ENDFUNCTION()
 ADD_SUBDIRECTORY_BINDY()
 INCLUDE_DIRECTORIES(vendor)
 
+GET_DIRECTORY_PROPERTY(HAS_PARENT PARENT_DIRECTORY)
 FUNCTION(ADD_SUBDIRECTORY_ZF_LOG)
 IF(NOT HAS_PARENT) 
     SET(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
@@ -45,9 +46,15 @@ SET(SOURCES
          )
 	 
 #add_custom_target(tests) # Note: without 'ALL'
-ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
-TARGET_LINK_LIBRARIES(test bindy zf_log)
+IF(NOT HAS_PARENT) 
+  ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
+  TARGET_LINK_LIBRARIES(test bindy zf_log)
+ENDIF()  
 #add_dependencies(tests test_executable)
-ADD_LIBRARY(xibridge SHARED ${SOURCES})
+if (BUILD_SHARED_LIBS)
+  ADD_LIBRARY(xibridge SHARED ${SOURCES})
+else()
+  ADD_LIBRARY(xibridge STATIC ${SOURCES})
+endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
 
