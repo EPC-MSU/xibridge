@@ -15,11 +15,17 @@ class Bindy_helper
 	friend class Xibridge_client;
 public:
 
-	//Bindy_helper(const char *keyfile);
+	~Bindy_helper(){ shutdown_bindy(); };
 	static bindy::Bindy * instance_bindy();
 	conn_id_t connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr = nullptr);
-	static void set_keyfile(const char *keyfile) { _keyfile = keyfile; }
-	static void shutdown_bindy(){ bindy::Bindy::shutdown_network(); delete _pbindy; _pbindy = nullptr; }
+	/*
+	* Sets keyfile internal property only if
+	* it was not already set
+	* returns true if i's been set or the same as set
+	*         false if keyfile does not match that's alreday set           
+	*/
+	static bool set_keyfile(const char *keyfile);
+	static void shutdown_bindy();
 	static Bindy_helper *instance() { return &_bhelper; }
 	bool is_connected(conn_id_t conn_id) const;
 	bool send_bindy_data(conn_id_t conn_id, bvector data);

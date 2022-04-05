@@ -1,7 +1,9 @@
+#include <zf_log.h>
+
 #include "xibridge.h"
 #include "../Common/defs.h"
 #include "xibridge_client.h"
-#include <zf_log.h>
+
 
 // to make log level controlled
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
@@ -19,11 +21,6 @@ int xibridge_protocol_version()
 int xibridge_init(const char *key_file_path)
 {
 	return Xibridge_client::xibridge_init(key_file_path) == false ? 0 : 1;
-}
-
-void xibridge_shutdown()
-{
-	Xibridge_client::xibridge_shutdown();
 }
 
 void xibridge_set_server_protocol_verion(unsigned int conn_id, unsigned int ver)

@@ -57,13 +57,6 @@ bool Xibridge_client::xibridge_init(const char *key_file_path)
 	return _ex != nullptr;
 }
 
-void Xibridge_client::xibridge_shutdown()
-{
-	Bindy_helper::_global_mutex.lock();
-	Bindy_helper::shutdown_bindy();
-	Bindy_helper::_global_mutex.unlock();
-}
-
 void Xibridge_client::xibridge_set_server_protocol(unsigned int conn_id, unsigned int proto)
 {
 	Xibridge_client * cl = _get_client_as_free(conn_id);
@@ -164,7 +157,7 @@ int Xibridge_client::xibridge_read_connection_buffer(unsigned int conn_id,
 	Xibridge_client *pcl = _get_client_as_free(conn_id);
 	if (pcl == nullptr) return 0;
 	pcl -> _mutex_recv.lock();
-	int real_size = pcl->_recv_message.size();
+	int real_size = (int)pcl->_recv_message.size();
 	bool clear = false;
 	if (real_size <= size)
 	{

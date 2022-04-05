@@ -1,7 +1,10 @@
 #include <vector>
+#include <zf_log.h>
+
 #include <bindy/bindy-static.h>
 #include "../Common/utils.h"
 #include "Bindy_helper.h"
+
 
 // static data members init
 bindy::Bindy *Bindy_helper::_pbindy = nullptr;
@@ -19,6 +22,20 @@ Bindy_helper Bindy_helper::_bhelper;
 }
 */
 
+bool Bindy_helper::set_keyfile(const char *keyfile)
+{
+	// not possible to change active keyfile once installed at bindy really init
+	if (keyfile != nullptr && (_keyfile == nullptr || strcmp(_keyfile, keyfile) == 0))
+	{
+		_keyfile = keyfile;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+  
 bindy::Bindy *Bindy_helper::instance_bindy()
 {
 	if (_pbindy != nullptr)
@@ -40,16 +57,30 @@ bindy::Bindy *Bindy_helper::instance_bindy()
 
 }
 
+void Bindy_helper::shutdown_bindy()
+{ 
+	if (_pbindy == nullptr) return; // no initial-n done
+	bindy::Bindy::shutdown_network(); 
+	delete _pbindy; 
+	_pbindy = nullptr; 
+}
 
 conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr)
 {
 	bindy::Bindy *pb = instance_bindy();
+	conn_id_t conn;
 	if (pb == nullptr)
 	{
 		pcl -> _set_last_error(ERR_NO_BINDY);
 		return conn_id_invalid;
 	}
-	conn_id_t conn = instance_bindy() -> connect(addr/*, adapter_addr*/);
+	try {
+	    conn = instance_bindy()->connect(addr/*, adapter_addr*/);
+	}
+	catch (...)
+	{
+		ZF_LOGE("Catch exception at bindy connect, addr: %s", addr);
+	}
 	if (conn!= conn_id_invalid)
 	{
 		 _map_mutex.lock();
@@ -63,7 +94,14 @@ void  Bindy_helper::disconnect(conn_id_t conn_id)
 {
 	bindy::Bindy *pb = instance_bindy();
 	if (pb == nullptr || conn_id == conn_id_invalid) return;
-	pb->disconnect(conn_id);
+	try {
+		pb->disconnect(conn_id);
+	} 
+	catch (...)
+	{
+		ZF_LOGE("Catch exception at bindy disconnect, conn_id: %u", conn_id);
+	}
+
 	_map_mutex.lock();
 	if (_map.find(conn_id) != _map.cend())
 		_map.erase(conn_id);
@@ -80,6 +118,7 @@ bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 	}
 	catch (...)
 	{
+		ZF_LOGE("Catch exception at bindy send_data, conn_id: %u", conn_id);
 		return false;
 	}
 }

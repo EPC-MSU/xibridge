@@ -126,12 +126,6 @@ public:
 	static bool xibridge_init(const char *key_file_path);
 	
 	/**
-	* This static member function shutdown network and bindy - once per application
-	* Must be called once per this lib usage 
-	*/
-	static void xibridge_shutdown();
-
-	/**
 	* This static member function executes response-request to device
 	@param conn_id - connection id
 	@param req - request data

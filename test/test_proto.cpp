@@ -1,3 +1,6 @@
+/*
+ This contains test protocol(1,2,3) functions 
+*/
 #include <zf_log.h>
 #include <../common/protocols.h>
 #include "../common/defs.h"
@@ -183,24 +186,15 @@ static bool test_request_proto3()
 	return ret;
 }
 
-
-
-//ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
-
-extern  bool test_connect_2();
-
-int main(int argc, char *argv[])
+bool test_protocols()
 {
 	zf_log_set_output_level(ZF_LOG_DEBUG);
 
-	ZF_LOGD("This is first proto_test!");
+	ZF_LOGD("test_protocols...");
 	bool ret = test_request_proto1();
 	if (!test_request_proto2())
 		ret = false;
 	if (!test_request_proto3())
 		ret = false;
-
-	test_connect_2();
-
-	return ret == true ? 0 : 1;
+	return ret;
 }

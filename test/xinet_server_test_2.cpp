@@ -1,10 +1,11 @@
 #include <zf_log.h>
+#include <thread>
 #include <../common/protocols.h>
 #include <../client/xibridge.h>
 #include "urmc-min/urmc_min.h"
 #include "../common/utils.h"
 
-// to run with urpc-xinet-server
+// to run with urpc-xinet-server !!! the local urpc-connect
 bool test_connect_2()
 {
 	if (!xibridge_init("keyfile.sqlite"))
@@ -56,7 +57,42 @@ bool test_connect_2()
 	
 	xibridge_close_device_connection(connection);
 
-	xibridge_shutdown();
+	//xibridge_shutdown();
 
 	return true;
+}
+
+
+static void thread_body(int thread_num)
+{
+	if (!xibridge_init("keyfile.sqlite"))
+	{
+		ZF_LOGE("Thread %u: cannot initalize xibridge system!", thread_num);
+		return;
+	}
+	
+	unsigned int res_err, last_err;
+	//unsigned int version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
+	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
+	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, 2, TIMEOUT_3000, &last_err);
+	unsigned char resp[72];
+	ZF_LOGD("Thread %u: sending ginf... \n", thread_num);
+	int ginf_ok = xibridge_device_request_response(connection, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
+	
+	ZF_LOGD("Thread %u: ginf return %s\n", thread_num, 
+		     ginf_ok != 0 ? "true" : "false");
+
+	xibridge_close_device_connection(connection);
+}
+
+void test_connect_2_threads()
+{
+	for (auto i = 0; i < 10; i++)
+	{
+		//std::thread th(thread_body, i);
+		thread_body(i);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+
+
 }

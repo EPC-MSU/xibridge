@@ -33,10 +33,6 @@ int  XI_EXPORT xibridge_protocol_version();
 */
 int  XI_EXPORT xibridge_init(const char *key_file_path);
 
-/*
-* Функция завершения работы с системой xibridge
-*/
-void  XI_EXPORT xibridge_shutdown();
 
 /*
 * Функция установки версии протокола сервера xibridge для данного подключения
