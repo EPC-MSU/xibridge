@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
-OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
+OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
 
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 
@@ -47,11 +47,11 @@ SET(SOURCES
 	 
 #add_custom_target(tests) # Note: without 'ALL'
 IF(NOT HAS_PARENT) 
-  ADD_EXECUTABLE(test  test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
+  ADD_EXECUTABLE(test  test/test_main.cpp test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
   TARGET_LINK_LIBRARIES(test bindy zf_log)
 ENDIF()  
 #add_dependencies(tests test_executable)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS_XI)
   ADD_LIBRARY(xibridge SHARED ${SOURCES})
 else()
   ADD_LIBRARY(xibridge STATIC ${SOURCES})

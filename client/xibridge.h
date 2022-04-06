@@ -106,7 +106,7 @@ void  XI_EXPORT xibridge_get_err_expl(char * s, int len, int is_russian, unsigne
 * Реально работает c сервером ximc и сервером xibridge
 */
 int  XI_EXPORT xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
-	unsigned char *result,
+	unsigned char **result,
 	unsigned int *pcount, unsigned int timeout,
 	unsigned int* last_errno);
 

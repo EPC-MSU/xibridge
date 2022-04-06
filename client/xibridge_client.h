@@ -78,7 +78,7 @@ public:
 	* Функция по получению информации об устройствах только по первому протоколу, доступных на xibridge-сервере
 	*/
 	static bool xibridge_enumerate_adapter_devices(const char *addr, const char *adapter, 
-		                                   unsigned char *result, 
+		                                   unsigned char **result, 
 										   unsigned int *pcount, unsigned int timeout,
 										   unsigned int* last_errno = nullptr);
 

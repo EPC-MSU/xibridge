@@ -105,7 +105,7 @@ unsigned int xibridge_get_last_err_no(unsigned int conn_id)
 }
 
 int xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
-	                                    unsigned char *result,
+	                                    unsigned char **result,
 	                                    unsigned int *pcount, unsigned int timeout,
 	                                    unsigned int* last_errno)
 {

@@ -71,7 +71,7 @@ unsigned int Xibridge_client::xibridge_get_server_protocol(unsigned int conn_id)
 
 
 bool Xibridge_client::xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
-	                                              unsigned char *result,
+	                                              unsigned char **result,
 	                                              unsigned int *pcount, unsigned int timeout,
 	                                              unsigned int* last_errno)
 {
@@ -79,6 +79,7 @@ bool Xibridge_client::xibridge_enumerate_adapter_devices(const char *addr, const
 	* Create temporary client  with Protocol 2  and some serial 2 - to be a static func
 	*/
 	*pcount = 0;
+    *result = nullptr;
 	Xibridge_client * xl = new Xibridge_client(addr, 3, 1, 0, timeout);
 	auto conn = Bindy_helper::instance()->connect(addr, xl);
 	if (conn == conn_id_invalid)
@@ -108,8 +109,8 @@ bool Xibridge_client::xibridge_enumerate_adapter_devices(const char *addr, const
 
 		if (protocol -> get_data_from_bindy_callback(buf, green, grey, pckt, devid) == true)
 		{
-			result = (unsigned char *) malloc(grey.size());
-			memcpy(result, grey.data(), grey.size());
+			*result = (unsigned char *) malloc(grey.size());
+			memcpy(*result, grey.data(), grey.size());
 			*pcount = protocol -> get_result_error();
 			//
 		}
