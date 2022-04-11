@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 	ZF_LOGD("Starting test_main...");
 	bool ret = test_protocols();
 	
-	//if (!test_connect_2())
-	//	ret = false;
+	if (!test_connect_2())
+		ret = false;
 	
 	// if it is something wrong at protocol matching check stage or 
 	// server interaction stage - 
