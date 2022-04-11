@@ -1,0 +1,6 @@
+#ifndef XIBRIDGE_CONFIG_H
+#define XIBRIDGE_CONFIG_H
+
+#cmakedefine BUILD_SHARED_LIBS_XI
+
+#endif  // URPC_CONFIG_H

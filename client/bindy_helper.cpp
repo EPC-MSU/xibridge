@@ -68,24 +68,25 @@ void Bindy_helper::shutdown_bindy()
 conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr)
 {
 	bindy::Bindy *pb = instance_bindy();
-	conn_id_t conn;
+	conn_id_t conn = conn_id_invalid;
 	if (pb == nullptr)
 	{
 		pcl -> _set_last_error(ERR_NO_BINDY);
-		return conn_id_invalid;
+		return conn_id_invalid;;
 	}
 	try {
 	    conn = instance_bindy()->connect(addr/*, adapter_addr*/);
+
+		if (conn != conn_id_invalid)
+		{
+			_map_mutex.lock();
+			_map.insert(std::make_pair(conn, pcl));
+			_map_mutex.unlock();
+		}
 	}
 	catch (...)
 	{
 		ZF_LOGE("Catch exception at bindy connect, addr: %s", addr);
-	}
-	if (conn!= conn_id_invalid)
-	{
-		 _map_mutex.lock();
-		 _map.insert(std::make_pair(conn, pcl));
-		 _map_mutex.unlock();
 	}
 	return conn;
 }
@@ -96,16 +97,16 @@ void  Bindy_helper::disconnect(conn_id_t conn_id)
 	if (pb == nullptr || conn_id == conn_id_invalid) return;
 	try {
 		pb->disconnect(conn_id);
+
+		_map_mutex.lock();
+		if (_map.find(conn_id) != _map.cend())
+			_map.erase(conn_id);
+		_map_mutex.unlock();
 	} 
 	catch (...)
 	{
 		ZF_LOGE("Catch exception at bindy disconnect, conn_id: %u", conn_id);
 	}
-
-	_map_mutex.lock();
-	if (_map.find(conn_id) != _map.cend())
-		_map.erase(conn_id);
-	_map_mutex.unlock();
 }
 
 bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
@@ -147,7 +148,6 @@ void Bindy_helper::on_bindy_disconnect(conn_id_t conn_id)
 	{
 		Xibridge_client *pcl = _map.at(conn_id);
 		pcl->_conn_id = conn_id_invalid;
-		delete pcl;
 		_map.erase(conn_id);
 	}
 	_map_mutex.unlock();

@@ -2,7 +2,7 @@
 #define  _UTILS_H
 #include <vector>
 #include "defs.h"
-#include "ext_dev_id.h"
+#include "../client/xibridge.h"
 
 /*
 

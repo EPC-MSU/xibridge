@@ -2,7 +2,7 @@
 #define _PROTOCOLS_H
 #include <vector>
 #include <string>
-#include "ext_dev_id.h"
+#include "../client/xibridge.h"
 #include "defs.h"
 #include "utils.h"
 

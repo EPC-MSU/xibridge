@@ -16,7 +16,7 @@ bool test_connect_1()
 
 	unsigned int res_err, last_err;
 
-	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT_3000, &last_err);
+	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT, &last_err);
     
 
 	move_settings_calb_t resp_s;
@@ -41,7 +41,7 @@ static void thread_body(int thread_num)
 	unsigned int res_err, last_err;
 	//unsigned int version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
-	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, 1, TIMEOUT_3000, &last_err);
+	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, 1, TIMEOUT, &last_err);
 	unsigned char resp[72];
 	ZF_LOGD("Thread %u: sending xir... \n", thread_num);
 	move_settings_calb_t resp_s;

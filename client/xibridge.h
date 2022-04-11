@@ -2,22 +2,39 @@
 #define  _XIBRIDGE_H
 
 #if defined (WIN32) || defined(WIN64)
-//#if defined(xiwrapper_EXPORTS)
+#if defined(BUILD_SHARED_LIBS_XI)
     #define XI_EXPORT __declspec(dllexport)
-//#else
-//#define XI_EXPORT __declspec(dllimport)
-//#endif
+#else
+#define XI_EXPORT 
+#endif
 #else
    #define XI_EXPORT
 #endif
 
-#include "../common/ext_dev_id.h" 
+/**
+    * \russian
+    * Структура для работы с расширеным идентификаторм устройства (используется в протоколе обмена версии 3 и выше)
+*/
+typedef struct
+{
+	unsigned int reserve;
+	unsigned short int VID;
+	unsigned short int PID;
+	unsigned int id;
+} ExtDevId;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#define TIMEOUT_3000 3000
+/** 
+    * \russian
+	* Константа определяет значение базового таймаута при операциях взаимодействия с сервером 
+    * @return версия xibridge-компонента
+    * \endrussian
+*/
+#define TIMEOUT 3000
+
 /** 
     * \russian
 	* Функция определения версии xibridge-компонента 
@@ -112,7 +129,6 @@ unsigned int  /*XI_EXPORT*/ xibridge_open_device_connection_ext(const char *addr
 	                                                unsigned int proto, unsigned int recv_timeout, 
 													unsigned int* last_errno);
 
-/*
 
 /**
    * \russian
@@ -169,7 +185,7 @@ void  XI_EXPORT xibridge_get_err_expl(char * s, int len, int is_russian, unsigne
    * Функция распределяет и заполняет массив структур по количеству определенных устройств
    * @param[in] addr ip-адрес сервера
    * @param[in] addr ip-адрес адаптера(?)
-   * @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройтств
+   * @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройств
    * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
    * @param[in] timeout таймаут ответа сервера
    * @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
@@ -183,16 +199,16 @@ int  XI_EXPORT xibridge_enumerate_adapter_devices(const char *addr, const char *
 
 
 /**
-* \russian
-* Функция определения устройств с расширенными идентификаторами, доступных для работы на сервере (xibridge-)
-* Функция распределяет и заполняет массив расширенных идентификаторов по количеству определенных устройств
-* @param[in] addr ip-адрес сервера
-* @param[in] addr ip-адрес адаптера(?)
-* @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройтств
-* @param[out] pcount указатель на переменную, куда будет помещено количесиво найденных устройств
-* @param[in] timeout таймаут ответа сервера
-* @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
-* @return 0 в случае неудачи
+   * \russian
+   * Функция определения устройств с расширенными идентификаторами, доступных для работы на сервере (xibridge-)
+   * Функция распределяет и заполняет массив расширенных идентификаторов по количеству определенных устройств
+   * @param[in] addr ip-адрес сервера
+   * @param[in] addr ip-адрес адаптера(?)
+   * @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройтств
+   * @param[out] pcount указатель на переменную, куда будет помещено количесиво найденных устройств
+   * @param[in] timeout таймаут ответа сервера
+   * @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
+   * @return 0 в случае неудачи
 * \endrussian
 */void  /*XI_EXPORT*/ xibridge_enumerate_devices_ext(const char *addr,
 	const char *adapter,

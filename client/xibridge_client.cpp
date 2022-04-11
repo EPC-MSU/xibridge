@@ -381,13 +381,12 @@ void Xibridge_client::xibridge_close_connection_device(unsigned int conn_id)
 {
 	if ((conn_id_t)conn_id == conn_id_invalid) return;
 	bool non_connected;
-	Xibridge_client *pcl;
-	Bindy_helper::_map_mutex.lock();
-	non_connected = Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend();
-	if (!non_connected) pcl = Bindy_helper::_map.at((conn_id_t)conn_id);;
-	Bindy_helper::_map_mutex.unlock();
-	pcl -> close_connection_device();
-	delete pcl;
+	Xibridge_client *pcl = _get_client_as_free(conn_id);
+	if (pcl != nullptr)
+	{
+		pcl->close_connection_device();
+		delete pcl;
+	}
 } 
 
 void Xibridge_client::disconnect()

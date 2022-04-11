@@ -40,7 +40,7 @@ unsigned int xibridge_open_device_connection(const char *addr,
 											 unsigned int recv_timeout,
 											 unsigned int *err_no)
 {
-	Xibridge_client * cl = new Xibridge_client(addr, serial, proto, TIMEOUT_3000, recv_timeout);
+	Xibridge_client * cl = new Xibridge_client(addr, serial, proto, TIMEOUT, recv_timeout);
 	if (!cl->open_connection_device())
 	{
 		cl->disconnect();
