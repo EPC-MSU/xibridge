@@ -25,7 +25,8 @@ Bindy_helper Bindy_helper::_bhelper;
 bool Bindy_helper::set_keyfile(const char *keyfile)
 {
 	// not possible to change active keyfile once installed at bindy really init
-	if (keyfile != nullptr && (_keyfile == nullptr || strcmp(_keyfile, keyfile) == 0))
+    // if _pbindy is not init
+	if (keyfile != nullptr && (_pbindy == nullptr || (_keyfile == nullptr || strcmp(_keyfile, keyfile) == 0))
 	{
 		_keyfile = keyfile;
 		return true;
@@ -124,7 +125,7 @@ bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 	}
 }
 
-void Bindy_helper::callback_data_bindy(conn_id_t conn_id, std::vector<uint8_t> data) 
+void Bindy_helper::callback_data_bindy(conn_id_t conn_id, bvector data) 
 {
 	_map_mutex.lock();
 		

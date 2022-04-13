@@ -15,9 +15,9 @@ public :
     virtual bool littleEndian() const {
         return _lend;
     };
-    void put_stream1_4(uint8 **ptr, uint32 val);
+    void put_stream1_4(uint8_t **ptr, uint32_t val);
 protected:
-    uint32 _get_stream1_4(uint8 **ptr);
+    uint32_t _get_stream1_4(uint8_t **ptr);
    
     bool _lend;
 	int _tsize;
@@ -30,50 +30,50 @@ protected:
 class Hex32 : public AHex
 {
 public:
-	Hex32(uint32 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 4; }
+	Hex32(uint32_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 4; }
 
 	Hex32(char *psymbol_name_decimal);
-	operator uint32 () const { return value; }
-	Hex32& operator= (uint32 v) { value = v; return *this; }
-	void _get_stream(uint8 **ptr);
+	operator uint32_t () const { return value; }
+	Hex32& operator= (uint32_t v) { value = v; return *this; }
+	void _get_stream(uint8_t **ptr);
 private:
-	uint32 value;
+	uint32_t value;
 	
 };
 
 class Hex8 : public AHex
 {
 public:
-	Hex8(uint8 v = 0) :value(v){ _tsize = sizeof(uint32); }
-	void _get_stream(uint8 **ptr);
-	operator uint8 () const { return value; }
-	Hex8&  operator+=(uint8 a) { value += a; return *this; }
-	Hex8& operator=(uint8 v){ value = v; return *this; }
+	Hex8(uint8_t v = 0) :value(v){ _tsize = sizeof(uint32_t); }
+	void _get_stream(uint8_t **ptr);
+	operator uint8_t () const { return value; }
+	Hex8&  operator+=(uint8_t a) { value += a; return *this; }
+	Hex8& operator=(uint8_t v){ value = v; return *this; }
 
 private:
-	uint8 value;
+	uint8_t value;
 };
 
 class Hex16 : public AHex
 {
 public:
-	Hex16(uint16 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 1; }
-	void _get_stream(uint8 **ptr);
-	operator uint16 () const { return value; }
-	Hex16& operator=(uint16 v){ value = v; return *this; }
+	Hex16(uint16_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 1; }
+	void _get_stream(uint8_t **ptr);
+	operator uint16_t () const { return value; }
+	Hex16& operator=(uint16_t v){ value = v; return *this; }
 private:
-	uint16 value;
+	uint16_t value;
 };
 
 class Hex24 : public AHex
 {
 public:
-	Hex24(uint32 v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 3; }
-    void _get_stream(uint8 **ptr);
-    operator uint32 (){ return value; }
-    Hex24& operator = (uint32 v){ value = v; return *this; }
+	Hex24(uint32_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 3; }
+    void _get_stream(uint8_t **ptr);
+    operator uint32_t (){ return value; }
+    Hex24& operator = (uint32_t v){ value = v; return *this; }
 private:
-    uint32 value;
+    uint32_t value;
 };
 
 /*
@@ -84,14 +84,14 @@ class MBuf;
 class HexIDev3 : public AHex
 {
 public:
-    HexIDev3(uint32 id = 0, uint16 pid = 0, uint16 vid = 0, uint32 reserve = 0, bool lit_end = FALSE) :
+    HexIDev3(uint32_t id = 0, uint16_t pid = 0, uint16_t vid = 0, uint32_t reserve = 0, bool lit_end = FALSE) :
 		_id_value(id, lit_end), _id_pid(pid, lit_end), _id_vid(vid, lit_end), _reserve(reserve){
 		_lend = lit_end; _tsize = 12;
 	}
     void get_stream(MBuf& mbuf);
     void put_stream(MBuf& mbuf) const ;
-    //operator uint32 (){ return value; }
-    //Hex24& operator = (uint32 v){ value = v; return *this; }
+    //operator uint32_t (){ return value; }
+    //Hex24& operator = (uint32_t v){ value = v; return *this; }
     virtual bool littleEndian() const { return _lend; }
 
 	ExtDevId toExtDevId() const; 
@@ -116,14 +116,14 @@ class MBuf
 {
 public:
 
-	MBuf(const uint8 *readyd, int size, bool readonly = TRUE);
+	MBuf(const uint8_t *readyd, int size, bool readonly = TRUE);
 	MBuf(int size, bool readonly = FALSE);
 	~MBuf() { delete[] origin_data; }
 	// преобразование типа
-	operator const uint8 *() const { return origin_data; }
+	operator const uint8_t *() const { return origin_data; }
 	// просто уловка
-	operator uint8 *() const { return origin_data; }
-	uint8 * cur_data() const { return pdata; }
+	operator uint8_t *() const { return origin_data; }
+	uint8_t * cur_data() const { return pdata; }
 	int bufferLen() const { return dlen; }
 	void setRdOnly(){ _rdon = TRUE; }
 
@@ -143,19 +143,19 @@ public:
 	MBuf& operator << (const MBuf &src);
 
 	// дозапись данных в буфер этого объекта и перемещкение указателя на длину записанных данных
-	int memwrite(const uint8 *data, int len);
+	int memwrite(const uint8_t *data, int len);
 	// копирование данных из буфера (когда объект для чтения) в буфер-приемник и перемещкение указателя на длину скопированных данных
 	// dest - Приемник
 	// dlen - длина приемника
 	// len - длина копируемых данных
 	// возвр. дут, еслив  все нормально
-	int memread(uint8 *dest, int dlen, int len);
+	int memread(uint8_t *dest, int dlen, int len);
 
 	// рерраспределяет внутренний буфер, втавляя кусок 
 	// в начало
-	bool meminsert_start(const uint8 *what, int len);
+	bool meminsert_start(const uint8_t *what, int len);
 	// вставляет два байта в начало и пересапр. внутр. буфер
-	bool meminsert_start(uint8 num1, uint8 num2);
+	bool meminsert_start(uint8_t num1, uint8_t num2);
 
 	// перемещение тек. указателя
 	bool mseek(int offest);
@@ -168,17 +168,17 @@ public:
 	// вычисление отсавшегося размера, начиная с позиции from_pos
 	int restOfSize(int from_pos) const;
 		
-	uint32 CRC32(int from_pos);
+	uint32_t CRC32(int from_pos);
 	bvector to_vector(bool rest = false) const;
 
 protected:
 	int dlen;     // размер распределенной памяти - за это число нельзя выйти никогда
-	uint8 *origin_data;  // указатель на данные
-	uint8 *pdata;   // текущее положение указателя
-	uint8 ovrflow; // признак переполнения
+	uint8_t *origin_data;  // указатель на данные
+	uint8_t *pdata;   // текущее положение указателя
+	uint8_t ovrflow; // признак переполнения
 	bool _rdon;
 };
 
-extern bvector &add_uint32_2_bvector(bvector & bv, uint32 val);
+extern bvector &add_uint32_2_bvector(bvector & bv, uint32_t val);
 
 #endif // 

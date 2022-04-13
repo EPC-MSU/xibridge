@@ -13,9 +13,9 @@ bool test_connect_2()
 		ZF_LOGE("Cannot initalize xibridge system!");
 		return FALSE;
 	}
-	unsigned int res_err, last_err;
-	unsigned int version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
-	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT, &last_err);
+	uint32_t res_err, last_err;
+	uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
+	uint32_t connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT, &last_err);
 	unsigned char resp[72];
    
 	int ginf_ok = xibridge_device_request_response(connection, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
@@ -44,15 +44,15 @@ bool test_connect_2()
 	
     char man[16 + 1];
     memset(man, 0, 16 + 1);
-	mresp.memread((uint8 *)man, 16, 16);
+	mresp.memread((uint8_t *)man, 16, 16);
 	ZF_LOGD("Manufacture: %s\n", man);
 	
     memset(man, 0, 16 + 1);
-	mresp.memread((uint8 *)man, 16, 16);
+	mresp.memread((uint8_t *)man, 16, 16);
 	ZF_LOGD("Product name: %s\n", man);
 
     memset(man, 0, 16 + 1);
-	mresp.memread((uint8 *)man, 16, 16);
+	mresp.memread((uint8_t *)man, 16, 16);
 	ZF_LOGD("Controller: %s\n", man);
 	
 	xibridge_close_device_connection(connection);
@@ -69,10 +69,10 @@ static void thread_body(int thread_num)
 		return;
 	}
 	
-	unsigned int res_err, last_err;
-	//unsigned int version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
+	uint32_t res_err, last_err;
+	//uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
-	unsigned int connection = xibridge_open_device_connection("127.0.0.1", 9, 2, TIMEOUT, &last_err);
+	uint32_t connection = xibridge_open_device_connection("127.0.0.1", 9, 2, TIMEOUT, &last_err);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, connection);
 	unsigned char resp[72];
 	ZF_LOGD("Thread %u: sending ginf... \n", thread_num);

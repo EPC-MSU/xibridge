@@ -4,39 +4,40 @@
 #include "../Common/Protocols.h"
 #include "bindy_helper.h" 
 
-static const char * _err_strings[] =
-{ /*ERR_NO_PROTOCOL*/ "Protocol is undefined: supported versions are 1,2,3.|Протокол не определен: доступны версии 1, 2 или 3.", 
-  /*ERR_NO_CONNECTION*/ "Connection is not created or broken.|Соединение не установлено или разорвано."
-  /*ERR_SEND_TIMEOUT*/ "Send data timeout.|Таймаут отправки данных.",
-  /*ERR_NO_BINDY */    "Network component (bindy) is not initialized properly.|Сетeвой компонент (bindy) не был инициализирован."
-  /* ERR_SEND_DATA */ "Send data error.| Ошибка отправки данных.",
-  /* ERR_RECV_TIMEOUT */ "Receive data timeout.|Таймаут получения данных."
-}; 
-
-void Xibridge_client::xibridge_get_err_expl(char * s, int len, bool is_russian, unsigned int err_no)
+typedef struct
 {
-	const char *unkn_error = is_russian ? "Фатально: неизвестная ошибка!" : "Fatal: unknown error!";
-	memset(s, 0, len);
-	if ((int)err_no >= sizeof(_err_strings))
-	{
-		strncpy(s, unkn_error, len);
-	}
-	else if (err_no > 0)
-	{
-		const char *err_str = _err_strings[(int)err_no - 1];
-		const char *delim = strchr(err_str, '|');
-		if (delim != nullptr)
-			memcpy(s, is_russian ? delim + 1 : err_str, (is_russian ? strchr(err_str, '0') : delim) -
-			(is_russian ? delim + 1 : err_str));
-	}
+    int code;
+    const char *text;
+ 
+}err_def_t;
+
+static err_def_t _err_strings[] =
+{ 
+    { ERR_NO_PROTOCOL, "Protocol is undefined: supported versions are 1, 2, 3." },
+    { ERR_NO_CONNECTION, "Connection is not created or broken." },
+    { ERR_SEND_TIMEOUT, "Send data timeout." },
+    { ERR_NO_BINDY, "Network component (bindy) is not initialized properly." },
+    { ERR_SEND_DATA, "Send data error."},
+    { ERR_RECV_TIMEOUT, "Receive data timeout." },
+    { ERR_KEYFILE_NOT_REPLACED, "Xibridge initialized OK, but key file cannot be replaced." },
+ }; 
+
+
+static bool is_protocol_verified_version_t(const xibridge_version_t& ver)
+{
+    return ver.major > 0 && ver.major <= DEFAULT_PROTO_VERSION && ver.minor == 0 && ver.bagfix == 0;
 }
 
-void Xibridge_client::get_error_expl(char * s, int len, bool is_russian) const
+const char *Xibridge_client::xibridge_get_err_expl(uint32_t err_no)
 {
-	return xibridge_get_err_expl(s, len, is_russian, (unsigned int)_last_error);
+    for (int i = 0; i < sizeof(_err_strings); i++)
+    {
+        if (_err_strings[i].code == err_no) return _err_strings[i].text;
+    }
+    return nullptr;
 }
 
-Xibridge_client * Xibridge_client::_get_client_as_free(unsigned int conn_id)
+Xibridge_client * Xibridge_client::_get_client_as_free(conn_id_t conn_id)
 {
 	std::unique_lock<std::mutex> lock(Bindy_helper::_map_mutex);
 	if (Bindy_helper::_map.find((conn_id_t)conn_id) == Bindy_helper::_map.cend())
@@ -47,33 +48,38 @@ Xibridge_client * Xibridge_client::_get_client_as_free(unsigned int conn_id)
 	return Bindy_helper::_map.at((conn_id_t)conn_id);
 }
 
-bool Xibridge_client::xibridge_init(const char *key_file_path)
+uint32_t Xibridge_client::xibridge_init(const char *key_file_path)
 {
-	bindy::Bindy *_ex = nullptr;
+    uint32_t ret_err = 0;
 	Bindy_helper::_global_mutex.lock();
-	Bindy_helper::set_keyfile(key_file_path);
-	_ex = Bindy_helper::instance_bindy();
+	if (!Bindy_helper::set_keyfile(key_file_path))
+        ret_err = ERR_KEYFILE_NOT_REPLACED;
+    bindy::Bindy *_ex = Bindy_helper::instance_bindy();
 	Bindy_helper::_global_mutex.unlock();
-	return _ex != nullptr;
+    if (_ex == nullptr)
+        ret_err = ERR_NO_BINDY;
+	return ret_err;
 }
 
-void Xibridge_client::xibridge_set_server_protocol(unsigned int conn_id, unsigned int proto)
+uint32_t  Xibridge_client::xibridge_set_connection_protocol_version(xibridge_conn_t conn, xibridge_version_t ver)
 {
-	Xibridge_client * cl = _get_client_as_free(conn_id);
-	if (cl != nullptr)cl -> set_server_protocol_version(proto);
+	Xibridge_client * cl = _get_client_as_free(conn.conn_id);
+    if (cl == nullptr) return ERR_NO_CONNECTION;
+    if (!is_protocol_verified_version_t(ver)) return ERR_NO_PROTOCOL;
+	cl -> _server_protocol_version = ver.major;
 }
 
-unsigned int Xibridge_client::xibridge_get_server_protocol(unsigned int conn_id)
+xibridge_version_t Xibridge_client::xibridge_get_connection_protocol_version(xibridge_conn_t conn)
 {
-	Xibridge_client * cl = _get_client_as_free(conn_id);
-	return cl == nullptr ? 0 : (unsigned int) cl -> get_server_protocol_version();
+	Xibridge_client * cl = _get_client_as_free(conn.conn_id);
+    return {cl == nullptr ? DEFAULT_PROTO_VERSION : (uint8_t)cl->_server_protocol_version, 0, 0};
 }
 
 
 bool Xibridge_client::xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
 	                                              unsigned char **result,
-	                                              unsigned int *pcount, unsigned int timeout,
-	                                              unsigned int* last_errno)
+	                                              uint32_t *pcount, uint32_t timeout,
+	                                              uint32_t* last_errno)
 {
 	/* *
 	* Create temporary client  with Protocol 2  and some serial 2 - to be a static func
@@ -96,13 +102,13 @@ bool Xibridge_client::xibridge_enumerate_adapter_devices(const char *addr, const
 		return false;
 	}
 
-	xl->_conn_id = conn;
+	xl -> _conn = conn;
 	bool ret = true;
-	uint32 version = 0;
+	uint32_t version = 0;
 	if (xl -> _send_and_receive(req))
 	{
 		bvector green, grey;
-        uint32 pckt; DevId devid;
+        uint32_t pckt; DevId devid;
 		xl -> _mutex_recv.lock();
 		MBuf buf(xl -> _recv_message.data(), (int)xl -> _recv_message.size());
 		xl->_mutex_recv.unlock();
@@ -134,25 +140,22 @@ bool Xibridge_client::xibridge_enumerate_adapter_devices(const char *addr, const
 	return ret;
 }
 
-Xibridge_client::Xibridge_client(const char *addr, unsigned int serial, 
-	                                               unsigned int proto_version, 
-												   unsigned int send_tmout, 
-												   unsigned int recv_tmout) :
-_server_protocol_version((uint32)proto_version),
-_dev_num((uint32)serial),
+Xibridge_client::Xibridge_client(const char *xi_net_uri, unsigned int send_timeout, unsigned int recv_timeout) :
+_server_protocol_version(DEFAULT_PROTO_VERSION),
 _last_error(0),
-_send_tmout((uint32)send_tmout),
-_recv_tmout((uint32)recv_tmout),
+_send_tmout((uint32_t)send_timeout),
+_recv_tmout((uint32_t)recv_timeout),
 _conn_id(conn_id_invalid)
 {
   // bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
   // client 
-   memset(_host, 0, MAXHOST + 1);
-   int len = (int)strlen(addr);
-   memcpy(_host, addr, len > MAXHOST ? MAXHOST : len);
+   memset(_uri, 0, MAXURI + 1);
+   int len = (int)strlen(xi_net_uri);
+   memcpy(_uri, xi_net_uri, len > MAXURI ? MAXURI : len);
+  // to do ext_dev_id 
 }
 
-int Xibridge_client::xibridge_read_connection_buffer(unsigned int conn_id,
+int Xibridge_client::xibridge_read_connection_buffer(uint32_t conn_id,
                                                      unsigned char *buf, int size)
 {
 	Xibridge_client *pcl = _get_client_as_free(conn_id);
@@ -172,7 +175,7 @@ int Xibridge_client::xibridge_read_connection_buffer(unsigned int conn_id,
 	return size;
 }
 
-int Xibridge_client::xibridge_write_connection(unsigned int conn_id,
+int Xibridge_client::xibridge_write_connection(uint32_t conn_id,
 	const unsigned char *buf, int size)
 {
 	bvector d; 
@@ -246,7 +249,7 @@ bool Xibridge_client::open_connection_device()
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
-        uint32 pckt; DevId devid;
+        uint32_t pckt; DevId devid;
 		_mutex_recv.lock();
 		MBuf buf(_recv_message.data(), (int)_recv_message.size());
 		_mutex_recv.unlock();
@@ -262,7 +265,7 @@ bool Xibridge_client::open_connection_device()
 	}
 }
 
-bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length, uint32 & res_err)
+bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_length, uint32_t & res_err)
 {
 	clr_errors();
 
@@ -289,7 +292,7 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length,
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
-        uint32 pckt; DevId  serial;
+        uint32_t pckt; DevId  serial;
 		MBuf buf(_recv_message.data(), (int)_recv_message.size());
 		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, serial) == false)
 		{
@@ -303,17 +306,17 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32 resp_length,
 	}
 }
 
-bool Xibridge_client::xibridge_request_response(unsigned int conn_id, 
+bool Xibridge_client::xibridge_request_response(uint32_t conn_id, 
 	                                            const unsigned char *req, 
 												int req_len, 
 												unsigned char *resp, 
-												int resp_len, unsigned int *res_err)
+												int resp_len, uint32_t *res_err)
 {
 	if ((conn_id_t)conn_id == conn_id_invalid) return false;
 	
 	Xibridge_client *pcl = _get_client_as_free((conn_id_t)conn_id);
 	if (pcl == nullptr) return false;
-    MBuf send_data((uint8 *)req, req_len);
+    MBuf send_data((uint8_t *)req, req_len);
 
 	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len, *res_err);
 	// do not check real resp length because various reponses could be received or nit - error, the situation of timeout and so on
@@ -321,16 +324,16 @@ bool Xibridge_client::xibridge_request_response(unsigned int conn_id,
 	// but we restrict the size of vector 
 	if (resp != nullptr && resp_len != 0)
 	{
-		memcpy(resp, response.data(), response.size() < (unsigned int)resp_len ? response.size() : resp_len );
+		memcpy(resp, response.data(), response.size() < (uint32_t)resp_len ? response.size() : resp_len );
 	}
 	return pcl->get_last_error() == 0;
 }
 
-unsigned int Xibridge_client::xibridge_get_last_err_no(unsigned int conn_id)
+uint32_t Xibridge_client::xibridge_get_last_err_no(uint32_t conn_id)
 {
 	Xibridge_client *pcl = _get_client_as_free((conn_id_t)conn_id);
 
-	return pcl == nullptr ? 0 : (unsigned int)pcl -> get_last_error();
+	return pcl == nullptr ? 0 : (uint32_t)pcl -> get_last_error();
 }
 
 
@@ -360,7 +363,7 @@ bool Xibridge_client::close_connection_device()
 	if (_send_and_receive(req))
 	{
 		bvector green, grey;
-        uint32 pckt; DevId devid;
+        uint32_t pckt; DevId devid;
 		MBuf buf(_recv_message.data(), (int)_recv_message.size());
 		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, devid) == false)
 		{
@@ -377,7 +380,7 @@ bool Xibridge_client::close_connection_device()
 	
 }
 
-void Xibridge_client::xibridge_close_connection_device(unsigned int conn_id)
+void Xibridge_client::xibridge_close_connection_device(uint32_t conn_id)
 {
 	if ((conn_id_t)conn_id == conn_id_invalid) return;
 	bool non_connected;
@@ -395,7 +398,7 @@ void Xibridge_client::disconnect()
 	_conn_id = conn_id_invalid;
 }
 
-uint32  Xibridge_client::xibridge_detect_protocol_version(const char *addr, uint32 send_timeout, uint32 recv_timeout)
+uint32_t  Xibridge_client::xibridge_detect_protocol_version(const char *addr, uint32_t send_timeout, uint32_t recv_timeout)
 {
 	/* *
 	* Create temporary client  with Protocol 2  and some serial 2 - to be a static func
@@ -417,7 +420,7 @@ uint32  Xibridge_client::xibridge_detect_protocol_version(const char *addr, uint
 
 	xl -> _conn_id = conn;
 
-	uint32 version = 0;
+	uint32_t version = 0;
 	if (xl -> _send_and_receive(req))
 	{
 		version = xl -> get_proto_version_of_the_recv_message();
