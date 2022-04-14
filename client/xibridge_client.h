@@ -1,18 +1,10 @@
 #ifndef _XIBRIDGE_CLIENT_H
 #define  _XIBRIDGE_CLIENT_H
-
-#include "../Common/defs.h"
-
-#include "../Common/Protocols.h"
-
-#include "Bindy_helper.h"
-
-#include "xibridge.h"
-
 #include <vector>
-
-
-#define MAXURI 256  
+#include "xibridge.h"
+#include "../Common/defs.h"
+#include "../Common/Protocols.h"
+#include "Bindy_helper.h"
 
 /*
 * Defines client errors (errors to take place at the client side)
@@ -62,7 +54,7 @@ public:
 	* @return версия xibridge
 	* \endrussian
 */
-	static xibridge_version_t xibridge_get_version()
+	static xibridge_version_t xi_get_version()
 	{
         return {1, 0, 0};
 	};
@@ -73,7 +65,7 @@ public:
 	* @return версия максимальной версии протокола xibridge
 	* \endrussian
 */
-    static xibridge_version_t xibridge_get_max_protocol_version()
+    static xibridge_version_t xi_get_max_protocol_version()
 	{
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
 	}
@@ -86,7 +78,7 @@ public:
    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
    * \endrussian
 */
-    static uint32_t xibridge_set_connection_protocol_version(xibridge_conn_t conn, xibridge_version_t ver);
+    static uint32_t xi_set_connection_protocol_version(xibridge_conn_t conn, xibridge_version_t ver);
 
 /**
    * \russian
@@ -95,7 +87,7 @@ public:
    * @return версия протокола для взаимодействия с сервером (1,2 или 3), если подключение не существует - возвращается версия протокола 3
    * \endrussian
 */
-    static xibridge_version_t xibridge_get_connection_protocol_version(xibridge_conn_t conn);
+    static xibridge_version_t xi_get_connection_protocol_version(xibridge_conn_t conn);
 
 /**
    * \russian
@@ -104,25 +96,25 @@ public:
    * @return код ошибки в случае ее возникновения при закрытии подключения, 0 - если успех  
    * \endrussian
 */
-    static uint32_t xibridge_close_connection_device(xibridge_conn_t conn);
+    static uint32_t xi_close_connection_device(xibridge_conn_t conn);
 
-/**
-   * \russian
-   * Функция определения устройств, доступных для работы на сервере (ximc-) 
-   * Функция распределяет и заполняет массив структур по количеству определенных устройств
-   * @param[in] addr ip-адрес сервера
-   * @param[in] addr ip-адрес адаптера(?)
-   * @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройств
-   * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
-   * @param[in] timeout таймаут ответа сервера
-   * @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
-   * @return 0 в случае неудачи
-   * \endrussian
-*/
-	static bool xibridge_enumerate_adapter_devices(const char *addr, const char *adapter, 
-		                                   unsigned char **result, 
-										   unsigned int *pcount, unsigned int timeout,
-										   unsigned int* last_errno = nullptr);
+	/**
+	* \russian
+	* Функция определения устройств, доступных для работы на сервере (ximc-)
+	* Функция распределяет и заполняет последовательность строк по количеству определенных устройств
+	* @param[in] addr ip-адрес сервера
+	* @param[in] addr ip-адрес адаптера(?)
+	* @param[out] result указатель на указатель, по которому будут распределены строки(через 0) с uri-устройств
+	* @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
+	* @param[in] timeout таймаут ответа сервера
+	* @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
+	* @return код ошибки в случае или 0
+	* \endrussian
+	*/
+	static uint32_t  xi_enumerate_adapter_devices(const char *addr, const char *adapter,
+		char **result,
+		unsigned int *pcount, unsigned int timeout
+		);
 
 /**
    * \russian
@@ -133,7 +125,7 @@ public:
    * @return 0 - если операция завершилась неудачно
    * \endrussian
 */
-	static int xibridge_read_connection_buffer(unsigned int conn_id, unsigned char *buf, int size);
+	static int xi_read_connection_buffer(unsigned int conn_id, unsigned char *buf, int size);
 
 /**
 	* \russian
@@ -144,10 +136,7 @@ public:
 	* @return 0 - если операция завершилась неудачно
 	* \endrussian
 */
-	static int xibridge_write_connection(unsigned int conn_id, const unsigned char *buf, int size);
-
-	/*
-
+	static int xi_write_connection(unsigned int conn_id, const unsigned char *buf, int size);
 /**
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
@@ -160,28 +149,17 @@ public:
 
 /**
 	* \russian
-	* Функция автоопределения максимальной версии протокола, поддерживаемого на сервере (urpc-, ximc-, xibridge-)
-	* @param[in] addr ip-адрес сервера
-	* @param[in] send_timeout таймаут отправки запроса на сервер
-	* @param[in] recv_timeout таймаут получения ответа сервера
-	* @return возвращает номер максимальной версии протокола (1, 2 или 3) в случае успешного операции, 0 - если определить версия не удалось
-	* \endrussian
-*/
-	static uint32_t  xibridge_detect_protocol_version(const char *addr, uint32_t send_timeout, uint32_t resv_timeout);
-
-/**
-	* \russian
 	* Функция инициализации xibridge-системы, должна вызываться перед использованием любых других функций xibridge
 	* @param[in] key_file_path имя существующего файла, содержащего ключевую информацию шифрования
 	* @return код ошибки, если инициализация завершилась неудачно или key_file_path отличается от уже установленного, 0 если удачно
 	* \endrussian
 */
-	static uint32_t xibridge_init(const char *key_file_path);
+	static uint32_t xi_init(const char *key_file_path);
 	
 /**
    * \russian
    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
-   * @param[in] conn_id идентификатор подключения
+   * @param[in] conn данные подключения
    * @param[in] req данные запроса (код команды+параметры)
    * @param[in] req_len длина данных запроса
    * @param[out] resp буфер-приемник данных
@@ -190,7 +168,7 @@ public:
    * @return 0 - если операция завершилась неудачно
    * \endrussian
 */
-	static bool xibridge_request_response(unsigned int conn_id, 
+	static bool xi_request_response(xibridge_conn_t conn, 
 		                                  const unsigned char *req, 
 										  int req_len, 
 										  unsigned char *resp, 
@@ -203,7 +181,7 @@ public:
    * @return строка с ошибкой или нулевой указатель в случае неизвестного кода ошибки
    * \endrussian
 */
-	static const char * xibridge_get_err_expl(unsigned int err_no);
+	static const char * xi_get_err_expl(unsigned int err_no);
 
 	/*
 	* This static member function  returns last err number of the connection conn_id
@@ -211,7 +189,7 @@ public:
 /**
    * \english
    * This static member function returns last error number of the  conn_id connection
-   * @param[in] conn_id connection identifier
+   * @param[in] conn connection data
    * @return lst error code
    * \russian
    * Функция возвращает код последней ошибки, связанной с данным подключением
@@ -219,7 +197,7 @@ public:
    * @return код последней ошибки
    * \endrussian
 */
-	static unsigned int xibridge_get_last_err_no(unsigned int conn_id);
+	static unsigned int xi_get_last_err_no(xibridge_conn_t conn);
 	
 	bool open_connection_device();
 
@@ -237,28 +215,37 @@ public:
 
 	void clr_errors() { _last_error = 0; }
 
-	uint32_t get_dev_num() const {
-		return _dev_num;
-	}
-
 	uint32_t get_resv_tmout() const { return _recv_tmout; }
 
 	uint32_t get_proto_version_of_the_recv_message() const { return AProtocol::get_version_of_cmd(_recv_message); }
-    xibridge_conn_t to_xibridge_conn_t() const { return{ (uint32_t)_conn_id, { _server_protocol_version, 0, 0 } } };
+	xibridge_conn_t to_xibridge_conn_t() const {
+		return{ (uint32_t)_conn_id, { _server_protocol_version, 0, 0 } };
+	}
 private:
 /**
-	* Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
+		* \russian
+		* Функция автоопределения максимальной версии протокола, поддерживаемого на сервере(urpc - , ximc - , xibridge - )
+		* @param[in] addr ip - адрес сервера
+		* @param[in] send_timeout таймаут отправки запроса на сервер
+		* @param[in] recv_timeout таймаут получения ответа сервера
+		* @return возвращает номер максимальной версии протокола(1, 2 или 3) в случае успешного операции, 0 - если определить версия не удалось
+		* \endrussian
+*/
+		uint32_t  _detect_protocol_version();
+/**
+	    * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
 */
 	static Xibridge_client * _get_client_as_free(conn_id_t conn_id);
 
 	bool _send_and_receive(bvector &req);
 	void _set_last_error(uint32_t err) { _last_error = err; }
 /**
-	* Ключевые атрибуты сущности
+	* Ключевые атрибуты клиента
 */
     uint32_t _server_protocol_version; // default server_protocol_version number to put to the message
     conn_id_t _conn_id; //bindy id of this connection (bindy id + server protocol version)
     xibridge_device_t _dev_id;        // common device id 
+	bool _is_proto_detected; 
 /**
 	* Таймауты чтения-записи
 */	
@@ -279,7 +266,7 @@ private:
 /*
     *  Храним uri подключения для возможных логов  в процессе работы  
 */
-	char _uri[MAXURI+1];
+	char _host[XI_URI_HOST_LEN+1];
 };
 
 #endif

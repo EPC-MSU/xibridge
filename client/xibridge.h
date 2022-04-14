@@ -1,6 +1,7 @@
 #ifndef _XIBRIDGE_H
 #define  _XIBRIDGE_H
 
+#include <stdint.h>
 
 #if defined (WIN32) || defined(WIN64)
 #if defined(BUILD_SHARED_LIBS_XI)
@@ -12,49 +13,65 @@
    #define XI_EXPORT
 #endif
 
+/*
+#ifdef _MSC_VER
+#define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
+#else
+#define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+#endif
+*/
+
+#define XI_URI_HOST_LEN 64
+
 /**
     * \russian
     * Структура для работы с расширеным идентификаторм устройства (используется в протоколе обмена версии 3 и выше)
+	* \endrussian
 */
-typedef struct
+//PACK(
+struct _xibridge_device_t
 {
 	uint32_t reserve;
 	uint16_t VID;
 	uint16_t PID;
 	uint32_t id;
-} xibridge_device_t;
+};//);
+typedef _xibridge_device_t xibridge_device_t;
 
 /**
     * \russian
     * Структура для хранения версии библиотеки, протокола
+	* \endrussian
 */
-typedef struct
+//PACK(
+struct _xibridge_version_t
 {
     uint8_t major;
     uint8_t minor;
     uint8_t bagfix;
-} xibridge_version_t;
+};//);
+typedef _xibridge_version_t xibridge_version_t;
 
 /**
 * \russian
 * Структура для хранения данных подключения (id подключения +  версия протокола)
+* \endrussian
 */
-typedef struct
+//PACK(
+struct _xibridge_conn_t
 {
     uint32_t conn_id;  // уникальный идентифакатор сетевого подключения
     xibridge_version_t proto_ver; // версия протокола
-} xibridge_conn_t;
+};//);
+typedef _xibridge_conn_t xibridge_conn_t;
 
 
 /**
     * \russian
     * Определение идентификатора несуществующего подключения
+	* \endrussian
 */
 #define conn_id_invalid 0
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /** 
     * \russian
@@ -62,6 +79,10 @@ extern "C" {
     * \endrussian
 */
 #define TIMEOUT 3000
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /** 
     * \russian
@@ -96,7 +117,7 @@ uint32_t  XI_EXPORT xibridge_init(const char *key_file_path);
    * @return код ошибки, если установка версии завершилась неудачно,  0 если удачно
    * \endrussian
 */
-uint32_t  XI_EXPORT xibridge_set_connection_protocol_verion(xibridge_conn_t conn, xibridge_version_t ver);
+uint32_t  XI_EXPORT xibridge_set_connection_protocol_version(xibridge_conn_t conn, xibridge_version_t ver);
 
 /**
    * \russian
@@ -109,55 +130,27 @@ xibridge_version_t  XI_EXPORT xibridge_get_connection_protocol_version(xibridge_
 
 /**
    * \russian
-   * Функция записи данных ("как есть", без формирования по протоколу) в устройство с помощью данного подключения
-   * @param[in] conn_id идентификатор подключения
-   * @param[in] buf данные для отправки в устройство 
-   * @param[in] size длина данных 
-   * @return 0 - если операция завершилась неудачно
-   * \endrussian
-*/
-int  XI_EXPORT xibridge_write_connection(unsigned int conn_id, const unsigned char *buf, int size);
-
-/**
-   * \russian
-   * Функция чтения данных ("как есть", без парсинга по протоколу) из устройства с помощью данного подключения
-   * @param[in] conn_id идентификатор подключения
-   * @param[in] buf буфер-приемник для получения данных 
-   * @param[in] size длина буфера-приемника 
-   * @return 0 - если операция завершилась неудачно
-   * \endrussian
-*/
-int  XI_EXPORT xibridge_read_connection_buffer(unsigned int conn_id, unsigned char *buf, int size);
-
-/**
-   * \russian
-   * Функция открытия подключения по сети к устройству через сервер (xibridge) при использовании расширенного идентификатора устройств
-   
-   * @param[in] recv_timeout таймаут ответа сервера
+   * Функция открытия подключения по сети к устройству через сервер (xibridge) 
+     * @param[in] recv_timeout таймаут ответа сервера
    * @param[out] pconn указатель переменной, куда будут  записаны данные подключения
-   * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха ненулевой идентификатор подключения в случае успешного подключения к устройству, 0 - в случае неудачи 
+   * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
    * \endrussian
 */
 uint32_t  XI_EXPORT xibridge_open_device_connection(const char *xi_net_uri, unsigned int recv_timeout, xibridge_conn_t *pconn);
 
-
+/**
+   * \russian
+   * Функция закрытия подключения по сети к устройству через сервер (xibridge) 
+   * @param[out] pconn указатель переменной, куда будут  записаны данные подключения
+   * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
+   * \endrussian
+*/
 uint32_t  XI_EXPORT xibridge_close_device_connection(xibridge_conn_t conn);
 
 /**
    * \russian
-   * Функция автоопределения максимальной версии протокола, поддерживаемого на сервере (urpc-, ximc-, xibridge-) 
-   * @param[in] addr ip-адрес сервера
-   * @param[in] send_timeout таймаут отправки запроса на сервер
-   * @param[in] recv_timeout таймаут получения ответа сервера 
-   * @return возвращает номер максимальной версии протокола (1, 2 или 3) в случае успешного операции, 0 - если определить версия не удалось 
-   * \endrussian
-*/
-unsigned int  XI_EXPORT xibridge_detect_protocol_version(const char *addr, unsigned int send_timeout, unsigned int recv_timeout);
-
-/**
-   * \russian
    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
-   * @param[in] conn_id идентификатор подключения
+   * @param[in] conn данные подключения
    * @param[in] req данные запроса (код команды+параметры)
    * @param[in] req_len длина данных запроса
    * @param[out] resp буфер-приемник данных
@@ -166,7 +159,7 @@ unsigned int  XI_EXPORT xibridge_detect_protocol_version(const char *addr, unsig
    * @return 0 - если операция завершилась неудачно
    * \endrussian
 */
-int  XI_EXPORT xibridge_device_request_response(unsigned int conn_id,
+int  XI_EXPORT xibridge_device_request_response(xibridge_conn_t conn,
 	                                         const unsigned char *req, 
 											 int req_len, unsigned char *resp, 
                                              int resp_len, unsigned int *res_err
@@ -182,43 +175,23 @@ int  XI_EXPORT xibridge_device_request_response(unsigned int conn_id,
 */
 const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
 
-
 /**
    * \russian
    * Функция определения устройств, доступных для работы на сервере (ximc-) 
-   * Функция распределяет и заполняет массив структур по количеству определенных устройств
+   * Функция распределяет и заполняет последовательность строк по количеству определенных устройств
    * @param[in] addr ip-адрес сервера
    * @param[in] addr ip-адрес адаптера(?)
-   * @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройств
+   * @param[out] result указатель на указатель, по которому будут распределены и размещены строки(через 0) с uri-адресами устройств
    * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
    * @param[in] timeout таймаут ответа сервера
    * @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
-   * @return 0 в случае неудачи
+   * @return код ошибки в случае или 0
    * \endrussian
 */
-int  XI_EXPORT xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
-	unsigned char **result,
-	unsigned int *pcount, unsigned int timeout,
-	unsigned int* last_errno);
-
-
-/**
-   * \russian
-   * Функция определения устройств с расширенными идентификаторами, доступных для работы на сервере (xibridge-)
-   * Функция распределяет и заполняет массив расширенных идентификаторов по количеству определенных устройств
-   * @param[in] addr ip-адрес сервера
-   * @param[in] addr ip-адрес адаптера(?)
-   * @param[out] result указатель на указатель, по которому будет распределен массив структур с описанием устройтств
-   * @param[out] pcount указатель на переменную, куда будет помещено количесиво найденных устройств
-   * @param[in] timeout таймаут ответа сервера
-   * @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
-   * @return 0 в случае неудачи
-* \endrussian
-*/void  /*XI_EXPORT*/ xibridge_enumerate_devices_ext(const char *addr,
-	const char *adapter,
-	ExtDevId **result,
-	unsigned int *pcount, unsigned int timeout,
-	unsigned int* last_errno);
+uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
+	char **result,
+	unsigned int *pcount, unsigned int timeout
+);
 
 /**
    * \russian

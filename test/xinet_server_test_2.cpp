@@ -14,11 +14,12 @@ bool test_connect_2()
 		return FALSE;
 	}
 	uint32_t res_err, last_err;
-	uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
-	uint32_t connection = xibridge_open_device_connection("127.0.0.1", 9, version, TIMEOUT, &last_err);
+	//uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
+	xibridge_conn_t conn;
+	uint32_t err = xibridge_open_device_connection("127.0.0.1", TIMEOUT, &conn);
 	unsigned char resp[72];
    
-	int ginf_ok = xibridge_device_request_response(connection, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
+	int ginf_ok = xibridge_device_request_response(conn, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
 
 	// разобрать структуру
 	// to do - sync 

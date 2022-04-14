@@ -7,43 +7,34 @@
 #include "utils.h"
 
 
-/*
-* C++ struct to keep device identifiers of 2 types
+/**
+    * C++ struct to keep device identifiers with implicit constructors
 */
 struct DevId {
-	DevId(uint32_t id, bool is_n = false) :
-	_dev_id(id),
-	_is_new(is_n)
-	{
-		if (is_n)
-		{
-			_dev_id_new.PID = 0;
-			_dev_id_new.VID = 0;
-			_dev_id_new.reserve = 0;
-			_dev_id_new.id = id;
-		}
-	};
-
+	
 	DevId(const xibridge_device_t &e_id) :
-		_dev_id_new(e_id),
-		_is_new(true)
+		_dev_id(e_id)
 	{
-		
 	};
 
-    DevId(): _is_new(true) {}
-	uint32_t _dev_id;
- 
-	xibridge_device_t _dev_id_new;
+    DevId(uint32_t just_id = 0)
+	{
+		_dev_id.id = just_id;
+		_dev_id.PID = _dev_id.VID = 0;
+		_dev_id.reserve = 0;
+	}
+	
 
-	bool _is_new;
+	xibridge_device_t _dev_id;
+		
 };
 
   
-/* * structure to connect packet type and command schema
- *   command schema ia a string like this "v_p_0_d_0_0_x"
- *   v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
- *   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit number, I - extended device identifier
+/** 
+    * structure to connect packet type and command schema
+    * command schema ia a string like this "v_p_0_d_0_0_x"
+    * v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
+    * l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit number, I - extended device identifier
 */
 typedef struct _sm
 {
@@ -69,14 +60,17 @@ typedef struct _sm
 class AProtocol
 {
 public:
-	/*
+
+	virtual bool is_device_id_extended() = 0;
+
+/**
 	 * Prepares protocol formatted data FROM Bindy callback into some separated arrays and fields
 	 * Gets protocol results data (green in Wiki) and device  data (light blue in Wiki), packet type and serial of the device (at server)
 	 * @param [out] green_data - data could be interpritited by any of the protocols
 	 * @param [out] grey_data - data direct from a device
 	 * @param [out] pckt_type - packet type in terms of the protocol
 	 * @param [out] devid - device identifier of the device at server side
-	 */
+*/
 	bool get_data_from_bindy_callback(MBuf &cmd,
 		bvector &green_data,
 		bvector &grey_data,
@@ -129,9 +123,12 @@ class Protocol1 : public AProtocol
 {
 public:
 	Protocol1(bool isserver):AProtocol(isserver) {};
-    virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector *data = nullptr)
+	virtual bool is_device_id_extended() {
+		return false;
+	};
+
+	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector *data = nullptr)
     {
-        if (devid._is_new) return bvector();
         return create_client_request(pckt, devid._dev_id, tmout, data);
     }
 	
@@ -185,9 +182,11 @@ class Protocol2 : public AProtocol
 {
 public:
 	Protocol2(bool isserver) :AProtocol(isserver) {};
+	virtual bool is_device_id_extended() {
+		return false;
+	};
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector *data = nullptr)
     {
-        if (devid._is_new) return bvector();
         return create_client_request(pckt, devid._dev_id, tmout, data);
     }
 	
@@ -237,6 +236,9 @@ class Protocol3 : public AProtocol
 {
 public:
 	Protocol3(bool isserver) :AProtocol(isserver) {};
+	virtual bool is_device_id_extended() {
+		return true;
+	};
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector* data = nullptr);
 	virtual bvector create_open_request(DevId devid, uint32_t tmout)
 	{

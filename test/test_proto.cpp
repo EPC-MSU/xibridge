@@ -145,7 +145,7 @@ static bool test_request_proto3()
 		ret = false;
 	}
 
-	reqw = proto.create_open_request(DevId(1, true), 1000);
+	reqw = proto.create_open_request(DevId(1), 1000);
 
 	const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_OPEN, proto.get_cmd_shema());
     if (!cm1.is_match(reqw.data(), (int)reqw.size(), 3, 1))
@@ -154,7 +154,7 @@ static bool test_request_proto3()
 		ret = false;
 	}
 
-	reqw = proto.create_close_request(DevId(2, true), 2000);
+	reqw = proto.create_close_request(DevId(2), 2000);
 
 	const cmd_schema & cm2 = cmd_schema::get_schema(PROTO_3_CLOSE, proto.get_cmd_shema());
     if (!cm2.is_match(reqw.data(), (int)reqw.size(), 3, 2))
@@ -165,7 +165,7 @@ static bool test_request_proto3()
 
 	bvector data = { 'h', 'a', 'h', 'a', 'h', 'a', '3' };
 
-	reqw = proto.create_cmd_request(DevId(3, true), 3000, &data);
+	reqw = proto.create_cmd_request(DevId(3), 3000, &data);
 	const cmd_schema & cm3 = cmd_schema::get_schema(PROTO_3_CMD, proto.get_cmd_shema());
     if (!cm3.is_match(reqw.data(), (int)reqw.size(), 3, 3))
 	{

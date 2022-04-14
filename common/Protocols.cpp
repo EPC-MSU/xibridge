@@ -117,15 +117,15 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
     grey_data.clear(); green_data.clear(); _res_err = 0;
 	Hex32 skip_prt, skip_tout, sr, pckt, serial; HexIDev3 hdev;
 	cmd >> skip_prt >> pckt >> skip_tout;
-	if (devid._is_new)
+	if (is_device_id_extended() == false)
 	{
 		cmd >> serial;
-		devid._dev_id = (uint32_t)serial;
+		devid._dev_id.id = (uint32_t)serial;
 	}
 	else
 	{
 		cmd >> hdev;
-		devid._dev_id_new = hdev.toExtDevId();
+		devid._dev_id = hdev.toExtDevId();
 	}
 	
 	if (cmd.wasBroken())
@@ -470,7 +470,7 @@ bvector Protocol3::create_client_request(uint32_t pckt, DevId devid, uint32_t tm
 {
 	MBuf mbuf(64 + (data == nullptr ? 0 : (int)data -> size()));
 	mbuf << Hex32(version()) << Hex32(pckt) << Hex32(tmout);
-    HexIDev3 _idev(devid._dev_id_new.id, devid._dev_id_new.PID, devid._dev_id_new.VID, devid._dev_id_new.reserve);
+    HexIDev3 _idev(devid._dev_id.id, devid._dev_id.PID, devid._dev_id.VID, devid._dev_id.reserve);
     if (pckt == pkt3_close_req || pckt == pkt3_open_req || pckt == pkt3_cmd_req)
     {
 
