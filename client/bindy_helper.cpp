@@ -26,7 +26,7 @@ bool Bindy_helper::set_keyfile(const char *keyfile)
 {
 	// not possible to change active keyfile once installed at bindy really init
     // if _pbindy is not init
-	if (keyfile != nullptr && (_pbindy == nullptr || (_keyfile == nullptr || strcmp(_keyfile, keyfile) == 0))
+	if (keyfile != nullptr && (_pbindy == nullptr || (_keyfile == nullptr || strcmp(_keyfile, keyfile) == 0)))
 	{
 		_keyfile = keyfile;
 		return true;

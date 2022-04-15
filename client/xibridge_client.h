@@ -19,6 +19,7 @@
 * Defines protocol and server errors
 */
 #define ERR_RECV_TIMEOUT 7
+#define ERR_ANOTHER_PROTOCOL 8
 
 
 /**
@@ -165,14 +166,14 @@ public:
    * @param[out] resp буфер-приемник данных
    * @param[in] resp_len точная длина ожидаемых данных
    * @param[out] res_err указатель переменной для записи результата операции или ошибки в случае неудачи 
-   * @return 0 - если операция завершилась неудачно
+   * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-	static bool xi_request_response(xibridge_conn_t conn, 
+	static uint32_t xi_request_response(xibridge_conn_t conn, 
 		                                  const unsigned char *req, 
 										  int req_len, 
 										  unsigned char *resp, 
-										  int resp_len, unsigned int *res_err);
+										  int resp_len);
 
 /**
    * \russian
@@ -199,7 +200,9 @@ public:
 */
 	static unsigned int xi_get_last_err_no(xibridge_conn_t conn);
 	
-	bool open_connection_device();
+	bool open_device(uint32_t& panswer_proto_version);
+
+    bool open_connection();
 
 	bool is_connected();
 
@@ -207,9 +210,11 @@ public:
 	
 	bool close_connection_device();
 
+    bool decrement_server_protocol_version();
+
 	conn_id_t conn_id() const { return _conn_id; }
 
-	bvector  send_data_and_receive(bvector data, uint32_t resp_length, uint32_t& res_err);
+	bvector  send_data_and_receive(bvector data, uint32_t resp_length);
 	
 	uint32_t get_last_error() const { return _last_error; };
 

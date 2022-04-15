@@ -11,7 +11,7 @@ typedef struct
  
 } err_def_t;
 
-err_def_t _err_strings[] =
+static err_def_t _err_strings[] =
 { 
     { ERR_NO_PROTOCOL, "Protocol is undefined: supported versions are 1, 2, 3." },
     { ERR_NO_CONNECTION, "Connection is not created or broken." },
@@ -30,12 +30,10 @@ static bool is_protocol_verified_version_t(const xibridge_version_t& ver)
 
 const char *Xibridge_client::xi_get_err_expl(uint32_t err_no)
 {
-	/*
 	for (int i = 0; _err_strings[i].code != 0; i++)
     {
         if (_err_strings[i].code == err_no) return _err_strings[i].text;
     }
-	*/
     return nullptr;
 }
 
@@ -97,7 +95,7 @@ uint32_t Xibridge_client::xi_enumerate_adapter_devices(const char *addr, const c
 		return err;
 	}
 	// to do !!!
-	AProtocol *protocol = create_appropriate_protocol(/*xl -> get_server_version().major*/1);  
+	AProtocol *protocol = create_appropriate_protocol(xl -> _server_protocol_version);  
 	bvector req = protocol -> create_enum_request(xl -> get_resv_tmout());
 	if (req.size() == 0)
 	{
@@ -106,36 +104,30 @@ uint32_t Xibridge_client::xi_enumerate_adapter_devices(const char *addr, const c
 		return ERR_NO_PROTOCOL;
 	}
 
-	xl -> _conn = conn;
-	bool ret = true;
+	xl -> _conn_id = conn;
+	uint32_t ret = 0;
 	uint32_t version = 0;
 	if (xl -> _send_and_receive(req))
 	{
-		bvector green, grey;
-        uint32_t pckt; DevId devid;
-		xl -> _mutex_recv.lock();
+		bvector res_data, data;
+        xl -> _mutex_recv.lock();
 		MBuf buf(xl -> _recv_message.data(), (int)xl -> _recv_message.size());
 		xl->_mutex_recv.unlock();
-
-		if (protocol -> get_data_from_bindy_callback(buf, green, grey, pckt, devid) == true)
+        uint32_t pckt;
+		if (protocol -> get_data_from_bindy_callback(buf, res_data, data, pckt) == true)
 		{
-			*result = (unsigned char *) malloc(grey.size());
-			memcpy(*result, grey.data(), grey.size());
+			*result = (char *) malloc(data.size());
+			memcpy(*result, data.data(), data.size());
 			*pcount = protocol -> get_result_error();
-			//
 		}
 		else
 		{
-			if (last_errno != nullptr)
-				*last_errno = ERR_NO_PROTOCOL;
-			ret = false;
+			ret = ERR_NO_PROTOCOL;
 		}
 	}
 	else
 	{
-		if (last_errno != nullptr)
-			*last_errno = ERR_RECV_TIMEOUT;
-		ret = false;
+        ret = ERR_RECV_TIMEOUT;
 	}
 
 	xl->close_connection_device(); // if any device really opened
@@ -158,7 +150,7 @@ _conn_id(conn_id_invalid)
    
    xibridge_parsed_uri parsed;
 
-   if (xibridge_parse_uri(xi_net_uri, &parsed) == 0)
+   if (xibridge_parse_uri_dev12(xi_net_uri, &parsed) == 0)
    {
 	   memcpy(_host, parsed.uri_server_host, XI_URI_HOST_LEN);
 	   _dev_id = parsed.uri_device_id;
@@ -229,21 +221,33 @@ bool Xibridge_client::is_connected()
 		     Bindy_helper::instance()->is_connected(_conn_id);
 }
 
-bool Xibridge_client::open_connection_device()
+bool Xibridge_client::decrement_server_protocol_version()
+{
+    if (_server_protocol_version <= DEFAULT_PROTO_VERSION && _server_protocol_version > 1)
+    {
+       _server_protocol_version--;
+       return true;
+    }
+    return false;
+}
+
+bool Xibridge_client::open_connection()
+{
+    clr_errors();
+    _conn_id = Bindy_helper::instance() -> connect(_host, this);
+    if (_conn_id == conn_id_invalid)
+    {
+        _last_error = ERR_NO_CONNECTION;
+        return false;
+    }
+    return true;
+}
+
+bool Xibridge_client::open_device(uint32_t & answer_version)
 {
 	clr_errors();
-
-	if (is_connected()) return true;
-
-	auto conn = Bindy_helper::instance() -> connect(_host, this);
-	if (conn == conn_id_invalid)
-	{
-	   _last_error = ERR_NO_CONNECTION;
-	   return false;
-	}
-
+    answer_version = _server_protocol_version;
 	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
-
 	if (proto == nullptr) 
 	{
 		_last_error = ERR_NO_PROTOCOL;
@@ -255,19 +259,26 @@ bool Xibridge_client::open_connection_device()
 		_last_error = ERR_NO_PROTOCOL;
 		return false;
 	}
-	_conn_id = conn;
 	if (_send_and_receive(req))
 	{
-		bvector green, grey;
-        uint32_t pckt; DevId devid;
+		bvector res_data, data;
+        uint32_t pckt; 
 		_mutex_recv.lock();
 		MBuf buf(_recv_message.data(), (int)_recv_message.size());
 		_mutex_recv.unlock();
-		if (proto -> get_data_from_bindy_callback(buf, green, grey, pckt, devid) == false)
+        
+        answer_version = get_proto_version_of_the_recv_message();
+        if (answer_version != _server_protocol_version)
+        {
+            _server_protocol_version = answer_version;
+            _last_error = ERR_ANOTHER_PROTOCOL;
+            return false;
+        }
+		if (proto -> get_data_from_bindy_callback(buf, res_data, data, pckt) == false)
 		{
-			return false;
+            return false;
 		}
-		return proto -> translate_response(pckt, green);
+		return proto -> translate_response(pckt, res_data);
 	}
 	else
 	{
@@ -275,7 +286,7 @@ bool Xibridge_client::open_connection_device()
 	}
 }
 
-bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_length, uint32_t & res_err)
+bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_length)
 {
 	clr_errors();
 
@@ -301,14 +312,14 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_lengt
 	}
 	if (_send_and_receive(req))
 	{
-		bvector green, grey;
-        uint32_t pckt; DevId  serial;
+		bvector res_data, data;
+        uint32_t pckt; 
 		MBuf buf(_recv_message.data(), (int)_recv_message.size());
-		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, serial) == false)
+		if (proto->get_data_from_bindy_callback(buf, res_data, data, pckt) == false)
 		{
 			return bvector();
 		}
-		return grey;
+		return data;
 	}
 	else
 	{
@@ -316,19 +327,19 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_lengt
 	}
 }
 
-bool Xibridge_client::xi_request_response(xibridge_conn_t conn, 
+uint32_t Xibridge_client::xi_request_response(xibridge_conn_t conn, 
 	                                            const unsigned char *req, 
 												int req_len, 
 												unsigned char *resp, 
-												int resp_len, uint32_t *res_err)
+												int resp_len)
 {
-	if ((conn_id_t)conn_id == conn_id_invalid) return false;
+	if ((conn_id_t)conn.conn_id == conn_id_invalid) return ERR_NO_CONNECTION;
 	
 	Xibridge_client *pcl = _get_client_as_free(conn.conn_id);
-	if (pcl == nullptr) return false;
+	if (pcl == nullptr) return ERR_NO_CONNECTION;
     MBuf send_data((uint8_t *)req, req_len);
 
-	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len, *res_err);
+	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len);
 	// do not check real resp length because various reponses could be received or nit - error, the situation of timeout and so on
 
 	// but we restrict the size of vector 
@@ -336,7 +347,7 @@ bool Xibridge_client::xi_request_response(xibridge_conn_t conn,
 	{
 		memcpy(resp, response.data(), response.size() < (uint32_t)resp_len ? response.size() : resp_len );
 	}
-	return pcl->get_last_error() == 0;
+	return pcl->get_last_error();
 }
 
 uint32_t Xibridge_client::xi_get_last_err_no(xibridge_conn_t conn)
@@ -371,14 +382,14 @@ bool Xibridge_client::close_connection_device()
 	bool ret;
 	if (_send_and_receive(req))
 	{
-		bvector green, grey;
-        uint32_t pckt; DevId devid;
+		bvector res_data, data;
+        uint32_t pckt; 
 		MBuf buf(_recv_message.data(), (int)_recv_message.size());
-		if (proto->get_data_from_bindy_callback(buf, green, grey, pckt, devid) == false)
+		if (proto->get_data_from_bindy_callback(buf, res_data, data, pckt) == false)
 		{
 			ret = false;
 		}
-		ret = proto->translate_response(pckt, green);
+		ret = proto->translate_response(pckt, res_data);
 	}
 	else
 	{

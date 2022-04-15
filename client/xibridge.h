@@ -13,29 +13,29 @@
    #define XI_EXPORT
 #endif
 
-/*
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #ifdef _MSC_VER
 #define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
 #else
 #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 #endif
-*/
-
-#define XI_URI_HOST_LEN 64
 
 /**
     * \russian
     * Структура для работы с расширеным идентификаторм устройства (используется в протоколе обмена версии 3 и выше)
 	* \endrussian
 */
-//PACK(
+PACK(
 struct _xibridge_device_t
 {
 	uint32_t reserve;
 	uint16_t VID;
 	uint16_t PID;
 	uint32_t id;
-};//);
+});
 typedef _xibridge_device_t xibridge_device_t;
 
 /**
@@ -43,13 +43,13 @@ typedef _xibridge_device_t xibridge_device_t;
     * Структура для хранения версии библиотеки, протокола
 	* \endrussian
 */
-//PACK(
+PACK(
 struct _xibridge_version_t
 {
     uint8_t major;
     uint8_t minor;
     uint8_t bagfix;
-};//);
+});
 typedef _xibridge_version_t xibridge_version_t;
 
 /**
@@ -57,21 +57,35 @@ typedef _xibridge_version_t xibridge_version_t;
 * Структура для хранения данных подключения (id подключения +  версия протокола)
 * \endrussian
 */
-//PACK(
+PACK(
 struct _xibridge_conn_t
 {
     uint32_t conn_id;  // уникальный идентифакатор сетевого подключения
     xibridge_version_t proto_ver; // версия протокола
-};//);
+});
 typedef _xibridge_conn_t xibridge_conn_t;
 
 
 /**
-    * \russian
-    * Определение идентификатора несуществующего подключения
-	* \endrussian
+* \russian
+* Константы длин чаcтей uri
+* \endrussian
 */
-#define conn_id_invalid 0
+#define XI_URI_HOST_LEN 64
+#define XI_URI_SCHEMA_LEN 16
+
+/**
+*\russain
+* Структура для хранения частей uri устройства
+*\endrussain
+*/
+PACK(
+struct _xibridge_parsed_uri{
+    char uri_schema[XI_URI_SCHEMA_LEN];
+    char uri_server_host[XI_URI_HOST_LEN];
+    xibridge_device_t uri_device_id;
+});
+typedef _xibridge_parsed_uri xibridge_parsed_uri;
 
 /** 
     * \russian
@@ -79,10 +93,6 @@ typedef _xibridge_conn_t xibridge_conn_t;
     * \endrussian
 */
 #define TIMEOUT 3000
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /** 
     * \russian
@@ -155,15 +165,13 @@ uint32_t  XI_EXPORT xibridge_close_device_connection(xibridge_conn_t conn);
    * @param[in] req_len длина данных запроса
    * @param[out] resp буфер-приемник данных
    * @param[in] resp_len точная длина ожидаемых данных
-   * @param[out] res_err указатель переменной для записи результата операции или ошибки в случае неудачи 
-   * @return 0 - если операция завершилась неудачно
+   * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-int  XI_EXPORT xibridge_device_request_response(xibridge_conn_t conn,
-	                                         const unsigned char *req, 
-											 int req_len, unsigned char *resp, 
-                                             int resp_len, unsigned int *res_err
-											);
+uint32_t  XI_EXPORT xibridge_device_request_response(xibridge_conn_t conn,
+    const unsigned char *req,
+    int req_len, unsigned char *resp,
+    int resp_len);
 
 /**
    * \russian
@@ -184,14 +192,12 @@ const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
    * @param[out] result указатель на указатель, по которому будут распределены и размещены строки(через 0) с uri-адресами устройств
    * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
    * @param[in] timeout таймаут ответа сервера
-   * @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
    * @return код ошибки в случае или 0
    * \endrussian
 */
 uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
 	char **result,
-	unsigned int *pcount, unsigned int timeout
-);
+	unsigned int *pcount, unsigned int timeout);
 
 /**
    * \russian

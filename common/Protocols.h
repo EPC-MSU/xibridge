@@ -23,10 +23,8 @@ struct DevId {
 		_dev_id.PID = _dev_id.VID = 0;
 		_dev_id.reserve = 0;
 	}
-	
 
 	xibridge_device_t _dev_id;
-		
 };
 
   
@@ -60,22 +58,19 @@ typedef struct _sm
 class AProtocol
 {
 public:
-
 	virtual bool is_device_id_extended() = 0;
-
 /**
 	 * Prepares protocol formatted data FROM Bindy callback into some separated arrays and fields
 	 * Gets protocol results data (green in Wiki) and device  data (light blue in Wiki), packet type and serial of the device (at server)
-	 * @param [out] green_data - data could be interpritited by any of the protocols
-	 * @param [out] grey_data - data direct from a device
+	 * @param [out] res_data - data could be interpritited by any of the protocols
+	 * @param [out] data - data direct from a device
 	 * @param [out] pckt_type - packet type in terms of the protocol
 	 * @param [out] devid - device identifier of the device at server side
 */
 	bool get_data_from_bindy_callback(MBuf &cmd,
-		bvector &green_data,
-		bvector &grey_data,
-		uint32_t &pckt_type,
-		DevId & devid);
+		bvector &res_data,
+		bvector &data,
+		uint32_t &pckt_type);
 
 	static uint32_t get_version_of_cmd(const bvector& cmd) { return (uint32_t)(cmd.size() > 3 ? cmd[3] : 0); }
 
@@ -86,7 +81,7 @@ public:
 	virtual bvector create_enum_request(uint32_t tmout) { return bvector(); }
 	virtual bvector create_cmd_request(DevId devid, uint32_t tmout, const bvector *data = nullptr, uint32_t resp_length = 0) = 0;
 	
-	virtual bool translate_response(uint32_t pckt, const bvector& green) = 0;
+	virtual bool translate_response(uint32_t pckt, const bvector& res_data) = 0;
 
 	virtual uint32_t version() = 0;
 	virtual const cmd_schema *get_cmd_shema() = 0;  // pure virtual
@@ -94,8 +89,8 @@ public:
 protected:
 	AProtocol(bool is_server): _is_server(is_server), _is_inv_pckt(false), _is_inv_pcktfmt(false) {};
 	virtual bool get_spec_data(MBuf&  mbuf,
-		bvector &green_data,
-		bvector &grey_data,
+		bvector &res_data,
+		bvector &data,
 		uint32_t pckt) = 0;
 
 	//virtual bvector create_cmd_req_proxy(DevId devid, uint32_t tmout, const bvector & data) = 0;
@@ -129,7 +124,7 @@ public:
 
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector *data = nullptr)
     {
-        return create_client_request(pckt, devid._dev_id, tmout, data);
+        return create_client_request(pckt, devid._dev_id.id, tmout, data);
     }
 	
 	virtual bvector create_open_request(DevId devid, uint32_t /*tmout*/)
@@ -149,12 +144,12 @@ public:
 
     virtual bvector create_cmd_request(DevId devid, uint32_t tmout, const bvector *data = nullptr, uint32_t resp_length = 0);
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
-	virtual bool translate_response(uint32_t pckt, const bvector& green) ;
+	virtual bool translate_response(uint32_t pckt, const bvector& res_data) ;
 protected:
 	virtual uint32_t version() { return 1; }
 	virtual bool get_spec_data(MBuf&  mbuf,
-		bvector &green_data,
-		bvector &grey_data,
+		bvector &res_data,
+		bvector &data,
 		uint32_t pckt);
 
 private:
@@ -187,7 +182,7 @@ public:
 	};
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector *data = nullptr)
     {
-        return create_client_request(pckt, devid._dev_id, tmout, data);
+        return create_client_request(pckt, devid._dev_id.id, tmout, data);
     }
 	
     virtual bvector create_open_request(DevId devid, uint32_t tmout)
@@ -201,15 +196,15 @@ public:
 	
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
-	virtual bool translate_response(uint32_t pckt, const bvector& green);
+	virtual bool translate_response(uint32_t pckt, const bvector& res_data);
 
     virtual bvector create_cmd_request(DevId devid, uint32_t tmout, const bvector *data = nullptr, uint32_t resp_length = 0);
 protected:
 	
 	virtual uint32_t version() { return 2; }
 	virtual bool get_spec_data(MBuf&  mbuf,
-		bvector &green_data,
-		bvector &grey_data,
+		bvector &res_data,
+		bvector &data,
 		uint32_t pckt);
 	
 private:
@@ -260,7 +255,7 @@ public:
 
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }
 
-	virtual bool translate_response(uint32_t pckt, const bvector& green);
+	virtual bool translate_response(uint32_t pckt, const bvector& res_data);
 
     virtual bvector create_cmd_request(DevId devid, uint32_t tmout, const bvector *data = nullptr, uint32_t resp_length = 0);
     
@@ -269,8 +264,8 @@ protected:
 	
 	virtual uint32_t version() { return 3; }
 	virtual bool get_spec_data(MBuf&  mbuf,
-		bvector &green_data,
-		bvector &grey_data,
+		bvector &res_data,
+		bvector &data,
 		uint32_t pckt);
 		
 private:

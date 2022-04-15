@@ -109,23 +109,20 @@ bool cmd_schema::is_match(const uint8_t *data, int len, uint32_t proto, uint32_t
 }
 
 bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
-	bvector &green_data,
-	bvector& grey_data,
-	uint32_t &pckt_type,
-	DevId & devid)
+	bvector &res_data,
+	bvector& data,
+   	uint32_t &pckt_type)
 {
-    grey_data.clear(); green_data.clear(); _res_err = 0;
+    res_data.clear(); data.clear(); _res_err = 0;
 	Hex32 skip_prt, skip_tout, sr, pckt, serial; HexIDev3 hdev;
 	cmd >> skip_prt >> pckt >> skip_tout;
-	if (is_device_id_extended() == false)
-	{
-		cmd >> serial;
-		devid._dev_id.id = (uint32_t)serial;
-	}
-	else
+    if (is_device_id_extended() == false)
+    {
+        cmd >> serial;
+    }
+    else
 	{
 		cmd >> hdev;
-		devid._dev_id = hdev.toExtDevId();
 	}
 	
 	if (cmd.wasBroken())
@@ -134,11 +131,10 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 		return false;
 	}
 
-	if (!get_spec_data(cmd, green_data, grey_data, pckt))
+	if (!get_spec_data(cmd, res_data, data, pckt))
 		return false;
-	serial = sr;
-	pckt_type = pckt;
 
+	pckt_type = pckt;
 	return true;
 }
 
@@ -170,8 +166,8 @@ bvector Protocol3::create_cmd_request(DevId devid, uint32_t tmout, const bvector
 }
 
 bool Protocol1::get_spec_data(MBuf&  mbuf,
-	bvector &green_data,
-	bvector &grey_data,
+	bvector &res_data,
+	bvector &data,
 	uint32_t pckt)
 {
 	// 16 bytes has already read from mbuf
@@ -190,7 +186,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
-						 grey_data.assign(mbuf.cur_data(), mbuf.cur_data()+len);
+						 data.assign(mbuf.cur_data(), mbuf.cur_data()+len);
 						
 						 return true;
 		}
@@ -223,7 +219,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 _is_inv_pcktfmt = true;
 							 return false;
 						 }
-						 grey_data = mbuf.to_vector(true);
+						 data = mbuf.to_vector(true);
 						 return true;
 		}
 		case pkt1_open_resp:
@@ -245,23 +241,10 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
                          mbuf.mseek(-4);
 						 mbuf >> count;
 						 _res_err = (uint32_t)count;
-						 grey_data = mbuf.to_vector(true);  //all data as is is grey
-						 /**
-						 MBuf gr_buf(sizeof(uint32_t) * count);
-						 {
-							 for (int i = 0; i < (int)count; i++)
-							 {
-								 mbuf >> devnum;
-								 gr_buf << Hex32(devnum, true); // another order of bytes
-								 mbuf.mseek(180 - 4);
-							 }
-
-							 _is_inv_pcktfmt = true;
-							 return false;
-						 }
-						 */
-						 grey_data = mbuf.to_vector(true);
-						 //green_data = gr_buf.to_vector();
+						 data = mbuf.to_vector(true);  //all data as is is grey
+					
+						 data = mbuf.to_vector(true);
+						 //res_data = gr_buf.to_vector();
 					     return !mbuf.wasBroken();
 					    
 		}
@@ -274,8 +257,8 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 }
 
 bool Protocol2::get_spec_data(MBuf&  mbuf,
-	bvector &green_data,
-	bvector &grey_data,
+	bvector &res_data,
+	bvector &data,
 	uint32_t pckt)
 {
 	// 16 bytes or 16 bytes + 8 (extended identifier) has already read from mbuf
@@ -297,7 +280,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 							 return false;
 						 }
                          _res_err = r;
-						 grey_data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+						 data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
 
 						 return true;
 		}
@@ -329,7 +312,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 							 return false;
 						 }
 						 _res_err = r;
-						 grey_data = mbuf.to_vector(true);
+						 data = mbuf.to_vector(true);
 						 return true;
 		}
 		case pkt2_open_resp:
@@ -355,8 +338,8 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 }
 
 bool Protocol3::get_spec_data(MBuf&  mbuf,
-	bvector &green_data,
-	bvector &grey_data,
+	bvector &res_data,
+	bvector &data,
 	uint32_t pckt)
 {
 	// 16 bytes has already read from mbuf
@@ -375,7 +358,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								 _is_inv_pcktfmt = true;
 								 return false;
 							 }
-							 grey_data = mbuf.to_vector(true);
+							 data = mbuf.to_vector(true);
 
 							 return true;
 		}
@@ -403,7 +386,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								  _is_inv_pcktfmt = true;
 								  return false;
 							  }
-							  grey_data = mbuf.to_vector(true);
+							  data = mbuf.to_vector(true);
 		}
 		case pkt3_open_resp:
 		case pkt3_close_resp:
@@ -428,10 +411,10 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 
 							   mbuf.mseek(8);
 							   mbuf >> size;
-							   green_data.assign(mbuf.cur_data(), mbuf.cur_data() + size * sizeof(uint32_t));
+							   res_data.assign(mbuf.cur_data(), mbuf.cur_data() + size * sizeof(uint32_t));
 							   mbuf >> size;
 							   if (mbuf.restOfSize(-1) != (int)size) return false;
-							   grey_data = mbuf.to_vector(true);
+							   data = mbuf.to_vector(true);
 							   return true;
 
 		}
@@ -487,24 +470,24 @@ bvector Protocol3::create_client_request(uint32_t pckt, DevId devid, uint32_t tm
 	return mbuf.to_vector();
 }
 
-bool Protocol1::translate_response(uint32_t pckt, const bvector& green)
+bool Protocol1::translate_response(uint32_t pckt, const bvector& res_data)
 {
 	if (pckt == pkt1_error_ntf)
 	{
 		_is_device_broken = true;
 		return false;
 	}
-	if (green.size() > 0) return green[0] != 0;
+	if (res_data.size() > 0) return res_data[0] != 0;
 	return  true;
 }
 
-bool Protocol2::translate_response(uint32_t pckt, const bvector& green)
+bool Protocol2::translate_response(uint32_t pckt, const bvector& res_data)
 {
-    if (green.size() > 3 && pckt == pkt2_open_resp) return green[3] != 0;
+    if (res_data.size() > 3 && pckt == pkt2_open_resp) return res_data[3] != 0;
 	return  true;
 }
 
-bool Protocol3::translate_response(uint32_t pckt, const bvector& green)
+bool Protocol3::translate_response(uint32_t pckt, const bvector& res_data)
 {
 	if (pckt == pkt3_error_resp)
 	{
@@ -512,7 +495,7 @@ bool Protocol3::translate_response(uint32_t pckt, const bvector& green)
 		// to do error codes !!!
 		return false;
 	}
-	if (green.size() > 0 && pckt == pkt3_open_resp) return true;
+	if (res_data.size() > 0 && pckt == pkt3_open_resp) return true;
 	return  false;
 }
 

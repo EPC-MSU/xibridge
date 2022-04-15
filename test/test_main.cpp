@@ -16,7 +16,7 @@ extern bool test_connect_2();
 extern void test_connect_2_threads();
 extern void test_connect_1_threads();
 
-#include "../common/xibridge_uri_parse.h"
+extern uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_uri);
 
 bool test_xibridge_uri_parse()
 {
@@ -24,7 +24,7 @@ bool test_xibridge_uri_parse()
 	ZF_LOGD("Starting test_xibridge_uri_parse...");
 	bool ret = true;
 	// test invalid uri
-	if (xibridge_parse_uri("xi-net://abcd/1", &parsed) != 0)
+	if (xibridge_parse_uri_dev12("xi-net://abcd/1", &parsed) != 0)
 	{
 		ZF_LOGE("URI base parse (xi-net://abcd/1) failed...");
 		return false;
@@ -43,7 +43,7 @@ bool test_xibridge_uri_parse()
 		ret =false;
 	}
 
-	if (xibridge_parse_uri("xi-net://0.0.0.0/000000df00DF00dFAAAAAAAA", &parsed) != 0)
+	if (xibridge_parse_uri_dev12("xi-net://0.0.0.0/000000df00DF00dFAAAAAAAA", &parsed) != 0)
 	{
 		ZF_LOGE("URI base parse (xi-net://0.0.0.0/000000df00DF00dFAAAAAAAA) failed...");
 		return false;

@@ -8,18 +8,24 @@
 // to run with urpc-xinet-server !!! the local urpc-connect
 bool test_connect_2()
 {
-	if (!xibridge_init("keyfile.sqlite"))
+    uint32_t err = xibridge_init("keyfile.sqlite");
+	if (err != 0)
 	{
-		ZF_LOGE("Cannot initalize xibridge system!");
+        ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
 		return FALSE;
 	}
 	uint32_t res_err, last_err;
 	//uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
 	xibridge_conn_t conn;
-	uint32_t err = xibridge_open_device_connection("127.0.0.1", TIMEOUT, &conn);
+    err = xibridge_open_device_connection("xi-net://127.0.0.1/9", TIMEOUT, &conn);
+    if (err)
+    {
+        ZF_LOGE("Cannot open xi-net://127.0.0.1/9: %s", xibridge_get_err_expl(err));
+        return FALSE;
+    }
 	unsigned char resp[72];
    
-	int ginf_ok = xibridge_device_request_response(conn, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
+	uint32_t ginf_err = xibridge_device_request_response(conn, (const unsigned char *)"ginf", 4, resp, 72);
 
 	// разобрать структуру
 	// to do - sync 
@@ -56,7 +62,7 @@ bool test_connect_2()
 	mresp.memread((uint8_t *)man, 16, 16);
 	ZF_LOGD("Controller: %s\n", man);
 	
-	xibridge_close_device_connection(connection);
+	xibridge_close_device_connection(conn);
 
 	return true;
 }
@@ -64,27 +70,28 @@ bool test_connect_2()
 
 static void thread_body(int thread_num)
 {
-	if (!xibridge_init("keyfile.sqlite"))
-	{
-		ZF_LOGE("Thread %u: cannot initalize xibridge system!", thread_num);
-		return;
-	}
+    uint32_t err = xibridge_init("keyfile.sqlite");
+
+    if (err != 0)
+    {
+        ZF_LOGE("Thread %u: cannot initalize xibridge system!", thread_num);
+        return;
+    }
 	
-	uint32_t res_err, last_err;
+	xibridge_conn_t conn;
 	//uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
-	uint32_t connection = xibridge_open_device_connection("127.0.0.1", 9, 2, TIMEOUT, &last_err);
-	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, connection);
+    err = xibridge_open_device_connection("xi-net://127.0.0.1/9", TIMEOUT, &conn);
+	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
 	unsigned char resp[72];
 	ZF_LOGD("Thread %u: sending ginf... \n", thread_num);
-	int ginf_ok = xibridge_device_request_response(connection, (const unsigned char *)"ginf", 4, resp, 72, &res_err);
+	uint32_t ginf_err = xibridge_device_request_response(conn, (const unsigned char *)"ginf", 4, resp, 72);
 	
 	ZF_LOGD("Thread %u: ginf return %s\n", thread_num, 
-		     ginf_ok != 0 ? "true" : "false");
-
-	ZF_LOGD("Thread %u: closing connection %u... \n", thread_num, connection);
-	xibridge_close_device_connection(connection);
-	ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, connection);
+		     ginf_err == 0 ? "true" : "false");
+	ZF_LOGD("Thread %u: closing connection %u... \n", thread_num, conn.conn_id);
+	xibridge_close_device_connection(conn);
+	ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
 }
 
 void test_connect_2_threads()
