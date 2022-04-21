@@ -18,16 +18,27 @@ bool test_connect_1()
 
 	uint32_t res_err, last_err;
     xibridge_conn_t conn;
-	err = xibridge_open_device_connection("xi-net://127.0.0.1/9", TIMEOUT, &conn);
+	err = xibridge_open_device_connection("xi-net://192.168.0.87/1f50", TIMEOUT, &conn);
+	if (err)
+	{
+		ZF_LOGE("Cannot open device: %s, error: %s", "xi-net://192.168.0.14/1f50", xibridge_get_err_expl(err));
+		xibridge_close_device_connection(conn);
+		return FALSE;
+	}
     
     move_settings_calb_t resp_s;
-	int _ok = xibridge_device_request_response(conn, (const unsigned char *)"XIR", 3, (unsigned char *)&resp_s, sizeof(resp_s));
+	uint32_t xir_err = xibridge_device_request_response(conn, (const unsigned char *)"XIR", 3, (unsigned char *)&resp_s, sizeof(resp_s));
+	if (xir_err)
+	{
+		ZF_LOGE("Cannot execute xir: %s", xibridge_get_err_expl(err));
+		return FALSE;
+	}
 
 	ZF_LOGD("Speed: %f\n", resp_s.Speed);
 	ZF_LOGD("Accelerartion: %f\n", resp_s.Accel);
 		
 	xibridge_close_device_connection(conn);
-	return true;
+	return TRUE;
 }
 
 static void thread_body(int thread_num)

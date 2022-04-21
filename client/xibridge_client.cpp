@@ -246,7 +246,8 @@ bool Xibridge_client::open_connection()
 bool Xibridge_client::open_device(uint32_t & answer_version)
 {
 	clr_errors();
-    answer_version = _server_protocol_version;
+	_server_protocol_version = 1;
+	answer_version = _server_protocol_version;
 	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
 	if (proto == nullptr) 
 	{

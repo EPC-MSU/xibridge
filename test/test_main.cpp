@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	if (!test_xibridge_uri_parse())
 		ret = false;
 	
-	if (!test_connect_2())
+	if (!test_connect_1())
 		ret = false;
 	
 	// if it is something wrong at protocol matching check stage or 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	// there is nothing more to do - exit with error
 	if (!ret) return 1;
 
-	test_connect_2_threads();
+	//test_connect_2_threads();
 
 	// test_connect_1();
 	// test_connect_1_threads();

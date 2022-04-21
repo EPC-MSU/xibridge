@@ -26,7 +26,11 @@ bool test_connect_2()
 	unsigned char resp[72];
    
 	uint32_t ginf_err = xibridge_device_request_response(conn, (const unsigned char *)"ginf", 4, resp, 72);
-
+	if (ginf_err)
+	{
+		ZF_LOGE("Cannot execute ginf: %s", xibridge_get_err_expl(err));
+		return FALSE;
+	}
 	// разобрать структуру
 	// to do - sync 
 	// urmc_get_identity_information_t  info;
