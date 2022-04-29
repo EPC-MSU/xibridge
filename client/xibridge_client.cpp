@@ -13,20 +13,21 @@ typedef struct
 
 static err_def_t _err_strings[] =
 { 
-    { ERR_NO_PROTOCOL, "Protocol is undefined: supported versions are 1, 2, 3." },
+    { ERR_NO_PROTOCOL, "Protocol is undefined: supported versions (major) are 1, 2, 3." },
     { ERR_NO_CONNECTION, "Connection is not created or broken." },
     { ERR_SEND_TIMEOUT, "Send data timeout." },
     { ERR_NO_BINDY, "Network component (bindy) is not initialized properly." },
     { ERR_SEND_DATA, "Send data error."},
-    { ERR_RECV_TIMEOUT, "Receive data timeout." },
-    { ERR_KEYFILE_NOT_REPLACED, "Xibridge initialized OK, but key file cannot be replaced." },
-	{ 0, "" }
+    { ERR_NULLPTR_PARAM, "Null pointer parameter." },
+    { 0, "" }
  }; 
 
 static bool is_protocol_verified_version_t(const xibridge_version_t& ver)
 {
     return ver.major > 0 && ver.major <= DEFAULT_PROTO_VERSION && ver.minor == 0 && ver.bagfix == 0;
 }
+
+uint32_t Xibridge_client::_server_base_protocol_version = 3;
 
 const char *Xibridge_client::xi_get_err_expl(uint32_t err_no)
 {
@@ -48,31 +49,29 @@ Xibridge_client * Xibridge_client::_get_client_as_free(conn_id_t conn_id)
 	return Bindy_helper::_map.at((conn_id_t)conn_id);
 }
 
-uint32_t Xibridge_client::xi_init(const char *key_file_path)
+uint32_t Xibridge_client::xi_init()
 {
     uint32_t ret_err = 0;
-	Bindy_helper::_global_mutex.lock();
-	if (!Bindy_helper::set_keyfile(key_file_path))
-        ret_err = ERR_KEYFILE_NOT_REPLACED;
     bindy::Bindy *_ex = Bindy_helper::instance_bindy();
-	Bindy_helper::_global_mutex.unlock();
-    if (_ex == nullptr)
+	if (_ex == nullptr)
         ret_err = ERR_NO_BINDY;
 	return ret_err;
 }
 
-uint32_t  Xibridge_client::xi_set_connection_protocol_version(xibridge_conn_t conn, xibridge_version_t ver)
+uint32_t  Xibridge_client::xi_set_base_protocol_version(xibridge_version_t ver)
 {
-	Xibridge_client * cl = _get_client_as_free(conn.conn_id);
-    if (cl == nullptr) return ERR_NO_CONNECTION;
-    if (!is_protocol_verified_version_t(ver)) return ERR_NO_PROTOCOL;
-	cl -> _server_protocol_version = ver.major;
+	if (!is_protocol_verified_version_t(ver)) return ERR_NO_PROTOCOL;
+     _server_base_protocol_version = (uint32_t)ver.major;
 }
 
-xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(xibridge_conn_t conn)
+xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(const xibridge_conn_t *pconn)
 {
-	Xibridge_client * cl = _get_client_as_free(conn.conn_id);
-    return {cl == nullptr ? DEFAULT_PROTO_VERSION : (uint8_t)cl->_server_protocol_version, 0, 0};
+    if (pconn == nullptr) 
+    {
+        return xibridge_version_invalid;
+    };
+	Xibridge_client * cl = _get_client_as_free(pconn->conn_id);
+    return {cl == nullptr ? _server_base_protocol_version : (uint8_t)cl->_server_protocol_version, 0, 0};
 }
 
 
@@ -138,7 +137,7 @@ uint32_t Xibridge_client::xi_enumerate_adapter_devices(const char *addr, const c
 #include "../common/xibridge_uri_parse.h"
 
 Xibridge_client::Xibridge_client(const char *xi_net_uri, unsigned int send_timeout, unsigned int recv_timeout) :
-_server_protocol_version(DEFAULT_PROTO_VERSION),
+_server_protocol_version(_server_base_protocol_version),
 _last_error(0),
 _send_tmout((uint32_t)send_timeout),
 _recv_tmout((uint32_t)recv_timeout),
@@ -223,10 +222,13 @@ bool Xibridge_client::is_connected()
 
 bool Xibridge_client::decrement_server_protocol_version()
 {
-    if (_server_protocol_version <= DEFAULT_PROTO_VERSION && _server_protocol_version > 1)
+    if (_server_protocol_version > 1)
     {
        _server_protocol_version--;
-       return true;
+     }
+    else
+    {
+        _server_protocol_version = xibridge_get_max_protocol_version().major;
     }
     return false;
 }
@@ -246,7 +248,6 @@ bool Xibridge_client::open_connection()
 bool Xibridge_client::open_device(uint32_t & answer_version)
 {
 	clr_errors();
-	_server_protocol_version = 1;
 	answer_version = _server_protocol_version;
 	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
 	if (proto == nullptr) 

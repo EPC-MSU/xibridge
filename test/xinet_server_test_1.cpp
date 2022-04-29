@@ -7,7 +7,7 @@
 // to run with ximc-xinet-server
 bool test_connect_1()
 {
-    uint32_t err = xibridge_init("keyfile.sqlite");
+    uint32_t err = xibridge_init();
 
 	if (err)
 	{
@@ -43,7 +43,7 @@ bool test_connect_1()
 
 static void thread_body(int thread_num)
 {
-    uint32_t err = xibridge_init("keyfile.sqlite");
+    uint32_t err = xibridge_init();
 
 	if (err != 0)
 	{

@@ -8,7 +8,7 @@
 // to run with urpc-xinet-server !!! the local urpc-connect
 bool test_connect_2()
 {
-    uint32_t err = xibridge_init("keyfile.sqlite");
+    uint32_t err = xibridge_init();
 	if (err != 0)
 	{
         ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
@@ -74,7 +74,7 @@ bool test_connect_2()
 
 static void thread_body(int thread_num)
 {
-    uint32_t err = xibridge_init("keyfile.sqlite");
+    uint32_t err = xibridge_init();
 
     if (err != 0)
     {

@@ -18,70 +18,63 @@ xibridge_version_t xibridge_get_max_protocol_version()
 	return Xibridge_client::xi_get_max_protocol_version();
 }
 
-uint32_t xibridge_init(const char *key_file_path)
+uint32_t xibridge_init()
 {
-	return Xibridge_client::xi_init(key_file_path);
+	return Xibridge_client::xi_init();
 }
 
-uint32_t xibridge_set_connection_protocol_verion(xibridge_conn_t conn, xibridge_version_t ver)
+uint32_t xibridge_set_base_protocol_verion(xibridge_version_t ver)
 {
-	return Xibridge_client::xi_set_connection_protocol_version(conn, ver);
+	return Xibridge_client::xi_set_base_protocol_version(ver);
 }
 
-xibridge_version_t xibridge_get_connection_protocol_version(xibridge_conn_t conn)
+xibridge_version_t xibridge_get_connection_protocol_version(const xibridge_conn_t *pconn)
 {
-	return Xibridge_client::xi_get_connection_protocol_version(conn);
+	return Xibridge_client::xi_get_connection_protocol_version(pconn);
 }
 
 uint32_t xibridge_open_device_connection(const char *xi_net_uri, unsigned int recv_timeout, xibridge_conn_t *pconn)
 {
     uint32_t res_err, answer_version;
-	
+    if (pconn == nullptr) return ERR_NO_OUT_PTR;
+    *pconn = { 0, {0,0,0} };
 	Xibridge_client * cl = new Xibridge_client(xi_net_uri, TIMEOUT, recv_timeout);
     if (!cl->open_connection())
     {
-        res_err = cl->get_last_error();
+        res_err = cl -> get_last_error();
         delete cl;
         return res_err;
     }
-
-       // making opening logic more complex
-    bool result = cl -> open_device(answer_version);
-    if (cl->get_last_error() == ERR_ANOTHER_PROTOCOL)  // another protocol required
-        result = cl -> open_device(answer_version);
-    if (result == true && cl -> get_last_error() == 0)  // opened just fine
+    // making opening logic more complex
+    uint32_t ncount = xibridge_get_max_protocol_version().major;
+    while (ncount--)
     {
-        if (pconn != nullptr)
+        cl->clr_errors();
+        bool result = cl->open_device(answer_version);
+        res_err = cl->get_last_error();
+        if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
         {
-            *pconn = cl -> to_xibridge_conn_t();
-        }
-        return 0;
-    }
-    else
-    {
-        if (cl->get_last_error() == ERR_RECV_TIMEOUT)  // may another protocol
+            if (ncount) ncount--;
+            cl->clr_errors();
+            if (!cl->open_device(answer_version))
+                break;
+            // opened just fine
+           *pconn = cl->to_xibridge_conn_t();
+            return 0;
+         }
+        else
         {
-            if (cl -> decrement_server_protocol_version())
+            if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
             {
-                result = cl->open_device(answer_version);
-
+                cl->decrement_server_protocol_version();
             }
-
+            else
+                break;
         }
     }
-
-	if (!result)
-	{
-       	cl->disconnect();
-		res_err = cl -> get_last_error();
-		delete cl;
-		return res_err;
-	}
-    if (pconn != nullptr)
-    {
-        *pconn = cl -> to_xibridge_conn_t();
-    }
-    return 0;
+    cl->disconnect();
+    delete cl;
+    return res_err;
 }
 
 uint32_t xibridge_close_device_connection(xibridge_conn_t conn)

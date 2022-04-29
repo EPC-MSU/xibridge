@@ -18,13 +18,6 @@ public:
 	~Bindy_helper(){ shutdown_bindy(); };
 	static bindy::Bindy * instance_bindy();
 	conn_id_t connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr = nullptr);
-	/*
-	* Sets keyfile internal property only if
-	* it was not already set
-	* returns true if i's been set or the same as set
-	*         false if keyfile does not match that's alreday set           
-	*/
-	static bool set_keyfile(const char *keyfile);
 	static void shutdown_bindy();
 	static Bindy_helper *instance() { return &_bhelper; }
 	bool is_connected(conn_id_t conn_id) const;
@@ -37,10 +30,9 @@ private:
 	static void on_bindy_disconnect(conn_id_t conn_id);
 
 	static bindy::Bindy *_pbindy;
-	static const char *_keyfile;
 	static std::mutex _map_mutex;
 	static std::map<conn_id_t, Xibridge_client *> _map;
-
+    static const bindy::aes_key_t _xinet_bindy_key;
 	static Bindy_helper _bhelper;
 };
 

@@ -5,57 +5,39 @@
 #include "../Common/utils.h"
 #include "Bindy_helper.h"
 
+//const data
+#define XINET_BINDY_USER "root-user"
+const bindy::aes_key_t Bindy_helper::_xinet_bindy_key = { 32, 87, 139, 134, 41, 227, 202, 19, 235, 29, 48, 119, 189, 61, 211, 135 };
+
 
 // static data members init
 bindy::Bindy *Bindy_helper::_pbindy = nullptr;
-const char *Bindy_helper::_keyfile = nullptr;
 bmap Bindy_helper::_map;
 std::mutex Bindy_helper::_map_mutex;
 std::mutex Bindy_helper::_global_mutex;
 
  
 Bindy_helper Bindy_helper::_bhelper;
-
-/*Bindy_helper::Bindy_helper(const char *keyfile)
-{
-	_keyfile = keyfile;
-}
-*/
-
-bool Bindy_helper::set_keyfile(const char *keyfile)
-{
-	// not possible to change active keyfile once installed at bindy really init
-    // if _pbindy is not init
-	if (keyfile != nullptr && (_pbindy == nullptr || (_keyfile == nullptr || strcmp(_keyfile, keyfile) == 0)))
-	{
-		_keyfile = keyfile;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
   
 bindy::Bindy *Bindy_helper::instance_bindy()
 {
+    std::unique_lock<std::mutex> lock(Bindy_helper::_global_mutex);
 	if (_pbindy != nullptr)
 		return _pbindy; // assumes old bindy is alive
-	if (_keyfile == nullptr)
-		return nullptr; // can't work without key set
 	try {
 	 	bindy::Bindy::initialize_network();
-
-		_pbindy = new bindy::Bindy(_keyfile, false, false); // is_server == false, is_buffered == false
-		_pbindy -> set_handler(&callback_data_bindy);
+        _pbindy = new bindy::Bindy("", false, false); // is_server == false, is_buffered == false
+        // HACK: we assume that the server has such user as master set - add it to in-memory keyfile
+        bindy::user_id_t uid{  };
+        _pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
+        _pbindy -> set_master_local(uid);
+        _pbindy -> set_handler(&callback_data_bindy);
 	}
 	catch (...){
 		_pbindy  = nullptr;
 		return nullptr;
 	}
-
 	return _pbindy;
-
 }
 
 void Bindy_helper::shutdown_bindy()

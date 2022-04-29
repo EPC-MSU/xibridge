@@ -14,12 +14,17 @@
 #define ERR_SEND_TIMEOUT  3
 #define ERR_NO_BINDY    4
 #define ERR_SEND_DATA 5
-#define ERR_KEYFILE_NOT_REPLACED 6
+
 /*
 * Defines protocol and server errors
 */
 #define ERR_RECV_TIMEOUT 7
 #define ERR_ANOTHER_PROTOCOL 8
+
+/*
+* User's fault to pass a pointer to param
+*/
+#define ERR_NULLPTR_PARAM  9
 
 
 /**
@@ -73,22 +78,21 @@ public:
 	
 /**
    * \russian
-   * Функция установки версии протокола для взаимодействия с сервером по данному подключению
-   * @param conn[in] данные подключения
+   * Отладочная функция установки версии протокола для взаимодействия с сервером
    * @param ver[in] версия протокола для взаимодействия с сервером (1, 2, 3) 
    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
    * \endrussian
 */
-    static uint32_t xi_set_connection_protocol_version(xibridge_conn_t conn, xibridge_version_t ver);
+    static uint32_t xi_set_base_protocol_version(xibridge_version_t ver);
 
 /**
    * \russian
    * Функция запроса версии протокола для взаимодействия с сервером по данному подключению
-   * @param conn_id[in] идентификатор подключения
+   * @param pconn указатель на идентификатор подключения
    * @return версия протокола для взаимодействия с сервером (1,2 или 3), если подключение не существует - возвращается версия протокола 3
    * \endrussian
 */
-    static xibridge_version_t xi_get_connection_protocol_version(xibridge_conn_t conn);
+    static xibridge_version_t xi_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /**
    * \russian
@@ -151,11 +155,10 @@ public:
 /**
 	* \russian
 	* Функция инициализации xibridge-системы, должна вызываться перед использованием любых других функций xibridge
-	* @param[in] key_file_path имя существующего файла, содержащего ключевую информацию шифрования
-	* @return код ошибки, если инициализация завершилась неудачно или key_file_path отличается от уже установленного, 0 если удачно
+	* @return код ошибки, если инициализация завершилась неудачно, 0 если удачно
 	* \endrussian
 */
-	static uint32_t xi_init(const char *key_file_path);
+	static uint32_t xi_init();
 	
 /**
    * \russian
@@ -236,18 +239,19 @@ private:
 		* @return возвращает номер максимальной версии протокола(1, 2 или 3) в случае успешного операции, 0 - если определить версия не удалось
 		* \endrussian
 */
-		uint32_t  _detect_protocol_version();
+	uint32_t  _detect_protocol_version();
 /**
 	    * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
 */
 	static Xibridge_client * _get_client_as_free(conn_id_t conn_id);
+    static uint32_t _server_base_protocol_version;
 
 	bool _send_and_receive(bvector &req);
 	void _set_last_error(uint32_t err) { _last_error = err; }
 /**
 	* Ключевые атрибуты клиента
 */
-    uint32_t _server_protocol_version; // default server_protocol_version number to put to the message
+    uint32_t _server_protocol_version; // server_protocol_version number to put to the message
     conn_id_t _conn_id; //bindy id of this connection (bindy id + server protocol version)
     xibridge_device_t _dev_id;        // common device id 
 	bool _is_proto_detected; 
