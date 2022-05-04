@@ -18,7 +18,7 @@ bool test_connect_1()
 
 	uint32_t res_err, last_err;
     xibridge_conn_t conn;
-	err = xibridge_open_device_connection("xi-net://192.168.0.87/1f50", TIMEOUT, &conn);
+	err = xibridge_open_device_connection("xi-net://192.168.0.87/1f50", &conn);
 	if (err)
 	{
 		ZF_LOGE("Cannot open device: %s, error: %s", "xi-net://192.168.0.14/1f50", xibridge_get_err_expl(err));
@@ -53,7 +53,7 @@ static void thread_body(int thread_num)
 	//uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
     xibridge_conn_t conn;
-    err = xibridge_open_device_connection("xi - net://127.0.0.1/9", TIMEOUT, &conn);
+    err = xibridge_open_device_connection("xi - net://127.0.0.1/9", &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
 	unsigned char resp[72];
 	ZF_LOGD("Thread %u: sending xir... \n", thread_num);

@@ -102,25 +102,7 @@ public:
    * \endrussian
 */
     static uint32_t xi_close_connection_device(xibridge_conn_t conn);
-
-	/**
-	* \russian
-	* Функция определения устройств, доступных для работы на сервере (ximc-)
-	* Функция распределяет и заполняет последовательность строк по количеству определенных устройств
-	* @param[in] addr ip-адрес сервера
-	* @param[in] addr ip-адрес адаптера(?)
-	* @param[out] result указатель на указатель, по которому будут распределены строки(через 0) с uri-устройств
-	* @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
-	* @param[in] timeout таймаут ответа сервера
-	* @param[out] last_errno указатель на переменную, куда будет помещен код ошибки в случае неудачной операции
-	* @return код ошибки в случае или 0
-	* \endrussian
-	*/
-	static uint32_t  xi_enumerate_adapter_devices(const char *addr, const char *adapter,
-		char **result,
-		unsigned int *pcount, unsigned int timeout
-		);
-
+    	
 /**
    * \russian
    * Функция чтения данных ("как есть", без парсинга по протоколу) из устройства с помощью данного подключения
@@ -150,7 +132,7 @@ public:
    * @param[in] recv_timeout таймаут ответа сервера
    * \endrussian
 */
-    Xibridge_client(const char *xi_net_uri, unsigned int send_timeout, unsigned int recv_timeout);
+    Xibridge_client(const char *xi_net_uri);
 
 /**
 	* \russian
@@ -203,7 +185,14 @@ public:
 */
 	static unsigned int xi_get_last_err_no(xibridge_conn_t conn);
 	
-	bool open_device(uint32_t& panswer_proto_version);
+	bool open_device(uint32_t &answer_proto_version);
+
+    bool exec_enumerate
+                       (
+                           char **result,
+                           unsigned int *pcount,
+                           uint32_t &answer_proto_version
+                       );
 
     bool open_connection();
 

@@ -33,12 +33,12 @@ xibridge_version_t xibridge_get_connection_protocol_version(const xibridge_conn_
 	return Xibridge_client::xi_get_connection_protocol_version(pconn);
 }
 
-uint32_t xibridge_open_device_connection(const char *xi_net_uri, unsigned int recv_timeout, xibridge_conn_t *pconn)
+uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_t *pconn)
 {
     uint32_t res_err, answer_version;
-    if (pconn == nullptr) return ERR_NO_OUT_PTR;
+    if (pconn == nullptr) return ERR_NULLPTR_PARAM;
     *pconn = { 0, {0,0,0} };
-	Xibridge_client * cl = new Xibridge_client(xi_net_uri, TIMEOUT, recv_timeout);
+	Xibridge_client * cl = new Xibridge_client(xi_net_uri);
     if (!cl->open_connection())
     {
         res_err = cl -> get_last_error();
@@ -108,12 +108,52 @@ uint32_t xibridge_get_last_err_no(xibridge_conn_t conn)
 	return  Xibridge_client::xi_get_last_err_no(conn);
 }
 
-uint32_t xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
-	                                    char **result,
-	                                    uint32_t *pcount, uint32_t timeout)
+// to do - adapter using 
+uint32_t xibridge_enumerate_adapter_devices(const char *addr, const char */*adapter*/,
+	                                    char **ppresult,
+	                                    uint32_t *pcount)
 {
 
-    return Xibridge_client::xi_enumerate_adapter_devices(addr, adapter,
-                                                result,
-                                                pcount, timeout);
+    uint32_t res_err, answer_version;
+    if (ppresult == nullptr || pcount) return ERR_NULLPTR_PARAM;
+    pcount = 0;
+    *ppresult = nullptr;
+    Xibridge_client * cl = new Xibridge_client(addr);
+    if (!cl->open_connection())
+    {
+        res_err = cl->get_last_error();
+        delete cl;
+        return res_err;
+    }
+    // making opening logic more complex
+    uint32_t ncount = xibridge_get_max_protocol_version().major;
+    while (ncount--)
+    {
+        cl->clr_errors();
+        bool result = cl->exec_enumerate(ppresult, pcount, answer_version);
+        res_err = cl->get_last_error();
+        if (res_err == ERR_ANOTHER_PROTOCOL || res_err == ERR_NO_PROTOCOL)  // another protocol required
+        {
+            if (ncount) ncount--;
+            cl->clr_errors();
+            if (!cl->exec_enumerate(ppresult, pcount, answer_version))
+                break;
+            // emumerated just fine
+            cl->close_connection_device();
+            delete cl;
+            return 0;
+        }
+        else
+        {
+            if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
+            {
+                cl->decrement_server_protocol_version();
+            }
+            else
+                break;
+        }
+    }
+    cl->disconnect();
+    delete cl;
+    return res_err;
 }

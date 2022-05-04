@@ -153,7 +153,7 @@ xibridge_version_t XI_EXPORT xibridge_get_connection_protocol_version(const xibr
    * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
    * \endrussian
 */
-uint32_t XI_EXPORT xibridge_open_device_connection(const char *xi_net_uri, unsigned int recv_timeout, xibridge_conn_t *pconn);
+uint32_t XI_EXPORT xibridge_open_device_connection(const char *xi_net_uri, xibridge_conn_t *pconn);
 
 /**
    * \russian
@@ -196,24 +196,17 @@ const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
    * Функция распределяет и заполняет последовательность строк по количеству определенных устройств
    * @param[in] addr ip-адрес сервера
    * @param[in] addr ip-адрес адаптера(?)
-   * @param[out] result указатель на указатель, по которому будут распределены и размещены строки(через 0) с uri-адресами устройств
+   * @param[out] ppresult указатель на указатель, по которому будут распределены и размещены строки, разделенные нулями, с uri-адресами устройств
    * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
-   * @param[in] timeout таймаут ответа сервера
    * @return код ошибки в случае или 0
    * \endrussian
 */
-uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(const char *addr, const char *adapter,
-	char **result,
-	unsigned int *pcount, unsigned int timeout);
-
-/**
-   * \russian
-   * Функция возвращает код последней ошибки, связанной с данным подключением
-   * @param[in] conn данные подключения
-   * @return код последней ошибки
-   * \endrussian
-*/
-uint32_t  XI_EXPORT xibridge_get_last_err_no(xibridge_conn_t conn);
+uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(
+                                                          const char *addr, 
+                                                          const char *adapter,
+	                                                      char **ppresult,
+                                                          unsigned int *pcount 
+                                                      );
 
 #if defined(__cplusplus)
 };

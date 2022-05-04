@@ -18,7 +18,7 @@ static err_def_t _err_strings[] =
     { ERR_SEND_TIMEOUT, "Send data timeout." },
     { ERR_NO_BINDY, "Network component (bindy) is not initialized properly." },
     { ERR_SEND_DATA, "Send data error."},
-    { ERR_NULLPTR_PARAM, "Null pointer parameter." },
+    { ERR_NULLPTR_PARAM, "Null pointer output parameter." },
     { 0, "" }
  }; 
 
@@ -75,72 +75,66 @@ xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(const xib
 }
 
 
-uint32_t Xibridge_client::xi_enumerate_adapter_devices(const char *addr, const char *adapter,
-	                                              char **result,
-	                                              uint32_t *pcount, uint32_t timeout
-	                                           )
+bool Xibridge_client::exec_enumerate(
+                                         char **result,
+                                         uint32_t *pcount,
+                                         uint32_t &answer_proto_version
+                                    )
 {
-	/* *
-	* Create temporary client  with Protocol 2  and some serial 2 - to be a static func
-	*/
-	*pcount = 0;
-    *result = nullptr;
-	Xibridge_client * xl = new Xibridge_client(addr, 0, timeout);
-	auto conn = Bindy_helper::instance()->connect(addr, xl);
-	if (conn == conn_id_invalid)
-	{
-		uint32_t err = xl->get_last_error();
-		delete xl;
-		return err;
-	}
-	// to do !!!
-	AProtocol *protocol = create_appropriate_protocol(xl -> _server_protocol_version);  
-	bvector req = protocol -> create_enum_request(xl -> get_resv_tmout());
-	if (req.size() == 0)
-	{
-		xl->close_connection_device(); 
-		delete xl;
-		return ERR_NO_PROTOCOL;
-	}
-
-	xl -> _conn_id = conn;
-	uint32_t ret = 0;
-	uint32_t version = 0;
-	if (xl -> _send_and_receive(req))
-	{
-		bvector res_data, data;
-        xl -> _mutex_recv.lock();
-		MBuf buf(xl -> _recv_message.data(), (int)xl -> _recv_message.size());
-		xl->_mutex_recv.unlock();
+    clr_errors();
+    answer_proto_version = _server_protocol_version;
+    AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
+    if (result == nullptr || pcount == nullptr)
+    {
+        _last_error = ERR_NO_PROTOCOL;
+        return false;
+    }
+    bvector req = proto -> create_enum_request(_recv_tmout);
+    if (req.size() == 0)
+    {
+        _last_error = ERR_NO_PROTOCOL;
+        return false;
+    }
+    if (_send_and_receive(req))
+    {
+        bvector res_data, data;
         uint32_t pckt;
-		if (protocol -> get_data_from_bindy_callback(buf, res_data, data, pckt) == true)
-		{
-			*result = (char *) malloc(data.size());
-			memcpy(*result, data.data(), data.size());
-			*pcount = protocol -> get_result_error();
-		}
-		else
-		{
-			ret = ERR_NO_PROTOCOL;
-		}
-	}
-	else
-	{
-        ret = ERR_RECV_TIMEOUT;
-	}
+        _mutex_recv.lock();
+        MBuf buf(_recv_message.data(), (int)_recv_message.size());
+        _mutex_recv.unlock();
 
-	xl->close_connection_device(); // if any device really opened
-	delete xl;
-	return ret;
+        answer_proto_version = get_proto_version_of_the_recv_message();
+        if (answer_proto_version != _server_protocol_version)
+        {
+            _server_protocol_version = answer_proto_version;
+            _last_error = ERR_ANOTHER_PROTOCOL;
+            return false;
+        }
+        if (proto->get_data_from_bindy_callback(buf, res_data, data, pckt) == false)
+        {
+            return false;
+        }
+
+        *result = (char *)malloc(data.size());
+        memcpy(*result, data.data(), data.size());
+        *pcount = proto->get_result_error();
+        return true;
+        
+    }
+    else
+    {
+        return false;
+    }
+
 }
 
 #include "../common/xibridge_uri_parse.h"
 
-Xibridge_client::Xibridge_client(const char *xi_net_uri, unsigned int send_timeout, unsigned int recv_timeout) :
+Xibridge_client::Xibridge_client(const char *xi_net_uri) :
 _server_protocol_version(_server_base_protocol_version),
 _last_error(0),
-_send_tmout((uint32_t)send_timeout),
-_recv_tmout((uint32_t)recv_timeout),
+_send_tmout((uint32_t)TIMEOUT),
+_recv_tmout((uint32_t)TIMEOUT),
 _conn_id(conn_id_invalid)
 {
   // bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
@@ -374,7 +368,6 @@ bool Xibridge_client::close_connection_device()
 		_last_error = ERR_NO_PROTOCOL;
 		return false;
 	}
-
 	bvector req = proto -> create_close_request(_dev_id, _recv_tmout);
 	if (req.size() == 0)
 	{
