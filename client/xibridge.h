@@ -139,7 +139,7 @@ uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver);
 /**
    * \russian
    * Функция запроса версии протокола для взаимодействия с сервером по данному подключению
-   * @param pconn[in] указатель на указатель на идентификатор подключения
+   * @param[in] pconn указатель на указатель на идентификатор подключения
    * @return версия протокола для взаимодействия с сервером 
    * \endrussian
 */
@@ -148,8 +148,7 @@ xibridge_version_t XI_EXPORT xibridge_get_connection_protocol_version(const xibr
 /**
    * \russian
    * Функция открытия подключения по сети к устройству через сервер (xibridge) 
-     * @param[in] recv_timeout таймаут ответа сервера
-   * @param[out] pconn указатель переменной, куда будут  записаны данные подключения
+   * @param[out] pconn указатель переменной, куда будут записаны данные подключения
    * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
    * \endrussian
 */
@@ -158,27 +157,30 @@ uint32_t XI_EXPORT xibridge_open_device_connection(const char *xi_net_uri, xibri
 /**
    * \russian
    * Функция закрытия подключения по сети к устройству через сервер (xibridge) 
-   * @param[out] pconn указатель переменной, куда будут  записаны данные подключения
-   * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
+   * @param[out] pconn указатель на данные подключения
+   * @return код ошибки в случае неудачной оперции закрытия, 0 - в случае успеха  
    * \endrussian
 */
-uint32_t XI_EXPORT xibridge_close_device_connection(xibridge_conn_t conn);
+uint32_t XI_EXPORT xibridge_close_device_connection(const xibridge_conn_t *pconn);
 
 /**
    * \russian
    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
-   * @param[in] conn данные подключения
-   * @param[in] req данные запроса (код команды+параметры)
+   * @param[in] pconn указатель на данные подключения
+   * @param[in] req данные запроса 
    * @param[in] req_len длина данных запроса
    * @param[out] resp буфер-приемник данных
-   * @param[in] resp_len точная длина ожидаемых данных
+   * @param[in] resp_len длина записанных данных ответа
    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-uint32_t XI_EXPORT xibridge_device_request_response(xibridge_conn_t conn,
-    const unsigned char *req,
-    int req_len, unsigned char *resp,
-    int resp_len);
+uint32_t XI_EXPORT xibridge_device_request_response(
+	                                                   const xibridge_conn_t *conn,
+                                                       const unsigned char *req,
+                                                       int req_len, 
+													   unsigned char *resp,
+                                                       int resp_len
+												   );
 
 /**
    * \russian
@@ -192,21 +194,32 @@ const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
 
 /**
    * \russian
-   * Функция определения устройств, доступных для работы на сервере (ximc-) 
+   * Функция определения списка устройств, доступных для работы на сервере (ximc-) 
    * Функция распределяет и заполняет последовательность строк по количеству определенных устройств
-   * @param[in] addr ip-адрес сервера
+   * @param[in] addr ip-адрес сервера (либо доменное имя), например: "192.168.0.16" или "server.com"
    * @param[in] addr ip-адрес адаптера(?)
-   * @param[out] ppresult указатель на указатель, по которому будут распределены и размещены строки, разделенные нулями, с uri-адресами устройств
+   * @param[out] ppresult указатель на указатель, по которому будут распределены и размещены строки, разделенные 
+   * нулями, с uri-адресами устройств, пример:
+   * "xi-net://192.168.0.16/09<0>xi-net://192.168.0.16/15a97f550017<0><0>"
    * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
    * @return код ошибки в случае или 0
    * \endrussian
 */
 uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(
-                                                          const char *addr, 
-                                                          const char *adapter,
-	                                                      char **ppresult,
-                                                          unsigned int *pcount 
-                                                      );
+                                                           const char *addr, 
+                                                           const char *adapter,
+	                                                       char **ppresult,
+                                                           unsigned int *pcount 
+                                                       );
+
+/**
+   * \russian
+   * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
+   * вызываться после xibridge_enumerate_adapter_devices
+   * @param[in] presult указатель на распределенные данные, полученные в результате вызова 
+   * xibridge_enumerate_adapter_devices 
+*/
+void XI_EXPORT xibridge_free_enumerate_devices(char *presult);
 
 #if defined(__cplusplus)
 };

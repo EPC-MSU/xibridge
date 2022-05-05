@@ -145,7 +145,7 @@ public:
 /**
    * \russian
    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
-   * @param[in] conn данные подключения
+   * @param[in] pconn указатель на данные подключения
    * @param[in] req данные запроса (код команды+параметры)
    * @param[in] req_len длина данных запроса
    * @param[out] resp буфер-приемник данных
@@ -154,7 +154,7 @@ public:
    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-	static uint32_t xi_request_response(xibridge_conn_t conn, 
+	static uint32_t xi_request_response(const xibridge_conn_t *pconn, 
 		                                  const unsigned char *req, 
 										  int req_len, 
 										  unsigned char *resp, 
@@ -184,6 +184,22 @@ public:
    * \endrussian
 */
 	static unsigned int xi_get_last_err_no(xibridge_conn_t conn);
+
+	/**
+	* \russian
+	* Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна
+	* вызываться после xibridge_enumerate_adapter_devices
+	* @param[in] presult указатель на распределенные данные, полученные в результате вызова
+	* xibridge_enumerate_adapter_devices
+	*/
+	void xi_free_enumerate_devices(char *presult)
+	{
+		if (presult != nullptr)
+		{
+			free presult;
+		}
+
+	}
 	
 	bool open_device(uint32_t &answer_proto_version);
 
