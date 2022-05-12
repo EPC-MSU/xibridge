@@ -28,8 +28,8 @@ bindy::Bindy *Bindy_helper::instance_bindy()
 	 	bindy::Bindy::initialize_network();
         _pbindy = new bindy::Bindy("", false, false); // is_server == false, is_buffered == false
         // HACK: we assume that the server has such user as master set - add it to in-memory keyfile
-        bindy::user_id_t uid{  };
-        _pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
+		bindy::user_id_t uid{ XINET_BINDY_USER };
+	    _pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
         _pbindy -> set_master_local(uid);
         _pbindy -> set_handler(&callback_data_bindy);
 	}
@@ -67,9 +67,17 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const c
 			_map_mutex.unlock();
 		}
 	}
+	catch (std::exception &ex)
+	{
+		
+		pcl->_set_last_error(ERR_SET_CONNECTION);
+		//pcl->_set_add_err_text(ex.what());
+		ZF_LOGE("Catch exception at bindy connect, addr: %s, text: %s", addr, ex.what());
+	}
 	catch (...)
 	{
-		ZF_LOGE("Catch exception at bindy connect, addr: %s", addr);
+		pcl->_set_last_error(ERR_SET_CONNECTION);
+		ZF_LOGE("Catch exception at bindy connect, addr: %s, text: %s", addr);
 	}
 	return conn;
 }
@@ -86,6 +94,10 @@ void  Bindy_helper::disconnect(conn_id_t conn_id)
 			_map.erase(conn_id);
 		_map_mutex.unlock();
 	} 
+	catch (std::exception &ex)
+	{
+		ZF_LOGE("Catch exception at bindy disconnect, conn_id: %u, text: %s", conn_id, ex.what());
+	}
 	catch (...)
 	{
 		ZF_LOGE("Catch exception at bindy disconnect, conn_id: %u", conn_id);
@@ -94,11 +106,19 @@ void  Bindy_helper::disconnect(conn_id_t conn_id)
 
 bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 {
+	if (!is_connected(conn_id))
+	{
+		return false;
+	}
 	bindy::Bindy *pb = instance_bindy();
 	try
 	{
 		_pbindy -> send_data(conn_id, data);
 		return TRUE;
+	}
+	catch (std::exception &ex)
+	{
+		ZF_LOGE("Catch exception at bindy send_data, conn_id: %u, text: %s", conn_id, ex.what());
 	}
 	catch (...)
 	{

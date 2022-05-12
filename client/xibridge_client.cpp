@@ -1,4 +1,4 @@
-#include <bindy/bindy-static.h>f
+#include <bindy/bindy-static.h>
 #include "../Common/defs.h"
 #include "xibridge_client.h" 
 #include "../Common/Protocols.h"
@@ -19,6 +19,10 @@ static err_def_t _err_strings[] =
     { ERR_NO_BINDY, "Network component (bindy) is not initialized properly." },
     { ERR_SEND_DATA, "Send data error."},
     { ERR_NULLPTR_PARAM, "Null pointer output parameter." },
+	{ ERR_SET_CONNECTION, "Network connection (bindy) error."},
+	{ ERR_RECV_TIMEOUT, "Receive data timeout." },
+	{ ERR_ANOTHER_PROTOCOL, "Another protocol is to be tested [internal flag]." },
+
     { 0, "" }
  }; 
 
@@ -61,7 +65,8 @@ uint32_t Xibridge_client::xi_init()
 uint32_t  Xibridge_client::xi_set_base_protocol_version(xibridge_version_t ver)
 {
 	if (!is_protocol_verified_version_t(ver)) return ERR_NO_PROTOCOL;
-     _server_base_protocol_version = (uint32_t)ver.major;
+    _server_base_protocol_version = (uint32_t)ver.major;
+	return 0;
 }
 
 xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(const xibridge_conn_t *pconn)
@@ -75,14 +80,13 @@ xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(const xib
 }
 
 
-bool Xibridge_client::exec_enumerate(
-                                         char **result,
-                                         uint32_t *pcount,
-                                         uint32_t &answer_proto_version
-                                    )
+bool Xibridge_client::exec_enumerate(  
+	                                     char **result,
+                                         uint32_t *pcount
+                                     )
 {
     clr_errors();
-    answer_proto_version = _server_protocol_version;
+    uint32_t answer_proto_version = _server_protocol_version;
     AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
     if (result == nullptr || pcount == nullptr)
     {
@@ -125,14 +129,12 @@ bool Xibridge_client::exec_enumerate(
     {
         return false;
     }
-
 }
 
 #include "../common/xibridge_uri_parse.h"
 
 Xibridge_client::Xibridge_client(const char *xi_net_uri) :
 _server_protocol_version(_server_base_protocol_version),
-_last_error(0),
 _send_tmout((uint32_t)TIMEOUT),
 _recv_tmout((uint32_t)TIMEOUT),
 _conn_id(conn_id_invalid)
@@ -148,15 +150,23 @@ _conn_id(conn_id_invalid)
 	   memcpy(_host, parsed.uri_server_host, XI_URI_HOST_LEN);
 	   _dev_id = parsed.uri_device_id;
    }
+   clr_errors();
 }
 
-int Xibridge_client::xi_read_connection_buffer(uint32_t conn_id,
-                                                     unsigned char *buf, int size)
+uint32_t Xibridge_client::xi_read_connection_buffer(const xibridge_conn_t *pconn, 
+                                                     uint8_t *buf, uint32_t size, uint32_t* preal_read)
 {
-	Xibridge_client *pcl = _get_client_as_free(conn_id);
-	if (pcl == nullptr) return 0;
+	if (pconn == nullptr)
+	{
+		return ERR_NULLPTR_PARAM;
+	}
+
+	Xibridge_client *pcl = _get_client_as_free(pconn -> conn_id);
+	if (pcl == nullptr) return ERR_NO_CONNECTION;
+
+	pcl -> clr_errors();
 	pcl -> _mutex_recv.lock();
-	int real_size = (int)pcl->_recv_message.size();
+	uint32_t real_size = (uint32_t)pcl->_recv_message.size();
 	bool clear = false;
 	if (real_size <= size)
 	{
@@ -167,15 +177,28 @@ int Xibridge_client::xi_read_connection_buffer(uint32_t conn_id,
 	if (clear) pcl->_recv_message.clear();
 	else pcl->_recv_message.assign(pcl->_recv_message.cbegin() + size, pcl->_recv_message.cend());
 	pcl->_mutex_recv.unlock();
-	return size;
+	if (preal_read != nullptr) *preal_read = size;
+	return pcl->get_last_error();
 }
 
-int Xibridge_client::xi_write_connection(uint32_t conn_id,
-	const unsigned char *buf, int size)
+uint32_t Xibridge_client::xi_write_connection(const xibridge_conn_t *pconn,
+	const uint8_t *buf, uint32_t size)
 {
+	if (pconn == nullptr)
+	{
+		return ERR_NULLPTR_PARAM;
+	}
+
+	Xibridge_client *pcl = _get_client_as_free(pconn->conn_id);
+	if (pcl == nullptr)
+	{
+		return ERR_NO_CONNECTION;
+	}
+	pcl->clr_errors();
 	bvector d; 
 	d.assign(buf, buf + size);
-	return Bindy_helper::instance()->send_bindy_data(conn_id, d) == true ? 1 : 0;
+	Bindy_helper::instance()->send_bindy_data(pconn -> conn_id, d);
+	return pcl ->get_last_error();
 }
 
 bool Xibridge_client::_send_and_receive(bvector &req)
@@ -233,16 +256,15 @@ bool Xibridge_client::open_connection()
     _conn_id = Bindy_helper::instance() -> connect(_host, this);
     if (_conn_id == conn_id_invalid)
     {
-        _last_error = ERR_NO_CONNECTION;
-        return false;
+       return false;
     }
     return true;
 }
 
-bool Xibridge_client::open_device(uint32_t & answer_version)
+bool Xibridge_client::open_device()
 {
 	clr_errors();
-	answer_version = _server_protocol_version;
+	uint32_t answer_version = _server_protocol_version;
 	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
 	if (proto == nullptr) 
 	{
@@ -323,16 +345,19 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_lengt
 	}
 }
 
-uint32_t Xibridge_client::xi_request_response(xibridge_conn_t conn, 
+uint32_t Xibridge_client::xi_request_response(const xibridge_conn_t *pconn, 
 	                                            const unsigned char *req, 
 												int req_len, 
 												unsigned char *resp, 
 												int resp_len)
 {
-	if ((conn_id_t)conn.conn_id == conn_id_invalid) return ERR_NO_CONNECTION;
-	
-	Xibridge_client *pcl = _get_client_as_free(conn.conn_id);
-	if (pcl == nullptr) return ERR_NO_CONNECTION;
+	if (pconn == nullptr)
+	{
+		return  ERR_NULLPTR_PARAM;
+	}
+
+	Xibridge_client * pcl = _get_client_as_free(pconn->conn_id);
+    if (pcl == nullptr) return ERR_NO_CONNECTION;
     MBuf send_data((uint8_t *)req, req_len);
 
 	bvector response = pcl -> send_data_and_receive(send_data.to_vector(), resp_len);
@@ -345,13 +370,6 @@ uint32_t Xibridge_client::xi_request_response(xibridge_conn_t conn,
 	}
 	return pcl->get_last_error();
 }
-
-uint32_t Xibridge_client::xi_get_last_err_no(xibridge_conn_t conn)
-{
-	Xibridge_client *pcl = _get_client_as_free(conn.conn_id);
-	return pcl == nullptr ? 0 : (uint32_t)pcl -> get_last_error();
-}
-
 
 bool Xibridge_client::close_connection_device()
 {
@@ -395,10 +413,14 @@ bool Xibridge_client::close_connection_device()
 	
 }
 
-uint32_t Xibridge_client::xi_close_connection_device(xibridge_conn_t conn)
+uint32_t Xibridge_client::xi_close_connection_device(const xibridge_conn_t *pconn)
 {
-	bool non_connected;
-	Xibridge_client *pcl = _get_client_as_free(conn.conn_id);
+	if (pconn == nullptr)
+	{
+		return ERR_NULLPTR_PARAM;
+	}
+
+	Xibridge_client *pcl = _get_client_as_free(pconn -> conn_id);
 	if (pcl != nullptr)
 	{
 		pcl->close_connection_device();
@@ -413,6 +435,7 @@ void Xibridge_client::disconnect()
 	_conn_id = conn_id_invalid;
 }
 
+/*
 uint32_t  Xibridge_client::_detect_protocol_version()
 {
 	if (_is_proto_detected) return _server_protocol_version;
@@ -453,3 +476,4 @@ uint32_t  Xibridge_client::_detect_protocol_version()
 	}
 	return version;
 }
+*/

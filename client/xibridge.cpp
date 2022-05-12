@@ -35,7 +35,7 @@ xibridge_version_t xibridge_get_connection_protocol_version(const xibridge_conn_
 
 uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_t *pconn)
 {
-    uint32_t res_err, answer_version;
+    uint32_t res_err;
     if (pconn == nullptr) return ERR_NULLPTR_PARAM;
     *pconn = { 0, {0,0,0} };
 	Xibridge_client * cl = new Xibridge_client(xi_net_uri);
@@ -50,71 +50,70 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
     while (ncount--)
     {
         cl->clr_errors();
-        bool result = cl->open_device(answer_version);
-        res_err = cl->get_last_error();
-        if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
+		bool open_ok = cl->open_device();
+		res_err = cl->get_last_error();
+		if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
         {
+			// second and final chance
             if (ncount) ncount--;
             cl->clr_errors();
-            if (!cl->open_device(answer_version))
-                break;
-            // opened just fine
-           *pconn = cl->to_xibridge_conn_t();
-            return 0;
+			open_ok = cl->open_device();
+			res_err = cl->get_last_error();
+            break;
          }
-        else
+		else if (res_err == ERR_RECV_TIMEOUT)  // may try another protocol - go far
         {
-            if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
-            {
-                cl->decrement_server_protocol_version();
-            }
-            else
-                break;
+            cl->decrement_server_protocol_version();
         }
+	    else // either all right or some non timeout error - exit anyway
+	    {
+				break;
+		}
     }
-    cl->disconnect();
-    delete cl;
+	if (res_err)
+	{
+		cl->disconnect();
+		delete cl;
+	}
+	else
+		*pconn = cl->to_xibridge_conn_t();
     return res_err;
 }
 
-uint32_t xibridge_close_device_connection(xibridge_conn_t conn)
+uint32_t xibridge_close_device_connection(const xibridge_conn_t *pconn)
 {
-	return Xibridge_client::xi_close_connection_device(conn);
+	return Xibridge_client::xi_close_connection_device(pconn);
 }
 
 /*
 * Функция выполнения запроса
-* To do timeout ???
 */
-uint32_t xibridge_device_request_response(xibridge_conn_t conn, 
-                                     const unsigned char *req, 
-                                     int req_len, 
-                                     unsigned char *resp, 
-                                     int resp_len)
+uint32_t xibridge_device_request_response(
+	                                          const xibridge_conn_t *pconn, 
+                                              const uint8_t *req, 
+                                              int req_len, 
+                                              uint8_t *resp, 
+                                              int resp_len
+										  )
 {
-	return Xibridge_client::xi_request_response(conn, req, req_len, resp, resp_len);
+	return Xibridge_client::xi_request_response(pconn, req, req_len, resp, resp_len);
 }
 
-/*
-* Для некоторых применений требуется просто читать буфер и смотреть на количество 
-*/
 const char * xibridge_get_err_expl(uint32_t err_no)
 {
 	return Xibridge_client::xi_get_err_expl(err_no);
 }
 
-uint32_t xibridge_get_last_err_no(xibridge_conn_t conn) 
-{
-	return  Xibridge_client::xi_get_last_err_no(conn);
-}
-
 // to do - adapter using 
-uint32_t xibridge_enumerate_adapter_devices(const char *addr, const char */*adapter*/,
-	                                    char **ppresult,
-	                                    uint32_t *pcount)
+uint32_t xibridge_enumerate_adapter_devices(
+	                                            const char *addr, 
+	                                            const char */*adapter*/,
+	                                            char **ppresult,
+	                                            uint32_t *pcount
+											)
 {
 
-    uint32_t res_err, answer_version;
+	uint32_t res_err;
     if (ppresult == nullptr || pcount) return ERR_NULLPTR_PARAM;
     pcount = 0;
     *ppresult = nullptr;
@@ -130,28 +129,29 @@ uint32_t xibridge_enumerate_adapter_devices(const char *addr, const char */*adap
     while (ncount--)
     {
         cl->clr_errors();
-        bool result = cl->exec_enumerate(ppresult, pcount, answer_version);
+        bool result = cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
-        if (res_err == ERR_ANOTHER_PROTOCOL || res_err == ERR_NO_PROTOCOL)  // another protocol required
+		
+		if (res_err == ERR_ANOTHER_PROTOCOL || res_err == ERR_NO_PROTOCOL)  // another protocol required
+		{
+			// second and final chance
+			if (ncount) ncount--;
+			cl->clr_errors();
+			result = cl->exec_enumerate(ppresult, pcount);
+			res_err = cl->get_last_error();
+			break;  
+		}
+     
+        else if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
         {
-            if (ncount) ncount--;
-            cl->clr_errors();
-            if (!cl->exec_enumerate(ppresult, pcount, answer_version))
-                break;
-            // emumerated just fine
-            cl->close_connection_device();
-            delete cl;
-            return 0;
-        }
-        else
-        {
-            if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
-            {
                 cl->decrement_server_protocol_version();
-            }
-            else
-                break;
         }
+		else
+		{
+			// emumerated just fine or not - going out
+			break;
+		}
+		
     }
     cl->disconnect();
     delete cl;

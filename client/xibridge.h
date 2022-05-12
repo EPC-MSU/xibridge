@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #if defined (WIN32) || defined(WIN64)
+#define _CRT_SECURE_NO_WARNINGS
+
 #if defined(BUILD_SHARED_LIBS_XI)
     #define XI_EXPORT __declspec(dllexport)
 #else
@@ -147,12 +149,17 @@ xibridge_version_t XI_EXPORT xibridge_get_connection_protocol_version(const xibr
 
 /**
    * \russian
-   * Функция открытия подключения по сети к устройству через сервер (xibridge) 
+   * Функция открытия подключения по сети к устройству через сервер (xibridge, ximc, urpc) 
+   * @param[in] xi_net_uri строка с uri-адресом открываемого устройства, например: "xi-net://192.168.0.16/9" или
+   * "xi-net://server.com/15a97f550017"
    * @param[out] pconn указатель переменной, куда будут записаны данные подключения
    * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
    * \endrussian
 */
-uint32_t XI_EXPORT xibridge_open_device_connection(const char *xi_net_uri, xibridge_conn_t *pconn);
+uint32_t XI_EXPORT xibridge_open_device_connection(
+	                                                   const char *xi_net_uri, 
+	                                                   xibridge_conn_t *pconn
+												  );
 
 /**
    * \russian
@@ -175,19 +182,18 @@ uint32_t XI_EXPORT xibridge_close_device_connection(const xibridge_conn_t *pconn
    * \endrussian
 */
 uint32_t XI_EXPORT xibridge_device_request_response(
-	                                                   const xibridge_conn_t *conn,
-                                                       const unsigned char *req,
-                                                       int req_len, 
-													   unsigned char *resp,
-                                                       int resp_len
+	                                                    const xibridge_conn_t *pconn,
+                                                        const uint8_t *req,
+                                                        int req_len, 
+													    uint8_t *resp,
+                                                        int resp_len
 												   );
 
 /**
    * \russian
    * Функция возвращает текст ошибки по ее коду
-   * @param[out] буфер-приемник текста ошибки
    * @param[in] err_no код ошибки
-   * @return строка с ошибкой, NULL, если код ошибки неизвестен
+   * @return строка с ошибкой или NULL, если код ошибки неизвестен
    * \endrussian
 */
 const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
@@ -197,12 +203,12 @@ const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
    * Функция определения списка устройств, доступных для работы на сервере (ximc-) 
    * Функция распределяет и заполняет последовательность строк по количеству определенных устройств
    * @param[in] addr ip-адрес сервера (либо доменное имя), например: "192.168.0.16" или "server.com"
-   * @param[in] addr ip-адрес адаптера(?)
+   * @param[in] addr ip-адрес адаптера(???, пока нужен)
    * @param[out] ppresult указатель на указатель, по которому будут распределены и размещены строки, разделенные 
    * нулями, с uri-адресами устройств, пример:
-   * "xi-net://192.168.0.16/09<0>xi-net://192.168.0.16/15a97f550017<0><0>"
+   * "xi-net://192.168.0.16/9<0>xi-net://192.168.0.16/15a97f550017<0><0>"
    * @param[out] pcount указатель на переменную, куда будет помещено количество найденных устройств
-   * @return код ошибки в случае или 0
+   * @return код ошибки в случае неудачного определения списка устройства или 0 в случае успеха
    * \endrussian
 */
 uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(

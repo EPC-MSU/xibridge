@@ -7,6 +7,7 @@
 	* @return 0 - успех, 1 - ошибка 
 	*\endrussian
 */
+
 uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_uri)
 {
 #define XI_NET_SCHEMA "xi-net" 
@@ -24,7 +25,7 @@ uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_u
 	if (end_s != 0 && (l = ((int)(end_s - p))) < XI_URI_SCHEMA_LEN)
 	{
 		memcpy(parsed_uri -> uri_schema, p, l);
-        if (stricmp(parsed_uri->uri_schema, XI_NET_SCHEMA) == 0)
+        if (strcmp(parsed_uri->uri_schema, XI_NET_SCHEMA) == 0)
 		{
 			p = end_s + 3; // length of separators;
 			end_s = strchr(p, '/');
