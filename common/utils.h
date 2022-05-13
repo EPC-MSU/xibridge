@@ -188,4 +188,8 @@ protected:
 
 extern bvector &add_uint32_2_bvector(bvector & bv, uint32_t val);
 
+extern bool xi_net_dev_uris(MBuf& result, const char *server, const bvector& data_devid, int count);
+
+extern bvector &add_dev_id_bvector_net_order(bvector & bv, const xibridge_device_t &devid);
+
 #endif // 

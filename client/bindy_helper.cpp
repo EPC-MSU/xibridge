@@ -119,6 +119,7 @@ bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 	catch (std::exception &ex)
 	{
 		ZF_LOGE("Catch exception at bindy send_data, conn_id: %u, text: %s", conn_id, ex.what());
+        return false;
 	}
 	catch (...)
 	{

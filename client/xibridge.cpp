@@ -23,7 +23,7 @@ uint32_t xibridge_init()
 	return Xibridge_client::xi_init();
 }
 
-uint32_t xibridge_set_base_protocol_verion(xibridge_version_t ver)
+uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver)
 {
 	return Xibridge_client::xi_set_base_protocol_version(ver);
 }
@@ -114,8 +114,8 @@ uint32_t xibridge_enumerate_adapter_devices(
 {
 
 	uint32_t res_err;
-    if (ppresult == nullptr || pcount) return ERR_NULLPTR_PARAM;
-    pcount = 0;
+    if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
+    *pcount = 0;
     *ppresult = nullptr;
     Xibridge_client * cl = new Xibridge_client(addr);
     if (!cl->open_connection())
@@ -156,4 +156,10 @@ uint32_t xibridge_enumerate_adapter_devices(
     cl->disconnect();
     delete cl;
     return res_err;
+}
+
+void xibridge_free_enumerate_devices(char *presult)
+{
+    Xibridge_client::xi_free_enumerate_devices(presult);
+
 }

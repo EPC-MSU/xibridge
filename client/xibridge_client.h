@@ -180,7 +180,7 @@ public:
 	* @param[in] presult указатель на распределенные данные, полученные в результате вызова
 	* xibridge_enumerate_adapter_devices
 	*/
-	void xi_free_enumerate_devices(char *presult)
+	static void xi_free_enumerate_devices(char *presult)
 	{
 		if (presult != nullptr)
 		{
@@ -192,7 +192,7 @@ public:
 
     bool exec_enumerate(
                             char **result,
-                            unsigned int *pcount       
+                            uint32_t *pcount       
                        );
 
     bool open_connection();

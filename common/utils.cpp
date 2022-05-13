@@ -432,7 +432,8 @@ int MBuf::memread(uint8_t *dest, int dlen, int len)
 // перемещение курсора массива
 bool MBuf::mseek(int offset)
 {
-	if (dlen <= pdata + offset - origin_data || pdata + offset < origin_data) ovrflow++;
+    int len;
+	if (dlen < (len = (pdata + offset - origin_data)) || (pdata + offset) < origin_data) ovrflow++;
 	else pdata += offset;
 	return ovrflow != 0;
 }
@@ -475,11 +476,53 @@ bvector MBuf::to_vector(bool rest) const
 }
 
 
+bvector &add_value_2_bvector_net_order(bvector & bv, uint32_t val, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        bv.push_back((uint8_t)(val >> ((size-1)*8 - 8 * i)));
+    }
+    return bv;
+}
+
 bvector &add_uint32_2_bvector(bvector & bv, uint32_t val)
 {
-	for (int i = 0; i < sizeof(uint32_t); i++)
-	{
-		bv.push_back((uint8_t)(val >> (24 - 8 * i)));
-	}
-	return bv;
+    return add_value_2_bvector_net_order(bv, val, sizeof(uint32_t));
+}
+
+bvector &add_uint16_2_bvector(bvector & bv, uint16_t val)
+{
+    return add_value_2_bvector_net_order(bv,(uint32_t) val, sizeof(uint16_t));
+}
+
+bvector &add_dev_id_bvector_net_order(bvector & bv, const xibridge_device_t &devid)
+{
+    add_uint32_2_bvector(bv, devid.reserve);
+    add_uint16_2_bvector(bv, devid.VID);
+    add_uint16_2_bvector(bv, devid.PID);
+    add_uint32_2_bvector(bv, devid.id);
+    return bv;
+}
+
+static const char *_xinet_pre = "xi-net://";
+
+bool xi_net_dev_uris(MBuf& result, const char *server, const bvector& data_devid, int count)
+{
+    uint8_t str_dev_id[sizeof(xibridge_device_t) * 2];
+    MBuf read_buf(data_devid.data(), data_devid.size());
+    while (count--)
+    {
+        HexIDev3 devid;
+        read_buf >> devid;
+        xibridge_device_t dev = devid.toExtDevId();
+        sprintf((char *)str_dev_id, "%X%X%X%X", dev.reserve, dev.VID, dev.PID, dev.id);
+        result.memwrite((const uint8_t *)_xinet_pre, strlen(_xinet_pre));
+        result.memwrite((const uint8_t *)server, strlen(server));
+        result << Hex8('/');
+        result.memwrite(str_dev_id, strlen((char *)str_dev_id));
+        result << Hex8(0x0);
+    }
+    if (result.realSize() != 0) result << Hex8(0x0);
+
+    return !read_buf.wasBroken() && !result.wasBroken();
 }

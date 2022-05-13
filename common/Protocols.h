@@ -62,6 +62,7 @@ public:
 /**
 	 * Prepares protocol formatted data FROM Bindy callback into some separated arrays and fields
 	 * Gets protocol results data (green in Wiki) and device  data (light blue in Wiki), packet type and serial of the device (at server)
+     * In case of enumeration response data will contain array of DevId-s
 	 * @param [out] res_data - data could be interpritited by any of the protocols
 	 * @param [out] data - data direct from a device
 	 * @param [out] pckt_type - packet type in terms of the protocol

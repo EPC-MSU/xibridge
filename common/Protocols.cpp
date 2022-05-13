@@ -171,15 +171,16 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 	uint32_t pckt)
 {
 	// 16 bytes has already read from mbuf
-	Hex32 count, devnum, r;
-
+	Hex32 count,  r;
+    Hex32 devnum(true);
+    
 	if (_is_server)
 	{
 		switch (pckt)
 		{
 		case pkt1_raw:
 		{
-						 mbuf.mseek(8);
+						 mbuf.mseek(8+4); //according to protocol
 						 int len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
@@ -241,10 +242,18 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
                          mbuf.mseek(-4);
 						 mbuf >> count;
 						 _res_err = (uint32_t)count;
-						 data = mbuf.to_vector(true);  //all data as is is grey
-					
-						 data = mbuf.to_vector(true);
-						 //res_data = gr_buf.to_vector();
+                         for (int i = 0; i < count; i++)
+                         {
+                             mbuf >> devnum;
+                             // according to protocol1
+                             DevId devid(devnum);
+                             add_dev_id_bvector_net_order(data, devid._dev_id);
+                             // according to protocol1
+                             mbuf.mseek(180 - sizeof(uint32_t));
+                         }
+                         
+	                     // according to protocol desc - the length of 				
+						 
 					     return !mbuf.wasBroken();
 					    
 		}

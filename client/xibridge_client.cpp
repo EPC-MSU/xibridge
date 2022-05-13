@@ -90,7 +90,7 @@ bool Xibridge_client::exec_enumerate(
     AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
     if (result == nullptr || pcount == nullptr)
     {
-        _last_error = ERR_NO_PROTOCOL;
+        _last_error = ERR_NULLPTR_PARAM;
         return false;
     }
     bvector req = proto -> create_enum_request(_recv_tmout);
@@ -118,10 +118,16 @@ bool Xibridge_client::exec_enumerate(
         {
             return false;
         }
-
-        *result = (char *)malloc(data.size());
-        memcpy(*result, data.data(), data.size());
-        *pcount = proto->get_result_error();
+        int num_devs = proto->get_result_error();
+        if (num_devs != 0)
+        {
+            MBuf res((strlen(_host) + sizeof(xibridge_device_t) * 2 + 16/* xi-net://<>/<>*/) * num_devs);
+            xi_net_dev_uris(res, _host, data, num_devs);
+            *result = (char *)malloc(res.realSize());
+            memcpy(*result, (const uint8_t *)res, res.realSize());
+        }
+  
+       *pcount = num_devs;
         return true;
         
     }

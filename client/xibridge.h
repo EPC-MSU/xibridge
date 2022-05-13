@@ -136,7 +136,7 @@ uint32_t XI_EXPORT xibridge_init();
    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
    * \endrussian
 */
-uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver);
+uint32_t XI_EXPORT xibridge_set_base_protocol_version(xibridge_version_t ver);
 
 /**
    * \russian
@@ -215,7 +215,7 @@ uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(
                                                            const char *addr, 
                                                            const char *adapter,
 	                                                       char **ppresult,
-                                                           unsigned int *pcount 
+                                                           uint32_t *pcount 
                                                        );
 
 /**
