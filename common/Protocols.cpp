@@ -172,7 +172,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 {
 	// 16 bytes has already read from mbuf
 	Hex32 count,  r;
-    Hex32 devnum(true);
+    Hex32 devnum(0, true);
     
 	if (_is_server)
 	{

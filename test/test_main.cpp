@@ -98,7 +98,11 @@ int main(int argc, char *argv[])
 
 	//test_connect_2_threads();
 
-	test_connect_1();
-	// test_connect_1_threads();
+    if (!test_connect_1())
+    {
+        ret = false;
+    }
+
+	test_connect_1_threads();
 	return 0;
 }

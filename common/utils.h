@@ -37,7 +37,7 @@ protected:
 class Hex32 : public AHex
 {
 public:
-	Hex32(uint32_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 4; }
+    Hex32(uint32_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = sizeof(uint32_t); }
 
 	Hex32(char *psymbol_name_decimal);
 	operator uint32_t () const { return value; }
@@ -51,7 +51,7 @@ private:
 class Hex8 : public AHex
 {
 public:
-	Hex8(uint8_t v = 0) :value(v){ _tsize = sizeof(uint32_t); }
+	Hex8(uint8_t v = 0) :value(v){ _tsize = sizeof(uint8_t); }
 	void _get_stream(uint8_t **ptr);
 	operator uint8_t () const { return value; }
 	Hex8&  operator+=(uint8_t a) { value += a; return *this; }
@@ -64,7 +64,7 @@ private:
 class Hex16 : public AHex
 {
 public:
-	Hex16(uint16_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 1; }
+    Hex16(uint16_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end;  _tsize = sizeof(uint16_t); }
 	void _get_stream(uint8_t **ptr);
 	operator uint16_t () const { return value; }
 	Hex16& operator=(uint16_t v){ value = v; return *this; }

@@ -61,14 +61,6 @@ void Hex8::_get_stream(uint8_t **ptr)
 
 void Hex32::_get_stream(uint8_t **ptr)
 {
-	/*
-	uint8_t * p = *ptr;
-	if (littleEndian())
-		value = *(p)+*(p + 1) * 0x100 + *(p + 2) * 0x10000 + *(p + 3) * 0x1000000;
-	else
-		value = *(p + 3) + *(p + 2) * 0x100 + *(p + 1) * 0x10000 + *(p)* 0x1000000;
-	*ptr += 4;
-	*/
 	value = _get_stream1_4(ptr);
 }
 
@@ -83,27 +75,11 @@ AHex()
 
 void Hex16::_get_stream(uint8_t ** ptr)
 {
-	/*
-	uint8_t * p = *ptr;
-	if (littleEndian())
-		value = *(p)+*(p + 1) * 0x100;
-	else
-		value = *(p + 1) + *p * 0x100;
-	*ptr += 2;
-	*/
 	value = _get_stream1_4(ptr);
 }
 
 void Hex24::_get_stream(uint8_t ** ptr)
 {
-	/*
-	uint8_t * p = *ptr;
-	if (littleEndian())
-		value = *(p)+*(p + 1) * 0x100 + *(p + 2) * 0x10000;
-	else
-		value = *(p + 2) + *(p + 1) * 0x100 + *(p)* 0x10000;
-	*ptr += 3;
-	*/
 	_get_stream1_4(ptr);
 }
 
@@ -184,26 +160,7 @@ MBuf& MBuf::operator << (Hex32 v)
 		// места в буфере не хватило
 		else
 		{
-			// хватило Места, разберемся с порядком следования байт в памяти
-            /*
-			if (v.littleEndian())
-			{
-				// порядок здесь little endian
-				*pdata++ = (uint8_t)(v & 0xFF);
-				*pdata++ = (uint8_t)((v >> 8) & 0xFF);
-				*pdata++ = (uint8_t)((v >> 16) & 0xFF);
-				*pdata++ = (uint8_t)((v >> 24) & 0xFF);
-			}
-			else
-			{
-				// порядок здесь big endian
-				*pdata++ = (uint8_t)((v >> 24) & 0xFF);
-				*pdata++ = (uint8_t)((v >> 16) & 0xFF);
-				*pdata++ = (uint8_t)((v >> 8) & 0xFF);
-				*pdata++ = (uint8_t)(v & 0xFF);
-			}
-            */
-            v.put_stream1_4(&pdata, v);
+			v.put_stream1_4(&pdata, v);
 		}
 	}
 	return *this;
@@ -233,23 +190,6 @@ MBuf& MBuf::operator << (Hex24 v)
 		// места в буфере не хватило
 		else
 		{
-            /*
-            // хватило
-			// порядок здесь 
-			if (v.littleEndian())
-			{
-				*pdata++ = (uint8_t)(v & 0xFF);
-				*pdata++ = (uint8_t)((v >> 8) & 0xFF);
-				*pdata++ = (uint8_t)((v >> 16) & 0xFF);
-
-			}
-			else
-			{
-				*pdata++ = (uint8_t)((v >> 16) & 0xFF);
-				*pdata++ = (uint8_t)((v >> 8) & 0xFF);
-				*pdata++ = (uint8_t)(v & 0xFF);
-			}
-            */
             v.put_stream1_4(&pdata, v);
 		}
 	}
@@ -278,21 +218,6 @@ MBuf& MBuf::operator << (Hex16 v)
 		// места в буфере не хватило
 		else
 		{
-            /*
-			// хватило
-			// порядок здесь 
-			if (v.littleEndian())
-			{
-				*pdata++ = (uint8_t)(v & 0xFF);
-				*pdata++ = (uint8_t)((v >> 8) & 0xFF);
-
-			}
-			else
-			{
-				*pdata++ = (uint8_t)((v >> 8) & 0xFF);
-				*pdata++ = (uint8_t)(v & 0xFF);
-			}
-            */
             v.put_stream1_4(&pdata, v);
 		}
 	}
