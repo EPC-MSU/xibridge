@@ -1,0 +1,30 @@
+#include <windows.h>
+
+#define VOS_NT_WINDOWS32    0x00040004L
+#define VFT_APP             0x00000001L
+
+1 VERSIONINFO
+FILEVERSION 0,0,1,100
+PRODUCTVERSION 0,0,1,100
+FILEOS VOS_DOS_WINDOWS32
+FILETYPE VFT_APP
+{
+    BLOCK "StringFileInfo" 
+    {
+        BLOCK "040904E4" 
+        {
+            VALUE "CompanyName", "COMPANY NAME HERE\0" 
+            VALUE "FileDescription", "xibridge library\0" 
+            VALUE "FileVersion", "0.0.1\0" 
+            VALUE "InternalName", "xibridge\0" 
+            VALUE "LegalCopyright", "MIT License\0" 
+            VALUE "OriginalFilename", "xibridge.dll\0" 
+            VALUE "ProductName", "xibridge\0" 
+            VALUE "ProductVersion","0.0.1\0" 
+        }
+    }
+    BLOCK "VarFileInfo" 
+    {
+        VALUE "Translation", 1033, 1252
+    }
+}

@@ -39,24 +39,29 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
     if (pconn == nullptr) return ERR_NULLPTR_PARAM;
     *pconn = { 0, {0,0,0} };
 	Xibridge_client * cl = new Xibridge_client(xi_net_uri);
-    if (!cl->open_connection())
-    {
-        res_err = cl -> get_last_error();
-        delete cl;
-        return res_err;
-    }
+
+    
     // making opening logic more complex
     uint32_t ncount = xibridge_get_max_protocol_version().major;
     while (ncount--)
     {
+label_noconn:
+		if (!cl->open_connection())
+		{
+			res_err = cl->get_last_error();
+			delete cl;
+			return res_err;
+		}
         cl->clr_errors();
 		bool open_ok = cl->open_device();
 		res_err = cl->get_last_error();
 		if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
         {
 			// second and final chance
-            if (ncount) ncount--;
+            // if (ncount) ncount--;
             cl->clr_errors();
+			cl->disconnect();
+			if (!cl->open_connection()) goto label_noconn;
 			open_ok = cl->open_device();
 			res_err = cl->get_last_error();
             break;
@@ -64,6 +69,7 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
 		else if (res_err == ERR_RECV_TIMEOUT)  // may try another protocol - go far
         {
             cl->decrement_server_protocol_version();
+			cl->disconnect();
         }
 	    else // either all right or some non timeout error - exit anyway
 	    {
@@ -118,26 +124,30 @@ uint32_t xibridge_enumerate_adapter_devices(
     *pcount = 0;
     *ppresult = nullptr;
     Xibridge_client * cl = new Xibridge_client(addr);
-    if (!cl->open_connection())
-    {
-        res_err = cl->get_last_error();
-        delete cl;
-        return res_err;
-    }
+   
     // making opening logic more complex
     uint32_t ncount = xibridge_get_max_protocol_version().major;
     while (ncount--)
     {
         cl->clr_errors();
+label_noconn:
+		if (!cl->open_connection())
+		{
+			res_err = cl->get_last_error();
+			delete cl;
+			return res_err;
+		}
         bool result = cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
 		
 		if (res_err == ERR_ANOTHER_PROTOCOL || res_err == ERR_NO_PROTOCOL)  // another protocol required
 		{
 			// second and final chance
-			if (ncount) ncount--;
+			// if (ncount) ncount--;
 			cl->clr_errors();
-			result = cl->exec_enumerate(ppresult, pcount);
+			cl->disconnect();
+			if (!cl->open_connection()) goto label_noconn;
+ 			result = cl->exec_enumerate(ppresult, pcount);
 			res_err = cl->get_last_error();
 			break;  
 		}
@@ -145,6 +155,7 @@ uint32_t xibridge_enumerate_adapter_devices(
         else if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
         {
                 cl->decrement_server_protocol_version();
+				cl->disconnect();
         }
 		else
 		{

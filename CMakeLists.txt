@@ -44,6 +44,7 @@ SET(SOURCES
         common/protocols.cpp
         common/utils.cpp
 		client/xibridge.cpp
+		client/version.rc
          )
 	 
 #add_custom_target(tests) # Note: without 'ALL'
