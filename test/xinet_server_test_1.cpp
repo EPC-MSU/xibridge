@@ -6,7 +6,7 @@
 
 // to run with ximc-xinet-server
 // !!! select the right address every time as tested
-static const char * const _DEV_IP = "xi-net://172.16.130.31/1f50";
+static const char * const _DEV_IP = "xi-net://172.16.130.38/1f50";
 
 bool test_connect_1()
 {
@@ -19,7 +19,7 @@ bool test_connect_1()
     }
 
     xibridge_conn_t conn;
-    xibridge_set_base_protocol_version({ 1, 0, 0 });
+    //xibridge_set_base_protocol_version({ 1, 0, 0 });
     err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {

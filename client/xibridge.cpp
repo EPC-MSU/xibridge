@@ -45,9 +45,10 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
     uint32_t ncount = xibridge_get_max_protocol_version().major;
     while (ncount--)
     {
-label_noconn:
+
 		if (!cl->open_connection())
 		{
+label_noconn:
 			res_err = cl->get_last_error();
 			delete cl;
 			return res_err;
@@ -69,7 +70,9 @@ label_noconn:
 		else if (res_err == ERR_RECV_TIMEOUT)  // may try another protocol - go far
         {
             cl->decrement_server_protocol_version();
+            //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 			cl->disconnect();
+            //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         }
 	    else // either all right or some non timeout error - exit anyway
 	    {
@@ -130,9 +133,10 @@ uint32_t xibridge_enumerate_adapter_devices(
     while (ncount--)
     {
         cl->clr_errors();
-label_noconn:
+
 		if (!cl->open_connection())
 		{
+label_noconn:
 			res_err = cl->get_last_error();
 			delete cl;
 			return res_err;
@@ -140,19 +144,19 @@ label_noconn:
         bool result = cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
 		
-		if (res_err == ERR_ANOTHER_PROTOCOL || res_err == ERR_NO_PROTOCOL)  // another protocol required
+		if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
 		{
 			// second and final chance
 			// if (ncount) ncount--;
 			cl->clr_errors();
 			cl->disconnect();
-			if (!cl->open_connection()) goto label_noconn;
+            if (!cl->open_connection()) goto label_noconn;
  			result = cl->exec_enumerate(ppresult, pcount);
 			res_err = cl->get_last_error();
 			break;  
 		}
      
-        else if (res_err == ERR_RECV_TIMEOUT)  // may another protocol
+        else if (res_err == ERR_RECV_TIMEOUT || res_err == ERR_NO_PROTOCOL)  // may another protocol
         {
                 cl->decrement_server_protocol_version();
 				cl->disconnect();

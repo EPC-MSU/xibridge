@@ -358,7 +358,7 @@ int MBuf::memread(uint8_t *dest, int dlen, int len)
 bool MBuf::mseek(int offset)
 {
     int len;
-	if (dlen < (len = (pdata + offset - origin_data)) || (pdata + offset) < origin_data) ovrflow++;
+	if (dlen < (len = (int)(pdata + offset - origin_data)) || (pdata + offset) < origin_data) ovrflow++;
 	else pdata += offset;
 	return ovrflow != 0;
 }
@@ -434,17 +434,17 @@ static const char *_xinet_pre = "xi-net://";
 bool xi_net_dev_uris(MBuf& result, const char *server, const bvector& data_devid, int count)
 {
     uint8_t str_dev_id[sizeof(xibridge_device_t) * 2];
-    MBuf read_buf(data_devid.data(), data_devid.size());
+    MBuf read_buf(data_devid.data(),(int) data_devid.size());
     while (count--)
     {
         HexIDev3 devid;
         read_buf >> devid;
         xibridge_device_t dev = devid.toExtDevId();
         sprintf((char *)str_dev_id, "%X%X%X%X", dev.reserve, dev.VID, dev.PID, dev.id);
-        result.memwrite((const uint8_t *)_xinet_pre, strlen(_xinet_pre));
-        result.memwrite((const uint8_t *)server, strlen(server));
+        result.memwrite((const uint8_t *)_xinet_pre, (int)strlen(_xinet_pre));
+        result.memwrite((const uint8_t *)server, (int)strlen(server));
         result << Hex8('/');
-        result.memwrite(str_dev_id, strlen((char *)str_dev_id));
+        result.memwrite(str_dev_id, (int)strlen((char *)str_dev_id));
         result << Hex8(0x0);
     }
     if (result.realSize() != 0) result << Hex8(0x0);

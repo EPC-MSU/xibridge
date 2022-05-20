@@ -242,7 +242,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
                          mbuf.mseek(-4);
 						 mbuf >> count;
 						 _res_err = (uint32_t)count;
-                         for (int i = 0; i < count; i++)
+                         for (int i = 0; i < (int)count; i++)
                          {
                              mbuf >> devnum;
                              // according to protocol1
