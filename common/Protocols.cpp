@@ -181,7 +181,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		case pkt1_raw:
 		{
 						 mbuf.mseek(8+4); //according to protocol
-						 int len = mbuf.restOfSize(-1);
+						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 _is_inv_pcktfmt = true;
@@ -214,7 +214,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		case pkt1_raw:
 		{
 						 mbuf.mseek(8);
-						 int len = mbuf.restOfSize(-1);
+						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 _is_inv_pcktfmt = true;
@@ -227,7 +227,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		case pkt1_close_resp:
 		{              
 						 mbuf.mseek(8);
-						 int len = mbuf.restOfSize(-1);
+						 size_t len = mbuf.restOfSize(-1);
 						 if (len != sizeof (uint32_t))
 						 {
 							 _is_inv_pcktfmt = true;
@@ -282,7 +282,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		{
 						 mbuf.mseek(8);
                          mbuf >> r;
-						 int len = mbuf.restOfSize(-1);
+						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 _is_inv_pcktfmt = true;
@@ -314,7 +314,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		{
 						 mbuf.mseek(8);
 						 mbuf >> r;
-						 int len = mbuf.restOfSize(-1);
+						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 _is_inv_pcktfmt = true;
@@ -328,7 +328,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		case pkt2_close_resp:
 		{
 								mbuf.mseek(8);
-								int len = mbuf.restOfSize(-1);
+								size_t len = mbuf.restOfSize(-1);
 								if (len != sizeof (uint32_t))
 								{
 									_is_inv_pcktfmt = true;
@@ -361,7 +361,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 		{
 							 mbuf.mseek(8);
 							 mbuf >> size;
-							 int len = mbuf.restOfSize(-1);
+							 size_t len = mbuf.restOfSize(-1);
 							 if (mbuf.wasBroken() || len != (int)size)
 							 {
 								 _is_inv_pcktfmt = true;
@@ -389,7 +389,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 		case pkt3_cmd_resp:
 		{
 							  mbuf >> size;
-							  int len = mbuf.restOfSize(-1);
+							  size_t len = mbuf.restOfSize(-1);
 							  if (mbuf.wasBroken() || len != (int)size)
 							  {
 								  _is_inv_pcktfmt = true;
@@ -404,7 +404,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 		{
 
 							  mbuf.mseek(8);
-							  int len = mbuf.restOfSize(-1);
+							  size_t len = mbuf.restOfSize(-1);
 							  if (len != sizeof (uint32_t))
 							  {
 								  _is_inv_pcktfmt = true;

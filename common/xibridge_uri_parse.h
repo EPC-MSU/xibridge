@@ -37,7 +37,7 @@ uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_u
                end_s = strchr(p, 0);
                if (end_s == 0) return 1;
                char sdev[24 + 1];  // hex-symbols;
-			   if (sprintf(sdev, "%024s", p) > 0)
+			   if (portable_snprintf(sdev, 24 +1 ,  "%024s", p) > 0)
 			   {
 				   unsigned int vid, pid, id, reserved;
 				   if (sscanf(sdev, "%8x%4x%4x%8x", &reserved, &vid, &pid, &id)

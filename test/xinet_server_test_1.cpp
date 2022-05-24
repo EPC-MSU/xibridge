@@ -51,7 +51,7 @@ bool test_connect_1()
     if (count)
     {
         const char *p = pdata;
-        for (int i = 0; i < count;  i++)
+        for (int i = 0; i < (int)count;  i++)
         {
             ZF_LOGD("Enumerated device #%d: URI: %s", i+1, p);
             p = strchr(p, 0) + 1;

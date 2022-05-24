@@ -116,7 +116,7 @@ const char * xibridge_get_err_expl(uint32_t err_no)
 // to do - adapter using 
 uint32_t xibridge_enumerate_adapter_devices(
 	                                            const char *addr, 
-	                                            const char */*adapter*/,
+	                                            const char *,
 	                                            char **ppresult,
 	                                            uint32_t *pcount
 											)

@@ -11,6 +11,26 @@
 #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 #endif
 
+
+#ifdef _MSC_VER
+
+#include <io.h>
+#include <fcntl.h>
+#define portable_strdup _strdup
+#define portable_snprintf _snprintf
+#define portable_strncasecmp _strnicmp
+#define portable_strcasecmp _stricmp
+
+typedef SSIZE_T ssize_t;
+
+#else
+
+#define portable_strdup strdup
+#define portable_snprintf snprintf
+#define portable_strncasecmp strncasecmp
+#define portable_strcasecmp strcasecmp
+
+#endif
 /*
 
 
@@ -27,7 +47,7 @@ protected:
     uint32_t _get_stream1_4(uint8_t **ptr);
    
     bool _lend;
-	int _tsize;
+	size_t _tsize;
 };
 
 /* * все числа более байта в протоколах заданы в обратном порядке, поэтому
@@ -123,7 +143,7 @@ class MBuf
 {
 public:
 
-	MBuf(const uint8_t *readyd, int size, bool readonly = TRUE);
+	MBuf(const uint8_t *readyd, size_t size, bool readonly = TRUE);
 	MBuf(int size, bool readonly = FALSE);
 	~MBuf() { delete[] origin_data; }
 	// преобразование типа
@@ -131,7 +151,7 @@ public:
 	// просто уловка
 	operator uint8_t *() const { return origin_data; }
 	uint8_t * cur_data() const { return pdata; }
-	int bufferLen() const { return dlen; }
+    size_t bufferLen() const { return dlen; }
 	void setRdOnly(){ _rdon = TRUE; }
 
 	MBuf& operator << (Hex32 v);
@@ -150,17 +170,17 @@ public:
 	MBuf& operator << (const MBuf &src);
 
 	// дозапись данных в буфер этого объекта и перемещкение указателя на длину записанных данных
-	int memwrite(const uint8_t *data, int len);
+	size_t memwrite(const uint8_t *data, size_t len);
 	// копирование данных из буфера (когда объект для чтения) в буфер-приемник и перемещкение указателя на длину скопированных данных
 	// dest - Приемник
 	// dlen - длина приемника
 	// len - длина копируемых данных
 	// возвр. дут, еслив  все нормально
-	int memread(uint8_t *dest, int dlen, int len);
+	size_t memread(uint8_t *dest, size_t dlen, size_t len);
 
 	// рерраспределяет внутренний буфер, втавляя кусок 
 	// в начало
-	bool meminsert_start(const uint8_t *what, int len);
+	bool meminsert_start(const uint8_t *what, size_t len);
 	// вставляет два байта в начало и пересапр. внутр. буфер
 	bool meminsert_start(uint8_t num1, uint8_t num2);
 
@@ -171,15 +191,15 @@ public:
 
 	// проверка, были ли нарушения
 	bool wasBroken() const { return ovrflow != 0; }
-	int realSize() const { return (int)(pdata - origin_data); }
+    size_t realSize() const { return (int)(pdata - origin_data); }
 	// вычисление отсавшегося размера, начиная с позиции from_pos
-	int restOfSize(int from_pos) const;
+	size_t restOfSize(int from_pos) const;
 		
 	uint32_t CRC32(int from_pos);
 	bvector to_vector(bool rest = false) const;
 
 protected:
-	int dlen;     // размер распределенной памяти - за это число нельзя выйти никогда
+	size_t dlen;     // размер распределенной памяти - за это число нельзя выйти никогда
 	uint8_t *origin_data;  // указатель на данные
 	uint8_t *pdata;   // текущее положение указателя
 	uint8_t ovrflow; // признак переполнения

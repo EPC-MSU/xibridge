@@ -1,9 +1,6 @@
-#include <stdlib.h>
 #include <string.h>
 #include "defs.h"
 #include "utils.h"
-
-
 
 uint32_t AHex::_get_stream1_4(uint8_t **ptr)
 { 
@@ -121,7 +118,7 @@ xibridge_device_t HexIDev3::toExtDevId() const
 // конструктор простого буфера MBuf
 // pdata может только расти
 // это  конструктор дл€ буфера чтени€
-MBuf::MBuf(const uint8_t *readyd, int size, bool readonly) :
+MBuf::MBuf(const uint8_t *readyd, size_t size, bool readonly) :
 ovrflow(0),
 _rdon(readonly)
 {
@@ -257,8 +254,8 @@ MBuf& MBuf::operator << (Hex8 v)
 // запись в буфер содержимого другого буфера  
 MBuf& MBuf::operator << (const MBuf & src)
 {
-	int _len = src.realSize();
-	int _dlen = restOfSize(-1);
+	size_t _len = src.realSize();
+	size_t _dlen = restOfSize(-1);
 	if (_dlen < _len) ovrflow++;
 	else
 	{
@@ -283,7 +280,7 @@ MBuf& MBuf::operator >> (HexIDev3 &hidev)
 }
 
 // запись данных в буфер объекта
-int MBuf::memwrite(const uint8_t *data, int len)
+size_t MBuf::memwrite(const uint8_t *data, size_t len)
 {
 	// провер€ем на перполнение
 	if (_rdon || len < 0) return 0;
@@ -299,7 +296,7 @@ int MBuf::memwrite(const uint8_t *data, int len)
 
 // рераспредел€ет внутренний буфер, втавл€€ кусок 
 // в начало старого внутреннего буфера
-bool MBuf::meminsert_start(const uint8_t *what, int len)
+bool MBuf::meminsert_start(const uint8_t *what, size_t len)
 {
 	// провер€ем на перполнение
 	if (_rdon || len < 0) return false;
@@ -344,7 +341,7 @@ bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
 
 
 // чтение  данных из буфера объекта
-int MBuf::memread(uint8_t *dest, int dlen, int len)
+size_t MBuf::memread(uint8_t *dest, size_t dlen, size_t len)
 {
 	// провер€ем, можно ли скопировать
 	if (len < 0 || len > dlen || restOfSize(-1) < len) return -1;
@@ -373,7 +370,7 @@ bool MBuf::tot_seek(int offset)
 
 // здесь даже в случае выхода за границу массива мы не ставим флаг ошибки
 // просто возвр. -1
-int MBuf::restOfSize(int from_pos) const
+size_t MBuf::restOfSize(int from_pos) const
 {
 	if (from_pos == -1) from_pos = (int)(pdata - origin_data);
 	if (from_pos < 0 || from_pos >= dlen) return -1;
@@ -401,11 +398,11 @@ bvector MBuf::to_vector(bool rest) const
 }
 
 
-bvector &add_value_2_bvector_net_order(bvector & bv, uint32_t val, int size)
+bvector &add_value_2_bvector_net_order(bvector & bv, uint32_t val, size_t size)
 {
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < (int)size; i++)
     {
-        bv.push_back((uint8_t)(val >> ((size-1)*8 - 8 * i)));
+        bv.push_back((uint8_t)(val >> (((int)size-1)*8 - 8 * i)));
     }
     return bv;
 }
@@ -440,7 +437,7 @@ bool xi_net_dev_uris(MBuf& result, const char *server, const bvector& data_devid
         HexIDev3 devid;
         read_buf >> devid;
         xibridge_device_t dev = devid.toExtDevId();
-        sprintf((char *)str_dev_id, "%X%X%X%X", dev.reserve, dev.VID, dev.PID, dev.id);
+		portable_snprintf((char *)str_dev_id, sizeof(xibridge_device_t)* 2, "%X%X%X%X", dev.reserve, dev.VID, dev.PID, dev.id);
         result.memwrite((const uint8_t *)_xinet_pre, (int)strlen(_xinet_pre));
         result.memwrite((const uint8_t *)server, (int)strlen(server));
         result << Hex8('/');
