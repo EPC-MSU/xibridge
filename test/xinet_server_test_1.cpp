@@ -15,7 +15,7 @@ bool test_connect_1()
     if (err)
     {
         ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
-        return FALSE;
+        return false;
     }
 
     xibridge_conn_t conn;
@@ -25,7 +25,7 @@ bool test_connect_1()
     {
         ZF_LOGE("Cannot open device: %s, error: %s", _DEV_IP, xibridge_get_err_expl(err));
         xibridge_close_device_connection(&conn);
-        return FALSE;
+        return false;
     }
 
     //move_settings_calb_t resp_s;
@@ -35,7 +35,7 @@ bool test_connect_1()
     if (xir_err)
     {
         ZF_LOGE("Cannot execute xir: %s", xibridge_get_err_expl(err));
-        return FALSE;
+        return false;
     }
 
     //ZF_LOGD("Speed: %f\n", resp_s.Speed);
@@ -59,7 +59,7 @@ bool test_connect_1()
     }
     xibridge_free_enumerate_devices(pdata);
 
-	return TRUE;
+	return true;
 }
 
 static void thread_body(int thread_num)

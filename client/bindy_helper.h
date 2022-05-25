@@ -10,6 +10,7 @@
 /**
  * Helper class for using Bindy as a client
 */
+class Xibridge_client;
 class Bindy_helper
 {
 	friend class Xibridge_client;

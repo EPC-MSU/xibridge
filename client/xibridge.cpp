@@ -1,5 +1,5 @@
 #include <zf_log.h>
-
+#include "../common/defs.h"
 #include "xibridge.h"
 #include "../common/defs.h"
 #include "xibridge_client.h"
@@ -95,7 +95,7 @@ uint32_t xibridge_close_device_connection(const xibridge_conn_t *pconn)
 }
 
 /*
-* Функция выполнения запроса
+* пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 */
 uint32_t xibridge_device_request_response(
 	                                          const xibridge_conn_t *pconn, 

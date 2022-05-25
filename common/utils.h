@@ -1,6 +1,5 @@
 #ifndef _UTILS_H
 #define  _UTILS_H
-#include <vector>
 #include "defs.h"
 #include "../client/xibridge.h"
 
@@ -57,7 +56,7 @@ protected:
 class Hex32 : public AHex
 {
 public:
-    Hex32(uint32_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = sizeof(uint32_t); }
+    Hex32(uint32_t v = 0, bool lit_end = false) :value(v){ _lend = lit_end; _tsize = sizeof(uint32_t); }
 
 	Hex32(char *psymbol_name_decimal);
 	operator uint32_t () const { return value; }
@@ -84,7 +83,7 @@ private:
 class Hex16 : public AHex
 {
 public:
-    Hex16(uint16_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end;  _tsize = sizeof(uint16_t); }
+    Hex16(uint16_t v = 0, bool lit_end = false):value(v){ _lend = lit_end;  _tsize = sizeof(uint16_t); }
 	void _get_stream(uint8_t **ptr);
 	operator uint16_t () const { return value; }
 	Hex16& operator=(uint16_t v){ value = v; return *this; }
@@ -95,7 +94,7 @@ private:
 class Hex24 : public AHex
 {
 public:
-	Hex24(uint32_t v = 0, bool lit_end = FALSE) :value(v){ _lend = lit_end; _tsize = 3; }
+	Hex24(uint32_t v = 0, bool lit_end = false) :value(v){ _lend = lit_end; _tsize = 3; }
     void _get_stream(uint8_t **ptr);
     operator uint32_t (){ return value; }
     Hex24& operator = (uint32_t v){ value = v; return *this; }
@@ -111,7 +110,7 @@ class MBuf;
 class HexIDev3 : public AHex
 {
 public:
-    HexIDev3(uint32_t id = 0, uint16_t pid = 0, uint16_t vid = 0, uint32_t reserve = 0, bool lit_end = FALSE) :
+    HexIDev3(uint32_t id = 0, uint16_t pid = 0, uint16_t vid = 0, uint32_t reserve = 0, bool lit_end = false) :
 		_id_value(id, lit_end), _id_pid(pid, lit_end), _id_vid(vid, lit_end), _reserve(reserve){
 		_lend = lit_end; _tsize = 12;
 	}
@@ -143,8 +142,8 @@ class MBuf
 {
 public:
 
-	MBuf(const uint8_t *readyd, size_t size, bool readonly = TRUE);
-	MBuf(int size, bool readonly = FALSE);
+	MBuf(const uint8_t *readyd, size_t size, bool readonly = true);
+	MBuf(int size, bool readonly = false);
 	~MBuf() { delete[] origin_data; }
 	// преобразование типа
 	operator const uint8_t *() const { return origin_data; }
@@ -152,7 +151,7 @@ public:
 	operator uint8_t *() const { return origin_data; }
 	uint8_t * cur_data() const { return pdata; }
     size_t bufferLen() const { return dlen; }
-	void setRdOnly(){ _rdon = TRUE; }
+	void setRdOnly(){ _rdon = true; }
 
 	MBuf& operator << (Hex32 v);
 	MBuf& operator >> (Hex32 &v);

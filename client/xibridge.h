@@ -183,11 +183,11 @@ uint32_t XI_EXPORT xibridge_close_device_connection(const xibridge_conn_t *pconn
 */
 uint32_t XI_EXPORT xibridge_device_request_response(
 	                                                    const xibridge_conn_t *pconn,
-                                                        const uint8_t *req,
-                                                        int req_len, 
-													    uint8_t *resp,
-                                                        int resp_len
-												   );
+                                                       const uint8_t *req,
+                                                       int req_len, 
+													                uint8_t *resp,
+                                                       int resp_len
+												               );
 
 /**
    * \russian
@@ -212,11 +212,11 @@ const char *  XI_EXPORT xibridge_get_err_expl(uint32_t err_no);
    * \endrussian
 */
 uint32_t  XI_EXPORT xibridge_enumerate_adapter_devices(
-                                                           const char *addr, 
-                                                           const char *adapter,
+                                                          const char *addr, 
+                                                          const char *adapter,
 	                                                       char **ppresult,
-                                                           uint32_t *pcount 
-                                                       );
+                                                          uint32_t *pcount 
+                                                      );
 
 /**
    * \russian

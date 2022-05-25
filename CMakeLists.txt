@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
-OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
+OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" OFF)
 
 CONFIGURE_FILE(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/generated/private/config.h)
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)

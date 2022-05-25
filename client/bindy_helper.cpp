@@ -1,9 +1,8 @@
-#include <vector>
 #include <zf_log.h>
-
+#include "../common/defs.h"
 #include <bindy/bindy-static.h>
-#include "../Common/utils.h"
-#include "Bindy_helper.h"
+#include "../common/utils.h"
+#include "bindy_helper.h"
 
 //const data
 #define XINET_BINDY_USER "root-user"
@@ -77,7 +76,7 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const c
 	catch (...)
 	{
 		pcl->_set_last_error(ERR_SET_CONNECTION);
-		ZF_LOGE("Catch exception at bindy connect, addr: %s, text: %s", addr);
+		ZF_LOGE("Catch exception at bindy connect, addr: %s.", addr);
 	}
 	return conn;
 }
@@ -114,7 +113,7 @@ bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 	try
 	{
 		_pbindy -> send_data(conn_id, data);
-		return TRUE;
+		return true;
 	}
 	catch (std::exception &ex)
 	{

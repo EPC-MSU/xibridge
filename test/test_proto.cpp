@@ -3,8 +3,6 @@
 */
 #include <zf_log.h>
 #include <../common/protocols.h>
-#include "../common/defs.h"
-
 
 #define PROTO_1_OPEN  1
 #define PROTO_1_CLOSE 2 

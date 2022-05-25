@@ -1,6 +1,7 @@
+#include "../common/defs.h"
 #include <zf_log.h>
 #include <../common/protocols.h>
-#include "../common/defs.h"
+
 
 /* 
 * The next definition is replaced to xibridge
@@ -40,7 +41,7 @@ bool test_xibridge_uri_parse()
 	if (parsed.uri_device_id.VID != 0 || parsed.uri_device_id.PID != 0 || parsed.uri_device_id.reserve != 0)
 	{
 		ZF_LOGE("xi-net://abcd/1: non zero device_id fields.");
-		ret =false;
+		ret = false;
 	}
 
 	if (xibridge_parse_uri_dev12("xi-net://0.0.0.0/000000df00DF00dFAAAAAAAA", &parsed) != 0)

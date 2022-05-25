@@ -1,10 +1,9 @@
 #ifndef _XIBRIDGE_CLIENT_H
 #define  _XIBRIDGE_CLIENT_H
-#include <vector>
+#include "../common/defs.h"
 #include "xibridge.h"
-#include "../Common/defs.h"
-#include "../Common/Protocols.h"
-#include "Bindy_helper.h"
+#include "../common/protocols.h"
+#include "bindy_helper.h"
 
 /*
 * Defines client errors (errors to take place at the client side)
@@ -107,11 +106,11 @@ public:
    * \endrussian
 */
 	static uint32_t xi_read_connection_buffer(
-		                                     const xibridge_conn_t *pconn, 
-											 uint8_t *buf, 
-											 uint32_t size,
-											 uint32_t* preal_read = nullptr
-										 );
+		                                         const xibridge_conn_t *pconn, 
+											     uint8_t *buf, 
+											     uint32_t size,
+											     uint32_t* preal_read = nullptr
+										     );
 
 /**
 	* \russian
@@ -123,10 +122,10 @@ public:
 	* \endrussian
 */
 	static uint32_t xi_write_connection(
-		                               const xibridge_conn_t *pconn, 
-									   const uint8_t*buf, 
-									   uint32_t size
-								   );
+		                                   const xibridge_conn_t *pconn, 
+									       const uint8_t*buf, 
+									       uint32_t size
+								       );
 /**
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
@@ -157,11 +156,11 @@ public:
    * \endrussian
 */
 	static uint32_t xi_request_response(
-		                                    const xibridge_conn_t *pconn, 
-		                                    const uint8_t *req, 
-										    int req_len, 
-										    uint8_t *resp, 
-										    int resp_len
+		                                   const xibridge_conn_t *pconn, 
+		                                   const uint8_t *req, 
+										   int req_len, 
+										   uint8_t *resp, 
+										   int resp_len
 								       );
 
 /**
@@ -191,8 +190,8 @@ public:
 	bool open_device();
 
     bool exec_enumerate(
-                            char **result,
-                            uint32_t *pcount       
+                           char **result,
+                           uint32_t *pcount       
                        );
 
     bool open_connection();
@@ -226,7 +225,7 @@ public:
 	
 	xibridge_conn_t to_xibridge_conn_t() const 
 	{
-		return{ (uint32_t)_conn_id, { _server_protocol_version, 0, 0 } };
+		return{ (uint32_t)_conn_id, { (uint8_t)_server_protocol_version, 0, 0 } };
 	}
 private:
 

@@ -12,7 +12,7 @@ bool test_connect_2()
 	if (err != 0)
 	{
         ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
-		return FALSE;
+		return false;
 	}
 	
 	xibridge_conn_t conn;
@@ -20,7 +20,7 @@ bool test_connect_2()
     if (err)
     {
         ZF_LOGE("Cannot open xi-net://127.0.0.1/9: %s", xibridge_get_err_expl(err));
-        return FALSE;
+        return false;
     }
 	unsigned char resp[72];
    
@@ -28,9 +28,9 @@ bool test_connect_2()
 	if (ginf_err)
 	{
 		ZF_LOGE("Cannot execute ginf: %s", xibridge_get_err_expl(err));
-		return FALSE;
+		return false;
 	}
-	// разобрать структуру
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	// to do - sync 
 	// urmc_get_identity_information_t  info;
 	

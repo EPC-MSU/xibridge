@@ -1,7 +1,7 @@
 #include <bindy/bindy-static.h>
-#include "../Common/defs.h"
+#include "../common/defs.h"
 #include "xibridge_client.h" 
-#include "../Common/Protocols.h"
+#include "../common/protocols.h"
 #include "bindy_helper.h" 
 
 typedef struct
@@ -76,7 +76,7 @@ xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(const xib
         return xibridge_version_invalid;
     };
 	Xibridge_client * cl = _get_client_as_free(pconn->conn_id);
-    return {cl == nullptr ? _server_base_protocol_version : (uint8_t)cl->_server_protocol_version, 0, 0};
+    return {cl == nullptr ? (uint8_t)_server_base_protocol_version : (uint8_t)cl->_server_protocol_version, 0, 0};
 }
 
 
@@ -214,7 +214,7 @@ bool Xibridge_client::_send_and_receive(bvector &req)
 	if (!is_ok)
 	{
 		_last_error = ERR_SEND_DATA;
-		return FALSE;
+		return false;
 	}
 
 	// receive 
@@ -232,9 +232,9 @@ bool Xibridge_client::_send_and_receive(bvector &req)
 	else
 	{
 		_last_error = ERR_RECV_TIMEOUT;
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 bool Xibridge_client::is_connected()
