@@ -22,7 +22,9 @@ static err_def_t _err_strings[] =
 	{ ERR_SET_CONNECTION, "Network connection (bindy) error."},
 	{ ERR_RECV_TIMEOUT, "Receive data timeout." },
 	{ ERR_ANOTHER_PROTOCOL, "Another protocol is to be tested [internal flag]." },
-
+	{ ERR_DEVICE_LOST, "Server tells that the device connected is lost." },
+	{ ERR_PCKT_FMT, "Invalid data format." },
+	{ ERR_PCKT_INV, "Invalid data packet." },
     { 0, "" }
  }; 
 
@@ -87,7 +89,7 @@ bool Xibridge_client::exec_enumerate(
 {
     clr_errors();
     uint32_t answer_proto_version = _server_protocol_version;
-    AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
+    AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
     if (result == nullptr || pcount == nullptr)
     {
         _last_error = ERR_NULLPTR_PARAM;
@@ -271,7 +273,7 @@ bool Xibridge_client::open_device()
 {
 	clr_errors();
 	uint32_t answer_version = _server_protocol_version;
-	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
+	AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
 	if (proto == nullptr) 
 	{
 		_last_error = ERR_NO_PROTOCOL;
@@ -320,7 +322,7 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_lengt
 		return bvector();
 	}
 
-	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
+	AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
 
 	if (proto == nullptr)
 	{
@@ -386,7 +388,7 @@ bool Xibridge_client::close_connection_device()
 		_last_error = ERR_NO_CONNECTION;
 		return false;
 	}
-	AProtocol *proto = create_appropriate_protocol(_server_protocol_version);
+	AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
 	if (proto == nullptr)
 	{
 		_last_error = ERR_NO_PROTOCOL;
@@ -441,45 +443,3 @@ void Xibridge_client::disconnect()
 	_conn_id = conn_id_invalid;
 }
 
-/*
-uint32_t  Xibridge_client::_detect_protocol_version()
-{
-	if (_is_proto_detected) return _server_protocol_version;
-	if (!is_connected())
-	{
-		return DEFAULT_PROTO_VERSION;
-	}
-
-	AProtocol *proto = create_appropriate_protocol(_server_protocol_version); 
-	bvector req = proto->create_open_request(_dev_id, get_resv_tmout());
-	if (req.size() == 0)
-	{
-		return DEFAULT_PROTO_VERSION;
-	}
-	
-	uint32_t version = 0;
-	if (_send_and_receive(req))
-	{
-		version = get_proto_version_of_the_recv_message();
-		if (version == 2) // resolved 
-		{
-			// check if there is a xibridge server
-			//xl -> set_server_protocol_version(3);
-			// send special version command
-			bvector req = create_appropriate_protocol(3) -> create_version_request(get_resv_tmout());
-			if (req.size() == 0)
-			{
-				return 2;
-			}
-			if (_send_and_receive(req))
-			{
-				if (get_proto_version_of_the_recv_message() == 3)
-					version = 3; // resolved to unknown proto version
-			}
-			//
-	 }
-		
-	}
-	return version;
-}
-*/

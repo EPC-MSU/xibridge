@@ -27,6 +27,18 @@
 
 #define ERR_SET_CONNECTION 10
 
+/*
+* Server errors
+*/
+
+#define ERR_DEVICE_LOST 11
+
+/*
+Packet-Fmt errors
+*/
+
+#define ERR_PCKT_FMT 12
+#define ERR_PCKT_INV 13
 
 /**
    * Defines default version number of the protocol

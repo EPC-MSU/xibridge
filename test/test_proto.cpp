@@ -24,8 +24,9 @@ static bool test_request_proto1()
 {
 	ZF_LOGD("?test_request_proto1?");
 
+	uint32_t err;
 	bool ret = true;
-	Protocol1 proto(false);
+	Protocol1 proto(&err, false);
 	bvector reqw = proto.create_version_request(0);
 	if (reqw.size() != 0) 
 	{
@@ -77,9 +78,9 @@ static bool test_request_proto1()
 static bool test_request_proto2()
 {
 	ZF_LOGD("?test_request_proto2?");
-
+	uint32_t err;
 	bool ret = true;
-	Protocol2 proto(false);
+	Protocol2 proto(&err, false);
 	bvector reqw = proto.create_version_request(0);
 	if (reqw.size() != 0)
 	{
@@ -132,9 +133,9 @@ static bool test_request_proto2()
 static bool test_request_proto3()
 {
 	ZF_LOGD("?test_request_proto3?");
-
+	uint32_t err;
 	bool ret = true;
-	Protocol3 proto(false);
+	Protocol3 proto(&err, false);
 	bvector reqw = proto.create_version_request(0);
 	const cmd_schema & cm0 = cmd_schema::get_schema(PROTO_3_VER, proto.get_cmd_shema());
     if (!cm0.is_match(reqw.data(), (int)reqw.size(), 3, 0))

@@ -1,5 +1,6 @@
 #include "protocols.h"
- 
+#include "../client/xibridge_client.h"
+
 // staic data init
 cmd_schema Protocol1::_cmd_shemas[9]=
 {
@@ -125,7 +126,7 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	
 	if (cmd.wasBroken())
 	{
-		_is_inv_pcktfmt = true;  
+		*_perror = ERR_PCKT_FMT;
 		return false;
 	}
 
@@ -145,7 +146,7 @@ bvector Protocol2::create_cmd_request(DevId devid, uint32_t tmout, const bvector
 {
     bvector data_and_length;
     auto data_cbeg = data -> cbegin();
-    if (data != nullptr && data->size() >= URPC_CID_SIZE)
+    if (data != nullptr && data->size() >= (size_t)URPC_CID_SIZE)
     {
         data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + URPC_CID_SIZE );
         add_uint32_2_bvector(data_and_length, resp_length);
@@ -182,7 +183,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
-							 _is_inv_pcktfmt = true;
+							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
 						 data.assign(mbuf.cur_data(), mbuf.cur_data()+len);
@@ -201,7 +202,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 			              
 			              return true;
 		default:
-			_is_inv_pckt = true;
+			*_perror = ERR_PCKT_INV;
 			return false;
 		}
 	}
@@ -209,13 +210,18 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 	{
 		switch (pckt)
 		{
+		case pkt1_error_ntf:
+		{
+						*_perror = ERR_DEVICE_LOST;
+						return false;
+		}
 		case pkt1_raw:
 		{
 						 mbuf.mseek(8);
 						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
-							 _is_inv_pcktfmt = true;
+							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
 						 data = mbuf.to_vector(true);
@@ -228,7 +234,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 						 size_t len = mbuf.restOfSize(-1);
 						 if (len != sizeof (uint32_t))
 						 {
-							 _is_inv_pcktfmt = true;
+							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
                          mbuf >> r;
@@ -251,13 +257,14 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
                          }
                          
 	                     // according to protocol desc - the length of 				
-						 
+						 if (mbuf.wasBroken()) 
+						     *_perror = ERR_PCKT_FMT;
 					     return !mbuf.wasBroken();
 					    
 		}
 		
 		default:
-			_is_inv_pckt = true;
+			*_perror = ERR_PCKT_INV;
 			return false;
 		}
 	}
@@ -283,7 +290,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
-							 _is_inv_pcktfmt = true;
+							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
                          _res_err = r;
@@ -300,7 +307,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 					     return true;
 		}
 		default:
-			_is_inv_pckt = true;
+			*_perror = ERR_PCKT_INV;
 			return false;
 		}
 	}
@@ -315,7 +322,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
-							 _is_inv_pcktfmt = true;
+							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
 						 _res_err = r;
@@ -329,7 +336,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 								size_t len = mbuf.restOfSize(-1);
 								if (len != sizeof (uint32_t))
 								{
-									_is_inv_pcktfmt = true;
+									*_perror = ERR_PCKT_FMT;
 									return false;
 								}
                                 mbuf >> r;
@@ -338,7 +345,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		}
 		
 		default:
-			_is_inv_pckt = true;
+			*_perror = ERR_PCKT_INV;
 			return false;
 		}
 	}
@@ -351,6 +358,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 {
 	// 16 bytes has already read from mbuf
 	Hex32 size, r;
+	HexIDev3 dev;
 	if (_is_server)
 	{
 		switch (pckt)
@@ -362,7 +370,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 							 size_t len = mbuf.restOfSize(-1);
 							 if (mbuf.wasBroken() || len != (int)size)
 							 {
-								 _is_inv_pcktfmt = true;
+								 *_perror = ERR_PCKT_FMT;
 								 return false;
 							 }
 							 data = mbuf.to_vector(true);
@@ -376,7 +384,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 							 return true;
 			                  
 		default:
-			_is_inv_pckt = true;
+			*_perror = ERR_PCKT_INV;
 			return false;
 		}
 	}
@@ -390,7 +398,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 							  size_t len = mbuf.restOfSize(-1);
 							  if (mbuf.wasBroken() || len != (int)size)
 							  {
-								  _is_inv_pcktfmt = true;
+								  *_perror = ERR_PCKT_FMT;
 								  return false;
 							  }
 							  data = mbuf.to_vector(true);
@@ -405,7 +413,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 							  size_t len = mbuf.restOfSize(-1);
 							  if (len != sizeof (uint32_t))
 							  {
-								  _is_inv_pcktfmt = true;
+								  *_perror = ERR_PCKT_FMT;
 								  return false;
 							  }
                               mbuf >> r;
@@ -418,15 +426,23 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 
 							   mbuf.mseek(8);
 							   mbuf >> size;
-							   res_data.assign(mbuf.cur_data(), mbuf.cur_data() + size * sizeof(uint32_t));
-							   mbuf >> size;
-							   if (mbuf.restOfSize(-1) != (int)size) return false;
-							   data = mbuf.to_vector(true);
-							   return true;
+							   _res_err = (uint32_t)size;
+							   for (int i = 0; i < (int)size; i++)
+							   {
+								   mbuf >> dev;
+								   // according to protocol3
+								   DevId devid(dev.toExtDevId());
+								   add_dev_id_bvector_net_order(data, devid._dev_id);
+								}
+
+							   // according to protocol desc - the length of 				
+							   if (mbuf.wasBroken()) *_perror = ERR_PCKT_FMT;
+							   return !mbuf.wasBroken();
+
 
 		}
 		default:
-			_is_inv_pckt = true;
+			*_perror = ERR_PCKT_FMT;
 			return false;
 		}
 	}
@@ -479,11 +495,6 @@ bvector Protocol3::create_client_request(uint32_t pckt, DevId devid, uint32_t tm
 
 bool Protocol1::translate_response(uint32_t pckt, const bvector& res_data)
 {
-	if (pckt == pkt1_error_ntf)
-	{
-		_is_device_broken = true;
-		return false;
-	}
 	if (res_data.size() > 0) return res_data[0] != 0;
 	return  true;
 }
@@ -498,7 +509,7 @@ bool Protocol3::translate_response(uint32_t pckt, const bvector& res_data)
 {
 	if (pckt == pkt3_error_resp)
 	{
-		_is_device_broken = true;
+		*_perror = ERR_DEVICE_LOST;
 		// to do error codes !!!
 		return false;
 	}
@@ -506,19 +517,19 @@ bool Protocol3::translate_response(uint32_t pckt, const bvector& res_data)
 	return  false;
 }
 
-AProtocol *create_appropriate_protocol(int version_number)
+AProtocol *create_appropriate_protocol(int version_number, uint32_t * perror)
 {
 	AProtocol * p = nullptr;
 	switch (version_number)
 	{
 	case 1:
-		p = new Protocol1(false);
+		p = new Protocol1(perror, false);
 		break;
 	case 2:
-		p = new Protocol2(false);
+		p = new Protocol2(perror, false);
 		break;
 	case 3:
-		p = new Protocol3(false);
+		p = new Protocol3(perror, false);
 		break;
 	}
 	return p;

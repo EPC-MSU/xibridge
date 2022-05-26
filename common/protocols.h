@@ -48,9 +48,7 @@ typedef struct _sm
 
 /**
 * \russian
-* ����� AProtocol
-* ����������� �����, ������������ ����� �������� ��� ����������
-* ���������� �� ������ �����������
+* Абстракный класс для поддержки различных протоколов обмена
   \endrussian
 */
 class AProtocol
@@ -86,7 +84,7 @@ public:
 	virtual const cmd_schema *get_cmd_shema() = 0;  // pure virtual
     uint32_t get_result_error() const { return _res_err; }
 protected:
-	AProtocol(bool is_server): _is_server(is_server), _is_inv_pckt(false), _is_inv_pcktfmt(false) {};
+	AProtocol(uint32_t *perror, bool is_server): _is_server(is_server), _perror(perror) {};
 	virtual bool get_spec_data(MBuf&  mbuf,
 		bvector &res_data,
 		bvector &data,
@@ -95,14 +93,10 @@ protected:
 	//virtual bvector create_cmd_req_proxy(DevId devid, uint32_t tmout, const bvector & data) = 0;
 	
 	bool _is_server;
+		
+    uint32_t _res_err;   //at response stage the result of an operation or error from other side
 
-	bool _is_inv_pckt; // to send error packet to the other side
-
-	bool _is_inv_pcktfmt; // to send error packet to the other side
-
-	bool _is_device_broken; 
-
-    uint32_t _res_err;   //at response stage the result of an operation or error from other side 
+	uint32_t  * _perror; // pointer to error field to write error code
 
 };
 
@@ -116,7 +110,7 @@ protected:
 class Protocol1 : public AProtocol
 {
 public:
-	Protocol1(bool isserver):AProtocol(isserver) {};
+	Protocol1(uint32_t * perror, bool isserver):AProtocol(perror, isserver) {};
 	virtual bool is_device_id_extended() {
 		return false;
 	};
@@ -157,7 +151,7 @@ private:
 	*/
     enum Pkt_types1
 	{
-		pkt1_raw = 0x0,             // ��� ������ � ������ � ������� ���� � ��� ��
+		pkt1_raw = 0x0,             // пакеты протокола 1
 		pkt1_open_req = 0x1,
 		pkt1_open_resp = 0xFF,
 		pkt1_close_req = 2,
@@ -175,7 +169,7 @@ private:
 class Protocol2 : public AProtocol
 {
 public:
-	Protocol2(bool isserver) :AProtocol(isserver) {};
+	Protocol2(uint32_t * perror, bool isserver) :AProtocol(perror, isserver) {};
 	virtual bool is_device_id_extended() {
 		return false;
 	};
@@ -229,7 +223,7 @@ private:
 class Protocol3 : public AProtocol
 {
 public:
-	Protocol3(bool isserver) :AProtocol(isserver) {};
+	Protocol3(uint32_t * perror, bool isserver) :AProtocol(perror, isserver) {};
 	virtual bool is_device_id_extended() {
 		return true;
 	};
@@ -295,7 +289,7 @@ private:
 /*
 * Virtual constructor
 */
-extern AProtocol *create_appropriate_protocol(int version_number);
+extern AProtocol *create_appropriate_protocol(int version_number, uint32_t *perror);
 
 #endif
 
