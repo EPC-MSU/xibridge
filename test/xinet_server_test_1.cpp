@@ -6,7 +6,26 @@
 
 // to run with ximc-xinet-server
 // !!! select the right address every time as tested
-static const char * const _DEV_IP = "xi-net://172.16.130.38/1f50";
+static const char * const _DEV_IP = "xi-net://172.16.130.45/1f50";
+
+
+PACK(
+struct _gets_re
+{
+    char gets[4];
+    status_t status;
+});
+
+typedef struct _gets_re re_gets;
+
+PACK(
+struct _geng_re
+{
+    char gets[4];
+    engine_settings_t settings;
+});
+
+typedef struct _geng_re re_geng;
 
 bool test_connect_1()
 {
@@ -28,21 +47,20 @@ bool test_connect_1()
         return false;
     }
 
-    //move_settings_calb_t resp_s;
-    uint32_t serial;
-
-    uint32_t xir_err = xibridge_device_request_response(&conn, (const unsigned char *)"GSER", 4, (unsigned char *)&serial, sizeof(uint32_t));
-    if (xir_err)
+   
+    re_gets status;
+    uint32_t err_op = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 4, (uint8_t *)&status, sizeof(re_gets));
+    if (err_op)
     {
-        ZF_LOGE("Cannot execute xir: %s", xibridge_get_err_expl(err));
+        ZF_LOGE("Cannot execute gets: %s", xibridge_get_err_expl(err));
         return false;
     }
 
-    //ZF_LOGD("Speed: %f\n", resp_s.Speed);
-    //ZF_LOGD("Accelerartion: %f\n", resp_s.Accel);
+    ZF_LOGD("Speed: %d", status.status.CurSpeed);
 
-    ZF_LOGD("Serial: %u", serial);
-
+    re_geng settings;
+    err_op = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
+    ZF_LOGD("Nom voltage: %u", settings.settings.NomVoltage);
     xibridge_close_device_connection(&conn);
     char  *pdata; uint32_t count;
 
@@ -76,13 +94,14 @@ static void thread_body(int thread_num)
     xibridge_conn_t conn;
     err = xibridge_open_device_connection(_DEV_IP, &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
-	ZF_LOGD("Thread %u: sending GSER... \n", thread_num);
+	ZF_LOGD("Thread %u: sending gets... \n", thread_num);
 	//move_settings_calb_t resp_s;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    uint32_t serial;
-  	err = xibridge_device_request_response(&conn, (const unsigned char *)"GSER", 3, (unsigned char *)&serial, sizeof(uint32_t));
+    //uint32_t serial;
+    status_t status;
+  	err = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 3, (uint8_t *)&status, sizeof(status_t));
 
-	ZF_LOGD("Thread %u: GSER return %s\n", thread_num,
+	ZF_LOGD("Thread %u: gets return %s\n", thread_num,
 		err == 0 ? "true" : "false");
 	ZF_LOGD("Thread %u: closing connection %u... \n", thread_num, conn.conn_id);
 

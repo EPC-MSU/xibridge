@@ -182,10 +182,10 @@ uint32_t XI_EXPORT xibridge_close_device_connection(const xibridge_conn_t *pconn
    * \endrussian
 */
 uint32_t XI_EXPORT xibridge_device_request_response(
-	                                                    const xibridge_conn_t *pconn,
+	                                                   const xibridge_conn_t *pconn,
                                                        const uint8_t *req,
                                                        int req_len, 
-													                uint8_t *resp,
+													   uint8_t *resp,
                                                        int resp_len
 												               );
 

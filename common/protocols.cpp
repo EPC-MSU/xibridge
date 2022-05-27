@@ -224,7 +224,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
-						 data = mbuf.to_vector(true);
+                   		 data = mbuf.to_vector(true);
 						 return true;
 		}
 		case pkt1_open_resp:

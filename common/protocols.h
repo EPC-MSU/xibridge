@@ -102,9 +102,8 @@ protected:
 
 /**
 * \russian
-* ����� Protocol1
-* ������������ ���������� �������� ������ 1, ���. � ximc-�������
-* 
+* Класс Protocol1
+* Для создания-обработки сообщений по протоколу версии 1(ximc-сервер)
 * \endrussian
 */
 class Protocol1 : public AProtocol
@@ -162,10 +161,15 @@ private:
 	};
 
 	static cmd_schema _cmd_shemas[9];
-
     bvector create_client_request(uint32_t pckt, uint32_t serial, uint32_t tmout, const bvector *data);
 };
 
+/**
+* \russian
+* Класс Protocol2
+* Для создания-обработки сообщений по протоколу версии 2(urpc-сервер)
+* \endrussian
+*/
 class Protocol2 : public AProtocol
 {
 public:
@@ -220,6 +224,12 @@ private:
     virtual bvector create_client_request(uint32_t pckt, uint32_t serial, uint32_t tmout, const bvector *data);
 };
 
+/**
+* \russian
+* Класс Protocol3
+* Для создания-обработки сообщений по протоколу версии 3(xibridge-сервер)
+* \endrussian
+*/
 class Protocol3 : public AProtocol
 {
 public:
@@ -251,8 +261,7 @@ public:
 	virtual bool translate_response(uint32_t pckt, const bvector& res_data);
 
     virtual bvector create_cmd_request(DevId devid, uint32_t tmout, const bvector *data = nullptr, uint32_t resp_length = 0);
-    
-
+ 
 protected:
 	
 	virtual uint32_t version() { return 3; }
