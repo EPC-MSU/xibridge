@@ -94,9 +94,7 @@ uint32_t xibridge_close_device_connection(const xibridge_conn_t *pconn)
 	return Xibridge_client::xi_close_connection_device(pconn);
 }
 
-/*
-* ������� ���������� �������
-*/
+
 uint32_t xibridge_device_request_response(
 	                                          const xibridge_conn_t *pconn, 
                                               const uint8_t *req, 
