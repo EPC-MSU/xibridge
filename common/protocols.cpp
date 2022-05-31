@@ -28,17 +28,17 @@ cmd_schema  Protocol2 ::_cmd_shemas[7] =
 
 cmd_schema Protocol3::_cmd_shemas[12] =
 {
-{ pkt3_ver_req, "v_p_u_0_0_0_0_0" },
-{ pkt3_ver_resp, "v_p_u_0_0_0_0_0d" },
-{ pkt3_cmd_req, "v_p_u_I_0_0_l_u" },
-{ pkt3_cmd_resp, "v_p_u_I_0_0_l" },
-{ pkt3_open_req, "v_p_u_I_0_0" },
-{ pkt3_open_resp, "v_p_u_I_0_0_b" },
-{ pkt3_close_req, "v_p_u_I_0_0" },
-{ pkt3_close_resp, "v_p_u_I_0_0_b" },
-{ pkt3_enum_req, "v_p_u_0_0_0_0_0" },
-{ pkt3_enum_resp, "v_p_u_0_0_0_0_0x" },
-{ pkt3_error_resp, "v_p_u_I_0_0_0_0u" },
+{ pkt3_ver_req, "v_p_0_0_0_0_0_0" },
+{ pkt3_ver_resp, "v_p_0_0_0_0_0_0_d" },
+{ pkt3_cmd_req, "v_p_0_I_0_0_l_u" },
+{ pkt3_cmd_resp, "v_p_0_I_0_0_l" },
+{ pkt3_open_req, "v_p_0_I_0_0" },
+{ pkt3_open_resp, "v_p_0_I_0_0_b" },
+{ pkt3_close_req, "v_p_0_I_0_0" },
+{ pkt3_close_resp, "v_p_0_I_0_0_b" },
+{ pkt3_enum_req, "v_p_0_0_0_0_0_0" },
+{ pkt3_enum_resp, "v_p_0_0_0_0_0_0_x" },
+{ pkt3_error_resp, "v_p_0_I_0_0_u" },
 { pkt3_error_resp, nullptr }
 };
 

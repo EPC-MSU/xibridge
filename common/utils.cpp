@@ -8,7 +8,7 @@ uint32_t AHex::_get_stream1_4(uint8_t **ptr)
 	if (littleEndian())
 	{
 		p += _tsize;
-		for (int i = 0; i < _tsize; i++)
+		for (int i = 0; i < (int)_tsize; i++)
 		{
 			val <<= 8;
 			val += *(--p);
@@ -17,7 +17,7 @@ uint32_t AHex::_get_stream1_4(uint8_t **ptr)
 	else
 	{
 		
-		for (int i = 0; i < _tsize; i++)
+		for (int i = 0; i < (int)_tsize; i++)
 		{
 			val <<= 8;
 			val += *(p++);
@@ -32,14 +32,14 @@ void AHex::put_stream1_4(uint8_t **ptr, uint32_t val)
     uint8_t *p = *ptr;
     if (littleEndian())
     {
-        for (int i = 0; i < _tsize; i++)
+        for (int i = 0; i < (int)_tsize; i++)
         {
            *p++ = (uint8_t)((val >> (i * 8)) & 0xFF);
         }
     }
     else
     {
-		for (int i = 0; i < _tsize; i++)
+		for (int i = 0; i < (int)_tsize; i++)
 		{
 			uint8_t v = (uint8_t)((val >> ((_tsize - 1 - 3) * 8)));
 			*p++ = (uint8_t)((val >> ((_tsize-1-i) * 8)) & 0xFF);
@@ -48,7 +48,7 @@ void AHex::put_stream1_4(uint8_t **ptr, uint32_t val)
     *ptr += _tsize;
  }
 
-// ������� ������������ �������� ��������� �������� �� ������������������ ���� �������
+
 void Hex8::_get_stream(uint8_t **ptr)
 {
 	value = **ptr;
@@ -60,8 +60,6 @@ void Hex32::_get_stream(uint8_t **ptr)
 	value = _get_stream1_4(ptr);
 }
 
-// ����������� �������� �� ����������� ���������� ASCII- c�����
-// ������ ������ ������. �����
 Hex32::Hex32(char *psymbol_name_decimal) :
 AHex()
 {
@@ -114,9 +112,6 @@ xibridge_device_t HexIDev3::toExtDevId() const
 	return exdevid;
 }
 
-// ����������� �������� ������ MBuf
-// pdata ����� ������ �����
-// ���  ����������� ��� ������ ������
 MBuf::MBuf(const uint8_t *readyd, size_t size, bool readonly) :
 ovrflow(0),
 _rdon(readonly)
@@ -125,7 +120,6 @@ _rdon(readonly)
 	memcpy(pdata, readyd, size);
 }
 
-// ��� ����������� ��� ������ ������
 MBuf::MBuf(int size, bool readonly) :
 ovrflow(0),
 _rdon(readonly)
@@ -134,26 +128,21 @@ _rdon(readonly)
 	memset(pdata, 0, dlen);
 }
 
-// ��������� �� ������� 4-����-�� �������� 
 MBuf& MBuf::operator >> (Hex32 &v)
 {
 	if (dlen - (pdata - origin_data)  < 4) ovrflow++;
-	// ����� �������� ����� ��� ���������
 	else
 	{
-		// �������
 		v._get_stream(&pdata);
 	}
 	return *this;
 }
 
-// ������ � ������ 4-�������� �������� 
 MBuf& MBuf::operator << (Hex32 v)
 {
 	if (!_rdon)
 	{
 		if (dlen - (pdata - origin_data)  < 4) ovrflow++;
-		// ����� � ������ �� �������
 		else
 		{
 			v.put_stream1_4(&pdata, v);
@@ -162,20 +151,16 @@ MBuf& MBuf::operator << (Hex32 v)
 	return *this;
 }
 
-// ��������� �� ������� 3-����-�� �������� 
 MBuf& MBuf::operator >> (Hex24 &v)
 {
 	if (dlen - (pdata - origin_data)  < 3) ovrflow++;
-	// ����� �������� ����� ��� ���������
 	else
 	{
-		// �������
 		v._get_stream(&pdata);
 	}
 	return *this;
 }
 
-// ������ � ������ 3-�������� �������� 
 MBuf& MBuf::operator << (Hex24 v)
 {
 	if (!_rdon)
@@ -183,7 +168,6 @@ MBuf& MBuf::operator << (Hex24 v)
 
 
 		if (dlen - (pdata - origin_data)  < 3) ovrflow++;
-		// ����� � ������ �� �������
 		else
 		{
             v.put_stream1_4(&pdata, v);
@@ -192,26 +176,21 @@ MBuf& MBuf::operator << (Hex24 v)
 	return *this;
 }
 
-// ��������� �� ������� 2-����-�� �������� 
 MBuf& MBuf::operator >> (Hex16 &v)
 {
 	if (dlen - (pdata - origin_data)  < 2) ovrflow++;
-	// ����� �������� ����� ��� ���������
 	else
 	{
-		// �������
 		v._get_stream(&pdata);
 	}
 	return *this;
 }
 
-// ������ � ������ 2-�������� �������� 
 MBuf& MBuf::operator << (Hex16 v)
 {
 	if (!_rdon)
 	{
 		if (dlen - (pdata - origin_data)  < 2) ovrflow++;
-		// ����� � ������ �� �������
 		else
 		{
             v.put_stream1_4(&pdata, v);
@@ -220,37 +199,30 @@ MBuf& MBuf::operator << (Hex16 v)
 	return *this;
 }
 
-// ��������� �� ������� 1-����-�� �������� 
 MBuf& MBuf::operator >> (Hex8 &v)
 {
 	if (dlen - (pdata - origin_data)  < 1) ovrflow++;
-	// ����� �������� ����� ��� ���������
 	else
 	{
-		// �������
 		v._get_stream(&pdata);
 	}
 	return *this;
 }
 
-// ������ � ������ 1-�������� �������� 
 MBuf& MBuf::operator << (Hex8 v)
 {
 	if (!_rdon)
 	{
 		if (dlen - (pdata - origin_data)  < 1) ovrflow++;
-		// ����� � ������ �� �������
 		else
 		{
-			// �������
-			// ������� ����� 
 			*pdata++ = (uint8_t)(v & 0xFF);
 		}
 	}
 	return *this;
 }
 
-// ������ � ����� ����������� ������� ������  
+ 
 MBuf& MBuf::operator << (const MBuf & src)
 {
 	size_t _len = src.realSize();
@@ -264,52 +236,40 @@ MBuf& MBuf::operator << (const MBuf & src)
 	return *this;
 }
 
-// ������ � ����� ����������� HexIDev3  
+  
 MBuf& MBuf::operator << (const HexIDev3 &hidev)
 {
     hidev.put_stream(*this);
     return *this;
 }
 
-// ������ �� ������ ����������� HexIDev3  
 MBuf& MBuf::operator >> (HexIDev3 &hidev)
 {
     hidev.get_stream(*this);
     return *this;
 }
 
-// ������ ������ � ����� �������
 size_t MBuf::memwrite(const uint8_t *data, size_t len)
 {
-	// ��������� �� �����������
 	if (_rdon || len < 0) return 0;
 
-	// ����� � ������ ���� �� �������
 	if (dlen - (pdata - origin_data)  < len) { ovrflow++; return 0; }
 
-	// ����� ����, ����������
 	memcpy(pdata, data, len);
 	pdata += len;
 	return len;
 }
 
-// �������������� ���������� �����, ������� ����� 
-// � ������ ������� ����������� ������
 bool MBuf::meminsert_start(const uint8_t *what, size_t len)
 {
-	// ��������� �� �����������
 	if (_rdon || len < 0) return false;
-	// ����� ��� �������� �� ����� 
 	const uint8_t * temp_origin = origin_data;
-	// ������� �� �������� 
 	int cur_pos = (int)(pdata - origin_data);
-	// ����� ���������� ������
 	dlen += len;
 	origin_data = pdata = new uint8_t[dlen];
 
 	memwrite(what, len);
 	memwrite(temp_origin, dlen - len);
-	// ���� �����, ���� � �����
 	pdata = origin_data + cur_pos + len;
 
 	delete[] temp_origin;
@@ -318,61 +278,48 @@ bool MBuf::meminsert_start(const uint8_t *what, size_t len)
 }
 
 
-// ��������� ��� ����� � ������ � ��������. �����. �����
 bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
 {
-	// ��������� �� �����������
 	if (_rdon) return false;
-	// ����� ��� �������� �� ����� 
 	const uint8_t * temp_origin = origin_data;
-	// ������� �� �������� 
 	int cur_pos = (int)(pdata - origin_data);
-	// ����� ���������� ������
 	dlen += 2;
 	origin_data = pdata = new uint8_t[dlen];
 	*this << Hex8(num1) << Hex8(num2);
 	memwrite(temp_origin, dlen - 2);
-	// ���� �����, ���� � �����
 	pdata = origin_data + cur_pos + 2;
 	delete[] temp_origin;
 	return true;
 }
 
 
-// ������  ������ �� ������ �������
 size_t MBuf::memread(uint8_t *dest, size_t dlen, size_t len)
 {
-	// ���������, ����� �� �����������
 	if (len < 0 || len > dlen || restOfSize(-1) < len) return -1;
-	// ����� ����, ��������
 	memcpy(dest, pdata, len);
 	pdata += len;
 	return len;
 }
 
-// ����������� ������� �������
 bool MBuf::mseek(int offset)
 {
     int len;
-	if (dlen < (len = (int)(pdata + offset - origin_data)) || (pdata + offset) < origin_data) ovrflow++;
+	if ((int)dlen < (len = (int)(pdata + offset - origin_data)) || (pdata + offset) < origin_data) ovrflow++;
 	else pdata += offset;
 	return ovrflow != 0;
 }
 
-// ����������� ������� ������� ������������ ��� ������
 bool MBuf::tot_seek(int offset)
 {
-	if (offset >= dlen || offset < 0) ovrflow++;
+	if (offset >= (int)dlen || offset < 0) ovrflow++;
 	else pdata = origin_data + offset;
 	return ovrflow == 0;
 }
 
-// ����� ���� � ������ ������ �� ������� ������� �� �� ������ ���� ������
-// ������ �����. -1
 size_t MBuf::restOfSize(int from_pos) const
 {
 	if (from_pos == -1) from_pos = (int)(pdata - origin_data);
-	if (from_pos < 0 || from_pos >= dlen) return -1;
+	if (from_pos < 0 || from_pos >= (int)dlen) return -1;
 	return (dlen - from_pos);
 }
 
