@@ -240,20 +240,20 @@ public:
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector* data = nullptr);
 	virtual bvector create_open_request(DevId devid, uint32_t tmout)
 	{
-		return create_client_request(pkt3_open_req, devid, tmout);
+		return create_client_request(pkt3_open_req, devid, 0);
 	};
 	virtual bvector create_close_request(DevId devid, uint32_t tmout)
 	{
-		return create_client_request(pkt3_close_req, devid, tmout);
+		return create_client_request(pkt3_close_req, devid, 0);
 	};
 	virtual bvector create_version_request(uint32_t tmout)
 	{
-		return create_client_request(pkt3_ver_req, DevId(), tmout);
+		return create_client_request(pkt3_ver_req, DevId(), 0);
 	}
 	
 	virtual bvector create_enum_request(uint32_t tmout)
 	{
-		return create_client_request(pkt3_enum_req, DevId(), tmout);
+		return create_client_request(pkt3_enum_req, DevId(), 0);
 	};
 
 	virtual const cmd_schema *get_cmd_shema() { return _cmd_shemas; }

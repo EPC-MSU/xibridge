@@ -488,7 +488,7 @@ bvector Protocol3::create_client_request(uint32_t pckt, DevId devid, uint32_t tm
     }
     else // enumerate and version req
     {
-        mbuf << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00);
+        mbuf << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00);
     }
 	return mbuf.to_vector();
 }

@@ -6,7 +6,7 @@
 #if defined (WIN32) || defined(WIN64)
 #define _CRT_SECURE_NO_WARNINGS
 
-#define BUILD_SHARED_LIBS_XI 1
+
 #if defined(BUILD_SHARED_LIBS_XI)
     #define XI_EXPORT __declspec(dllexport)
 #else
@@ -39,7 +39,7 @@ struct _xibridge_device_t
 	uint16_t PID;
 	uint32_t id;
 });
-typedef _xibridge_device_t xibridge_device_t;
+typedef struct _xibridge_device_t xibridge_device_t;
 
 /**
     * \russian
@@ -53,7 +53,7 @@ struct _xibridge_version_t
     uint8_t minor;
     uint8_t bagfix;
 });
-typedef _xibridge_version_t xibridge_version_t;
+typedef struct _xibridge_version_t xibridge_version_t;
 
 /*
 * Значение для invalid версии
@@ -71,12 +71,12 @@ struct _xibridge_conn_t
     uint32_t conn_id;  // уникальный идентифакатор сетевого подключения
     xibridge_version_t proto_ver; // версия протокола
 });
-typedef _xibridge_conn_t xibridge_conn_t;
+typedef struct _xibridge_conn_t xibridge_conn_t;
 
 /*
 * Значение для invalid подключения
 */
-const xibridge_conn_t xibridge_conn_invalid = {0, xibridge_version_invalid};
+const xibridge_conn_t xibridge_conn_invalid = { 0, { 0, 0, 0 } };
 
 /**
 * \russian
@@ -97,7 +97,7 @@ struct _xibridge_parsed_uri{
     char uri_server_host[XI_URI_HOST_LEN];
     xibridge_device_t uri_device_id;
 });
-typedef _xibridge_parsed_uri xibridge_parsed_uri;
+typedef struct _xibridge_parsed_uri xibridge_parsed_uri;
 
 /** 
     * \russian
