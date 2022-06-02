@@ -22,9 +22,9 @@ bool test_connect_2()
         ZF_LOGE("Cannot open xi-net://127.0.0.1/9: %s", xibridge_get_err_expl(err));
         return false;
     }
-	unsigned char resp[72];
+	unsigned char resp[72+4];
    
-	uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, 72);
+	uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, 72+4);
 	if (ginf_err)
 	{
 		ZF_LOGE("Cannot execute ginf: %s", xibridge_get_err_expl(err));
@@ -33,8 +33,8 @@ bool test_connect_2()
 	// ��������� ���������
 	// to do - sync 
 	// urmc_get_identity_information_t  info;
-	
-	MBuf mresp(resp, 72);
+	Hex32  urpc_res;
+	MBuf mresp(resp, 72+4);
 	/*
 	p = out_buffer;
 	for (i = 0; i<16; i++) output->Manufacturer[i] = pop_uint8_t(&p);
@@ -51,7 +51,10 @@ bool test_connect_2()
 	output->FirmwareBugfix = pop_uint16_t(&p);
 	output->SerialNumber = pop_uint32_t(&p);
 	*/
-	
+
+	mresp >> urpc_res;
+	ZF_LOGD("Urpc return code: %d\n", (int)urpc_res);
+
     char man[16 + 1];
     memset(man, 0, 16 + 1);
 	mresp.memread((uint8_t *)man, 16, 16);
@@ -86,9 +89,9 @@ static void thread_body(int thread_num)
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
     err = xibridge_open_device_connection("xi-net://127.0.0.1/9", &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
-	unsigned char resp[72];
+	unsigned char resp[72+4];
 	ZF_LOGD("Thread %u: sending ginf... \n", thread_num);
-	uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, 72);
+	uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, 72+4);
 	
 	ZF_LOGD("Thread %u: ginf return %s\n", thread_num, 
 		     ginf_err == 0 ? "true" : "false");

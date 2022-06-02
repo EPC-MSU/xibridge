@@ -286,14 +286,14 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		case pkt2_cmd_req:
 		{
 						 mbuf.mseek(8);
-                         mbuf >> r;
+                         //mbuf >> r; get data as is!!!
 						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
-                         _res_err = r;
+                         _res_err = 0;
 						 data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
 
 						 return true;

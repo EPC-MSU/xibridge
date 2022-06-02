@@ -19,87 +19,14 @@ extern void test_connect_1_threads();
 
 extern uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_uri);
 
-
-/*
-Temporary wrapper as a solution for finding key in libximc using c++ functions.
-*/
-bool find_key(const char* hints, const char* key, char* buf, unsigned int length)
-{
-    if (hints == NULL) return FALSE;
-    char *s, *ptr, *ptoc;
-    int key_count, i, len;
-    char delim, eq;
-    bool ret;
-    s = (char *)malloc(strlen(hints) + 1);
-    memcpy(s, hints, strlen(hints));
-    s[strlen(hints)] = 0;
-
-    delim = ',';
-    eq = '=';
-    key_count = 0;
-    ret = true;
-    do 
-    { // exit when no new item is found in strrchr() function
-        ptr = strrchr(s, eq);
-        if (ptr == NULL) break;
-        key_count++;
-        while (ptr != s && *ptr != delim) // find the nearest left delimiter
-            ptr--;
-        if (ptr == s) break;
-        *ptr-- = 0;
-    } while (1);
-    ptr = s;
-    for (i = 0; i < key_count; i++)
-    {
-        len = strlen(ptr);
-        ptoc = ptr;
-        while (*ptoc == ' ') ptoc++;
-        if (portable_strncasecmp(ptoc, key, strlen(key)) == 0 && strchr (ptoc, eq) != NULL)
-        {
-            ptoc += strlen(key);
-            while (*ptoc == ' ') ptoc++;
-            if (*ptoc++ == eq)
-            {
-                while (*ptoc == ' ') ptoc++;
-                if (length < strlen(ptoc) + 1) ret = false;
-                else  memcpy(buf, ptoc, strlen(ptoc) + 1);
-                free(s);
-                return ret;
-            }
-        }
-        ptr += (len + 1);
-    }
-    free(s);
-    return false;
-}
-
-bool test_find_key()
-{
-    ZF_LOGD("Starting test_find_key...");
-    char * hints = "addr= abb, c,dd, xi-net=  888, 999, ";
-    char *hints_empty = "addr=";
-    char *bad_hints = " addr = 8 = 9";
-    char result[128];
-    if (!find_key(hints, "addr", result, 128))
-        return false;
-    if (!find_key(hints, "xi-net", result, 128))
-        return false;
-    if (!find_key(hints_empty, "addr", result, 128))
-        return false;
-    if (!find_key(bad_hints, "addr", result, 128))
-        return false;
-    return true;
-}
-
-
 bool test_xibridge_uri_parse()
 {
 	xibridge_parsed_uri parsed;
 	ZF_LOGD("Starting test_xibridge_uri_parse...");
 	bool ret = true;
 
-    if (!test_find_key())
-        return false;
+    //if (!test_find_key())
+    //    return false;
 
 	// test invalid uri
 	if (xibridge_parse_uri_dev12("xi-net://abcd/1", &parsed) != 0)

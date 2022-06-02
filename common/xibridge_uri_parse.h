@@ -19,7 +19,7 @@ uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_u
 	parsed_uri->uri_device_id.PID = 0;
 	parsed_uri->uri_device_id.VID = 0;
     const char *p = uri;
-	while (*p == ' ' || *p == '\t') p++;
+	p += strspn(p, " \t");
 	const char *end_s = strstr(p, "://");
  	int l = 0;
 	if (end_s != 0 && (l = ((int)(end_s - p))) < XI_URI_SCHEMA_LEN)
