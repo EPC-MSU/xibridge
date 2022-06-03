@@ -56,7 +56,7 @@ typedef struct _xibridge_version_t xibridge_version_t;
 /*
 * Значение для invalid версии
 */
-const xibridge_version_t xibridge_version_invalid = {0, 0, 0};
+#define xibridge_version_invalid  {0, 0, 0}
 
 /**
 * \russian
@@ -74,7 +74,7 @@ typedef struct _xibridge_conn_t xibridge_conn_t;
 /*
 * Значение для invalid подключения
 */
-const xibridge_conn_t xibridge_conn_invalid = { 0, { 0, 0, 0 } };
+#define xibridge_conn_invalid { 0, { 0, 0, 0 } }
 
 /**
 * \russian
