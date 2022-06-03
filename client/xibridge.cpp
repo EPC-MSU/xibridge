@@ -7,7 +7,9 @@
 
 
 // to make log level controlled
-ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
+#if defined(BUILD_SHARED_LIBS_XI)
+    ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
+#endif
 
 xibridge_version_t xibridge_version()
 {
@@ -21,7 +23,12 @@ xibridge_version_t xibridge_get_max_protocol_version()
 
 uint32_t xibridge_init()
 {
-	return Xibridge_client::xi_init();
+	uint32_t res  = Xibridge_client::xi_init();
+    if (res == 0)
+    {
+        xibridge_set_base_protocol_version({1, 0, 0});
+    }
+    return res;
 }
 
 uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver)
@@ -38,7 +45,7 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
 {
     uint32_t res_err;
     if (pconn == nullptr) return ERR_NULLPTR_PARAM;
-    *pconn = { 0, {0,0,0} };
+    *pconn = xibridge_conn_invalid;
 	Xibridge_client * cl = new Xibridge_client(xi_net_uri);
 
     
