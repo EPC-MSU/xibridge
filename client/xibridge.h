@@ -4,8 +4,6 @@
 #include <stdint.h>
 
 #if defined (WIN32) || defined(WIN64)
-#define _CRT_SECURE_NO_WARNINGS
-
 
 #if defined(BUILD_SHARED_LIBS_XI)
     #define XI_EXPORT __declspec(dllexport)

@@ -3,4 +3,4 @@
 
 #cmakedefine BUILD_SHARED_LIBS_XI
 
-#endif  // URPC_CONFIG_H
+#endif  // XIBRIDGE_CONFIG_H

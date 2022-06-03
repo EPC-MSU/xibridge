@@ -3,9 +3,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(xibridge)
 OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
 
-CONFIGURE_FILE(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/generated/private/config.h)
+CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
-
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+   add_definitions( -D_CRT_SECURE_NO_WARNINGS) 
+endif()
 macro(use_cxx11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
