@@ -366,9 +366,9 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_lengt
 
 uint32_t Xibridge_client::xi_request_response(const xibridge_conn_t *pconn, 
 	                                            const unsigned char *req, 
-												int req_len, 
+												uint32_t req_len, 
 												unsigned char *resp, 
-												int resp_len)
+												uint32_t resp_len)
 {
 	if (pconn == nullptr)
 	{
@@ -385,7 +385,7 @@ uint32_t Xibridge_client::xi_request_response(const xibridge_conn_t *pconn,
 	// but we restrict the size of vector 
 	if (resp != nullptr && resp_len != 0)
 	{
-		memcpy(resp, response.data(), response.size() < (uint32_t)resp_len ? response.size() : resp_len );
+		memcpy(resp, response.data(), response.size() < resp_len ? response.size() : resp_len );
 	}
 	return pcl->get_last_error();
 }

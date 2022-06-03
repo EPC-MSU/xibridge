@@ -31,7 +31,7 @@
 * Server errors
 */
 
-#define ERR_DEVICE_LOST 11
+#define ERR_DEVICE_LOST -5
 
 /*
 Packet-Fmt errors
@@ -170,9 +170,9 @@ public:
 	static uint32_t xi_request_response(
 		                                   const xibridge_conn_t *pconn, 
 		                                   const uint8_t *req, 
-										   int req_len, 
+										   uint32_t req_len, 
 										   uint8_t *resp, 
-										   int resp_len
+										   uint32_t resp_len
 								       );
 
 /**
