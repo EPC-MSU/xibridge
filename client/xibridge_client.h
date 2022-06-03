@@ -141,12 +141,12 @@ public:
 /**
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
-   * @param[in] xi_net_uri строка с uri устройства, начинающаяся "xi-net://..."
+   * @param[in] xi_net_uri строка с uri устройства, начинающаяся "xi-net://..." илт строка с адресом (даже пустым) - только для сетевого для подключения 
    * @param[in] send_timeout таймаут отправки запроса на подключение к серверу
    * @param[in] recv_timeout таймаут ответа сервера
    * \endrussian
 */
-    Xibridge_client(const char *xi_net_uri);
+    Xibridge_client(const char *xi_net_uri, const char *adapter = NULL);
 
 /**
 	* \russian
@@ -288,6 +288,7 @@ private:
     *  Храним uri подключения для возможных логов  в процессе работы  
 */
 	char _host[XI_URI_HOST_LEN+1];
+    char _adapter[XI_URI_HOST_LEN + 1];
 };
 
 #endif

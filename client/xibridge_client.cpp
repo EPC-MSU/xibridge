@@ -141,7 +141,7 @@ bool Xibridge_client::exec_enumerate(
 
 #include "../common/xibridge_uri_parse.h"
 
-Xibridge_client::Xibridge_client(const char *xi_net_uri) :
+Xibridge_client::Xibridge_client(const char *xi_net_uri, const char *adapter) :
 _server_protocol_version(_server_base_protocol_version),
 _send_tmout((uint32_t)TIMEOUT),
 _recv_tmout((uint32_t)TIMEOUT),
@@ -150,13 +150,24 @@ _conn_id(conn_id_invalid)
   // bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
   // client 
    memset(_host, 0, XI_URI_HOST_LEN + 1);
+   memset(_adapter, 0, XI_URI_HOST_LEN + 1);
    
-   xibridge_parsed_uri parsed;
-
-   if (xibridge_parse_uri_dev12(xi_net_uri, &parsed) == 0)
+   if (adapter == NULL)
    {
-	   memcpy(_host, parsed.uri_server_host, XI_URI_HOST_LEN);
-	   _dev_id = parsed.uri_device_id;
+
+       xibridge_parsed_uri parsed;
+
+       if (xibridge_parse_uri_dev12(xi_net_uri, &parsed) == 0)
+       {
+           memcpy(_host, parsed.uri_server_host, XI_URI_HOST_LEN);
+           _dev_id = parsed.uri_device_id;
+       }
+   }
+   else
+   {
+       // just connection needed to make some enumerate
+       memcpy(_host, xi_net_uri, strlen(xi_net_uri));
+       memcpy(_adapter, adapter, strlen(adapter));
    }
    clr_errors();
 }

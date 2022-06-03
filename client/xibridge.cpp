@@ -57,9 +57,8 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
 		if (!cl->open_connection())
 		{
 label_noconn:
-			res_err = cl->get_last_error();
 			delete cl;
-			return res_err;
+			return ERR_NO_CONNECTION;
 		}
         cl->clr_errors();
 		bool open_ok = cl->open_device();
@@ -122,7 +121,7 @@ const char * xibridge_get_err_expl(uint32_t err_no)
 // to do - adapter using 
 uint32_t xibridge_enumerate_adapter_devices(
 	                                            const char *addr, 
-	                                            const char *,
+	                                            const char *adapter,
 	                                            char **ppresult,
 	                                            uint32_t *pcount
 											)
@@ -132,7 +131,7 @@ uint32_t xibridge_enumerate_adapter_devices(
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
     *pcount = 0;
     *ppresult = nullptr;
-    Xibridge_client * cl = new Xibridge_client(addr);
+    Xibridge_client * cl = new Xibridge_client(addr, adapter == NULL ? "" : adapter);
    
     // making opening logic more complex
     uint32_t ncount = xibridge_get_max_protocol_version().major;
@@ -143,9 +142,8 @@ uint32_t xibridge_enumerate_adapter_devices(
 		if (!cl->open_connection())
 		{
 label_noconn:
-			res_err = cl->get_last_error();
 			delete cl;
-			return res_err;
+            return ERR_NO_CONNECTION;
 		}
         bool result = cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
