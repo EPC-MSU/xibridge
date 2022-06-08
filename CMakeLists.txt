@@ -3,22 +3,42 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(xibridge)
 OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
 
+IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    # It is required to build a rpath framework
+    CMAKE_POLICY(SET CMP0042 NEW)
+ENDIF()
+
+# Detect correct C++11 flag
+IF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    INCLUDE(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    IF(COMPILER_SUPPORTS_CXX11)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    ELSEIF(COMPILER_SUPPORTS_CXX0X)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    ELSE()
+        MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    ENDIF()
+ENDIF()
+
+IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_SYSTEM_VERSION} EQUAL 6.1)
+    # HACK: Make cryptopp replace missing (till Windows 8) GetOverlappedResultEx() on Windows7 with somehting compatible
+    ADD_DEFINITIONS(-D_WIN32_WINNT=0x0601)
+ENDIF()
+
+IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+ENDIF()
+
 CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
    add_definitions( -D_CRT_SECURE_NO_WARNINGS) 
 endif()
-macro(use_cxx11)
-  if (CMAKE_VERSION VERSION_LESS "3.1")
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-    endif ()
-  else ()
-    set (CMAKE_CXX_STANDARD 11)
-  endif ()
-endmacro(use_cxx11)
 
-use_cxx11()
+# set fPIC for static and shared libs
+SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 FUNCTION(ADD_SUBDIRECTORY_BINDY)
     SET(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
