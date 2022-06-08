@@ -27,6 +27,14 @@ uint32_t xibridge_init()
     if (res == 0)
     {
         xibridge_set_base_protocol_version({1, 0, 0});
+#if defined(BUILD_SHARED_LIBS_XI)
+   #ifdef _DEBUG
+        //zf_log_set_output_level(ZF_LOG_DEBUG);
+        zf_log_set_output_level(ZF_LOG_WARN);
+   #else
+        zf_log_set_output_level(ZF_LOG_WARN);
+   #endif
+#endif
     }
     return res;
 }
