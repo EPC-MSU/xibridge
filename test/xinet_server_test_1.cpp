@@ -6,8 +6,8 @@
 
 // to run with ximc-xinet-server
 // !!! select the right address every time as tested
-static const char * const _DEV_IP = "xi-net://172.16.130.45/1f50";
-static const char *const _IP = "172.16.130.45";
+static const char * const _DEV_IP = "xi-net://172.16.130.55/1f50";
+static const char *const _IP = "172.16.130.55";
 
 
 PACK(
@@ -37,6 +37,20 @@ bool test_connect_1()
         ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
         return false;
     }
+    char  *pdata; uint32_t count;
+
+    xibridge_enumerate_adapter_devices(_IP, "", &pdata, &count);
+    ZF_LOGD("Count of enumerated devices: %u", count);
+    if (count)
+    {
+        const char *p = pdata;
+        for (int i = 0; i < (int)count; i++)
+        {
+            ZF_LOGD("Enumerated device #%d: URI: %s", i + 1, p);
+            p = strchr(p, 0) + 1;
+        }
+    }
+    xibridge_free_enumerate_devices(pdata);
 
     xibridge_conn_t conn;
     //xibridge_set_base_protocol_version({ 1, 0, 0 });
@@ -63,7 +77,7 @@ bool test_connect_1()
     err_op = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
     ZF_LOGD("Nom voltage: %u", settings.settings.NomVoltage);
     xibridge_close_device_connection(&conn);
-    char  *pdata; uint32_t count;
+    //char  *pdata; uint32_t count;
 
     xibridge_enumerate_adapter_devices(_IP, "", &pdata, &count);
     ZF_LOGD("Count of enumerated devices: %u", count);

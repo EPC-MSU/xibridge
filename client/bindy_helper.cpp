@@ -27,10 +27,12 @@ bindy::Bindy *Bindy_helper::instance_bindy()
 	 	bindy::Bindy::initialize_network();
         _pbindy = new bindy::Bindy("", false, false); // is_server == false, is_buffered == false
         // HACK: we assume that the server has such user as master set - add it to in-memory keyfile
+        
 		bindy::user_id_t uid{ XINET_BINDY_USER };
 	    _pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
         _pbindy -> set_master_local(uid);
         _pbindy -> set_handler(&callback_data_bindy);
+        
 	}
 	catch (...){
 		_pbindy  = nullptr;
@@ -47,7 +49,7 @@ void Bindy_helper::shutdown_bindy()
 	_pbindy = nullptr; 
 }
 
-conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr)
+conn_id_t  Bindy_helper::connect(Xibridge_client *pcl)
 {
 	bindy::Bindy *pb = instance_bindy();
 	conn_id_t conn = conn_id_invalid;
@@ -57,7 +59,7 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const c
 		return conn_id_invalid;;
 	}
 	try {
-	    conn = instance_bindy()->connect(addr, adapter_addr);
+	    conn = instance_bindy()->connect(pcl -> _host/*, pcl -> _adapter*/);
 
 		if (conn != conn_id_invalid)
 		{
@@ -71,12 +73,12 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const c
 		
 		pcl->_set_last_error(ERR_SET_CONNECTION);
 		//pcl->_set_add_err_text(ex.what());
-		ZF_LOGE("Catch exception at bindy connect, addr: %s, text: %s", addr, ex.what());
+		ZF_LOGE("Catch exception at bindy connect, addr: %s, text: %s", pcl->_host, ex.what());
 	}
 	catch (...)
 	{
 		pcl->_set_last_error(ERR_SET_CONNECTION);
-		ZF_LOGE("Catch exception at bindy connect, addr: %s.", addr);
+		ZF_LOGE("Catch exception at bindy connect, addr: %s.", pcl->_host);
 	}
 	return conn;
 }

@@ -86,9 +86,9 @@ label_noconn:
 		else if (res_err == ERR_RECV_TIMEOUT)  // may try another protocol - go far
         {
             cl->decrement_server_protocol_version();
-            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 			cl->disconnect();
-            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(3000));
         }
 	    else // either all right or some non timeout error - exit anyway
 	    {

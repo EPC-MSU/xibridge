@@ -272,7 +272,7 @@ bool Xibridge_client::decrement_server_protocol_version()
 bool Xibridge_client::open_connection()
 {
     clr_errors();
-    _conn_id = Bindy_helper::instance() -> connect(_host, this);
+    _conn_id = Bindy_helper::instance() -> connect(this);
     if (_conn_id == conn_id_invalid)
     {
        return false;

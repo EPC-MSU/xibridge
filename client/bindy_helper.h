@@ -18,7 +18,7 @@ public:
 
 	~Bindy_helper(){ shutdown_bindy(); };
 	static bindy::Bindy * instance_bindy();
-	conn_id_t connect(const char *addr, Xibridge_client *pcl, const char *adapter_addr = nullptr);
+	conn_id_t connect(Xibridge_client *pcl);
 	static void shutdown_bindy();
 	static Bindy_helper *instance() { return &_bhelper; }
 	bool is_connected(conn_id_t conn_id) const;
