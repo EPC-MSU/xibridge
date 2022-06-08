@@ -57,7 +57,7 @@ conn_id_t  Bindy_helper::connect(const char *addr, Xibridge_client *pcl, const c
 		return conn_id_invalid;;
 	}
 	try {
-	    conn = instance_bindy()->connect(addr/*, adapter_addr*/);
+	    conn = instance_bindy()->connect(addr, adapter_addr);
 
 		if (conn != conn_id_invalid)
 		{

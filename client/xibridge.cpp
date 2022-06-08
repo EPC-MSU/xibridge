@@ -65,8 +65,9 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
 		if (!cl->open_connection())
 		{
 label_noconn:
+            res_err = cl->get_last_error();
 			delete cl;
-			return ERR_NO_CONNECTION;
+			return res_err;
 		}
         cl->clr_errors();
 		bool open_ok = cl->open_device();
@@ -81,7 +82,7 @@ label_noconn:
 			open_ok = cl->open_device();
 			res_err = cl->get_last_error();
             break;
-         }
+        }
 		else if (res_err == ERR_RECV_TIMEOUT)  // may try another protocol - go far
         {
             cl->decrement_server_protocol_version();
@@ -150,8 +151,9 @@ uint32_t xibridge_enumerate_adapter_devices(
 		if (!cl->open_connection())
 		{
 label_noconn:
+            res_err = cl->get_last_error();
 			delete cl;
-            return ERR_NO_CONNECTION;
+            return res_err;
 		}
         bool result = cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
