@@ -102,14 +102,16 @@ static void thread_body(int thread_num)
 
 void test_connect_2_threads()
 {
-#define TH_NUM 10
+#define TH_NUM 5
 
 	std::thread *pthreads[TH_NUM];
+
+	//xibridge_set_base_protocol_version({ 2, 0, 0 });
 	
 	for (auto i = 0; i < TH_NUM; i++)
 	{
 		pthreads[i] = new std::thread(thread_body, i);
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 	for (auto i = 0; i < TH_NUM; i++)

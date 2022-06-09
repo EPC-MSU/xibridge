@@ -1,4 +1,4 @@
-#include "../config_xi.h"
+#include "../build/config_xi.h"
 #include <zf_log.h>
 #include "../common/defs.h"
 #include "xibridge.h"
@@ -30,7 +30,7 @@ uint32_t xibridge_init()
 #if defined(BUILD_SHARED_LIBS_XI)
    #ifdef _DEBUG
         //zf_log_set_output_level(ZF_LOG_DEBUG);
-        zf_log_set_output_level(ZF_LOG_WARN);
+        zf_log_set_output_level(ZF_LOG_DEBUG);
    #else
         zf_log_set_output_level(ZF_LOG_WARN);
    #endif

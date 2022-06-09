@@ -149,7 +149,7 @@ bvector Protocol2::create_cmd_request(DevId devid, uint32_t tmout, const bvector
     if (data != nullptr && data->size() >= (size_t)URPC_CID_SIZE)
     {
         data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + URPC_CID_SIZE );
-        add_uint32_2_bvector(data_and_length, resp_length);
+		add_uint32_2_bvector(data_and_length, resp_length - (uint32_t)(sizeof(uint32_t))); // minus answer code length according to Protocol2
         data_and_length.insert(data_and_length.end(), data_cbeg + URPC_CID_SIZE, data->cend());
     }
     return create_client_request(pkt2_cmd_req, devid._dev_id, 0,  &data_and_length);
@@ -318,30 +318,31 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		case pkt2_cmd_resp:
 		{
 						 mbuf.mseek(8);
-						 mbuf >> r;
+						 //mbuf >> r; get data as is!!!
+						 //mbuf >> r;
 						 size_t len = mbuf.restOfSize(-1);
 						 if (mbuf.wasBroken() || len == -1)
 						 {
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
 						 }
-						 _res_err = r;
+						 _res_err = 0;
 						 data = mbuf.to_vector(true);
 						 return true;
 		}
 		case pkt2_open_resp:
 		case pkt2_close_resp:
 		{
-								mbuf.mseek(8);
-								size_t len = mbuf.restOfSize(-1);
-								if (len != sizeof (uint32_t))
-								{
-									*_perror = ERR_PCKT_FMT;
-									return false;
-								}
-                                mbuf >> r;
-                                _res_err = r;
-								return true;
+						mbuf.mseek(8);
+						size_t len = mbuf.restOfSize(-1);
+						if (len != sizeof (uint32_t))
+						{
+							*_perror = ERR_PCKT_FMT;
+							return false;
+						}
+                        mbuf >> r;
+                        _res_err = r;
+						return true;
 		}
 		
 		default:

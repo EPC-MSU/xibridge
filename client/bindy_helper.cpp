@@ -28,9 +28,9 @@ bindy::Bindy *Bindy_helper::instance_bindy()
         _pbindy = new bindy::Bindy("", false, false); // is_server == false, is_buffered == false
         // HACK: we assume that the server has such user as master set - add it to in-memory keyfile
         
-		bindy::user_id_t uid{ XINET_BINDY_USER };
-	    _pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
-        _pbindy -> set_master_local(uid);
+		//bindy::user_id_t uid{ XINET_BINDY_USER };
+	    //_pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
+        //_pbindy -> set_master_local(uid);
         _pbindy -> set_handler(&callback_data_bindy);
         
 	}
@@ -59,7 +59,7 @@ conn_id_t  Bindy_helper::connect(Xibridge_client *pcl)
 		return conn_id_invalid;;
 	}
 	try {
-	    conn = instance_bindy()->connect(pcl -> _host/*, pcl -> _adapter*/);
+	    conn = instance_bindy()->connect(pcl -> _host, pcl -> _adapter);
 
 		if (conn != conn_id_invalid)
 		{
