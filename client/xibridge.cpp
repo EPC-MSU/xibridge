@@ -1,4 +1,4 @@
-#include "../build/config_xi.h"
+#include "../config_xi.h"
 #include <zf_log.h>
 #include "../common/defs.h"
 #include "xibridge.h"
