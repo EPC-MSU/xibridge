@@ -1,4 +1,4 @@
-#ifndef _DEFS_H
+﻿#ifndef _DEFS_H
 #define  _DEFS_H
 
 #include <bindy/bindy-static.h>

@@ -1,4 +1,4 @@
-#include "../common/defs.h"
+﻿#include "../common/defs.h"
 #include <zf_log.h>
 #include <../common/protocols.h>
 

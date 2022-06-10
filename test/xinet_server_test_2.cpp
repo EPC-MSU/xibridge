@@ -30,8 +30,8 @@ bool test_connect_2()
 		ZF_LOGE("Cannot execute ginf: %s", xibridge_get_err_expl(err));
 		return false;
 	}
-	// ��������� ���������
-	// to do - sync 
+    
+    // to do - sync 
 	// urmc_get_identity_information_t  info;
 	Hex32  urpc_res;
 	MBuf mresp(resp, 72+4);

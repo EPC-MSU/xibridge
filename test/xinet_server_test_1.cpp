@@ -1,4 +1,4 @@
-#include <zf_log.h>
+﻿#include <zf_log.h>
 #include <../common/protocols.h>
 #include <../client/xibridge.h>
 #include "ximc-min/ximc_min.h"

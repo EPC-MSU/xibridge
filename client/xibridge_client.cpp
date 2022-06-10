@@ -1,4 +1,4 @@
-#include <bindy/bindy-static.h>
+﻿#include <bindy/bindy-static.h>
 #include "../common/defs.h"
 #include "xibridge_client.h" 
 #include "../common/protocols.h"

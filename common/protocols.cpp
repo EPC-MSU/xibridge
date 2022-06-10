@@ -1,4 +1,4 @@
-#include "protocols.h"
+﻿#include "protocols.h"
 #include "../client/xibridge_client.h"
 
 // staic data init

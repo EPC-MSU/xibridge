@@ -4,10 +4,6 @@
 #include "../common/utils.h"
 #include "bindy_helper.h"
 
-//const data
-#define XINET_BINDY_USER "root-user"
-const bindy::aes_key_t Bindy_helper::_xinet_bindy_key = { 32, 87, 139, 134, 41, 227, 202, 19, 235, 29, 48, 119, 189, 61, 211, 135 };
-
 
 // static data members init
 bindy::Bindy *Bindy_helper::_pbindy = nullptr;
@@ -26,11 +22,6 @@ bindy::Bindy *Bindy_helper::instance_bindy()
 	try {
 	 	bindy::Bindy::initialize_network();
         _pbindy = new bindy::Bindy("", false, false); // is_server == false, is_buffered == false
-        // HACK: we assume that the server has such user as master set - add it to in-memory keyfile
-        
-		//bindy::user_id_t uid{ XINET_BINDY_USER };
-	    //_pbindy->add_user_local(XINET_BINDY_USER, _xinet_bindy_key, uid);
-        //_pbindy -> set_master_local(uid);
         _pbindy -> set_handler(&callback_data_bindy);
         
 	}

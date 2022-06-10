@@ -1,4 +1,4 @@
-#include "defs.h"
+﻿#include "defs.h"
 #include "utils.h"
 
 uint32_t AHex::_get_stream1_4(uint8_t **ptr)

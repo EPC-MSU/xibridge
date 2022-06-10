@@ -1,4 +1,4 @@
-#ifndef _BINDY_HELPER_H
+﻿#ifndef _BINDY_HELPER_H
 #define _BINDY_HELPER_H
 #include <map>
 #include <mutex> 
@@ -33,7 +33,6 @@ private:
 	static bindy::Bindy *_pbindy;
 	static std::mutex _map_mutex;
 	static std::map<conn_id_t, Xibridge_client *> _map;
-    static const bindy::aes_key_t _xinet_bindy_key;
 	static Bindy_helper _bhelper;
 };
 
