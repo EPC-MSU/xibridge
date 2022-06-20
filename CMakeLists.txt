@@ -31,6 +31,7 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 ENDIF()
 
+
 CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -81,4 +82,10 @@ else()
   ADD_LIBRARY(xibridge STATIC ${SOURCES})
 endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
+
+target_compile_options(xibridge PRIVATE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+          -Werror>
+     $<$<CXX_COMPILER_ID:MSVC>:
+          /WX>)
 

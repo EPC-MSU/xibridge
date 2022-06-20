@@ -74,8 +74,8 @@ public:
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector *data = nullptr) = 0;
 	virtual bvector create_open_request(DevId devid, uint32_t tmout) = 0;
 	virtual bvector create_close_request(DevId devid, uint32_t tmout) = 0;
-	virtual bvector create_version_request(uint32_t tmout) { return bvector(); }
-	virtual bvector create_enum_request(uint32_t tmout) { return bvector(); }
+	virtual bvector create_version_request(uint32_t /*tmout*/) { return bvector(); }
+	virtual bvector create_enum_request(uint32_t /*tmout*/) { return bvector(); }
 	virtual bvector create_cmd_request(DevId devid, uint32_t tmout, const bvector *data = nullptr, uint32_t resp_length = 0) = 0;
 	
 	virtual bool translate_response(uint32_t pckt, const bvector& res_data) = 0;
@@ -124,7 +124,7 @@ public:
 		return create_client_request(pkt1_open_req, devid, 0);
 	};
 
-	virtual bvector create_close_request(DevId devid, uint32_t tmout)
+	virtual bvector create_close_request(DevId devid, uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt1_close_req, devid, 0);
 	};
@@ -182,11 +182,11 @@ public:
         return create_client_request(pckt, devid._dev_id.id, tmout, data);
     }
 	
-    virtual bvector create_open_request(DevId devid, uint32_t tmout)
+    virtual bvector create_open_request(DevId devid, uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt2_open_req, devid, 0);
 	};
-	virtual bvector create_close_request(DevId devid, uint32_t tmout)
+	virtual bvector create_close_request(DevId devid, uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt2_close_req, devid, 0);
 	};
@@ -238,20 +238,20 @@ public:
 		return true;
 	};
 	virtual bvector create_client_request(uint32_t pckt, DevId devid, uint32_t tmout, const bvector* data = nullptr);
-	virtual bvector create_open_request(DevId devid, uint32_t tmout)
+	virtual bvector create_open_request(DevId devid, uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt3_open_req, devid, 0);
 	};
-	virtual bvector create_close_request(DevId devid, uint32_t tmout)
+	virtual bvector create_close_request(DevId devid, uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt3_close_req, devid, 0);
 	};
-	virtual bvector create_version_request(uint32_t tmout)
+	virtual bvector create_version_request(uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt3_ver_req, DevId(), 0);
 	}
 	
-	virtual bvector create_enum_request(uint32_t tmout)
+	virtual bvector create_enum_request(uint32_t /*tmout*/)
 	{
 		return create_client_request(pkt3_enum_req, DevId(), 0);
 	};
