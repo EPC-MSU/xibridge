@@ -27,9 +27,11 @@ bool test_connect_2()
 	uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, 72+4);
 	if (ginf_err)
 	{
-		ZF_LOGE("Cannot execute ginf: %s", xibridge_get_err_expl(err));
+		ZF_LOGE("Cannot execute ginf: %s", xibridge_get_err_expl(ginf_err));
 		return false;
 	}
+
+  
     
     // to do - sync 
 	// urmc_get_identity_information_t  info;
@@ -67,6 +69,15 @@ bool test_connect_2()
     memset(man, 0, 16 + 1);
 	mresp.memread((uint8_t *)man, 16, 16);
 	ZF_LOGD("Controller: %s\n", man);
+
+
+    uint32_t gets_err = xibridge_device_request_response(&conn, (const unsigned char *)"gets", 4, resp, 48 + 4);
+    if (gets_err)
+    {
+        ZF_LOGE("Cannot execute gets: %s", xibridge_get_err_expl(gets_err));
+        return false;
+    }
+
 	
 	xibridge_close_device_connection(&conn);
 
@@ -111,7 +122,7 @@ void test_connect_2_threads()
 	for (auto i = 0; i < TH_NUM; i++)
 	{
 		pthreads[i] = new std::thread(thread_body, i);
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 
 	for (auto i = 0; i < TH_NUM; i++)
