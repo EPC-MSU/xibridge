@@ -8,15 +8,15 @@
 // to run with urpc-xinet-server !!! the local urpc-connect
 bool test_connect_2()
 {
-    uint32_t err = xibridge_init();
+    /*uint32_t err = xibridge_init();
 	if (err != 0)
 	{
         ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
 		return false;
 	}
-	
+	*/
 	xibridge_conn_t conn;
-    err = xibridge_open_device_connection("xi-net://127.0.0.1/9", &conn);
+    uint32_t err = xibridge_open_device_connection("xi-net://127.0.0.1/9", &conn);
     if (err)
     {
         ZF_LOGE("Cannot open xi-net://127.0.0.1/9: %s", xibridge_get_err_expl(err));
@@ -87,18 +87,19 @@ bool test_connect_2()
 
 static void thread_body(int thread_num)
 {
-    uint32_t err = xibridge_init();
+	/*
+	uint32_t err = xibridge_init();
 
     if (err != 0)
     {
         ZF_LOGE("Thread %u: cannot initalize xibridge system!", thread_num);
         return;
     }
-	
+	*/
 	xibridge_conn_t conn;
 	//uint32_t version = xibridge_detect_protocol_version("127.0.0.1", 3000, 5000);
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
-    err = xibridge_open_device_connection("xi-net://127.0.0.1/9", &conn);
+    uint32_t err = xibridge_open_device_connection("xi-net://127.0.0.1/9", &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
 	unsigned char resp[72+4];
 	ZF_LOGD("Thread %u: sending ginf... \n", thread_num);
@@ -122,7 +123,7 @@ void test_connect_2_threads()
 	for (auto i = 0; i < TH_NUM; i++)
 	{
 		pthreads[i] = new std::thread(thread_body, i);
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 
 	for (auto i = 0; i < TH_NUM; i++)

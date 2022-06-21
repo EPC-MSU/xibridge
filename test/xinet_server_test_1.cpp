@@ -30,6 +30,7 @@ typedef struct _geng_re re_geng;
 
 bool test_connect_1()
 {
+	/*
     uint32_t err = xibridge_init();
 
     if (err)
@@ -37,6 +38,7 @@ bool test_connect_1()
         ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
         return false;
     }
+	*/
     char  *pdata; uint32_t count;
 
     xibridge_enumerate_adapter_devices(_IP, "", &pdata, &count);
@@ -54,7 +56,7 @@ bool test_connect_1()
 
     xibridge_conn_t conn;
     //xibridge_set_base_protocol_version({ 1, 0, 0 });
-    err = xibridge_open_device_connection(_DEV_IP, &conn);
+    uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {
         ZF_LOGE("Cannot open device: %s, error: %s", _DEV_IP, xibridge_get_err_expl(err));
@@ -97,6 +99,7 @@ bool test_connect_1()
 
 static void thread_body(int thread_num)
 {
+	/*
     uint32_t err = xibridge_init();
 
 	if (err != 0)
@@ -104,17 +107,18 @@ static void thread_body(int thread_num)
 	  ZF_LOGE("Thread %u: cannot initalize xibridge system!", thread_num);
 	  return;
 	}
-	
+	*/
+
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
     xibridge_conn_t conn;
-    err = xibridge_open_device_connection(_DEV_IP, &conn);
+	uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
 	ZF_LOGD("Thread %u: sending gets... \n", thread_num);
 	//move_settings_calb_t resp_s;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     //uint32_t serial;
     status_t status;
-  	err = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 3, (uint8_t *)&status, sizeof(status_t));
+    err = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 3, (uint8_t *)&status, sizeof(status_t));
 
 	ZF_LOGD("Thread %u: gets return %s\n", thread_num,
 		err == 0 ? "true" : "false");
