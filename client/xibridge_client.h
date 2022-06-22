@@ -80,6 +80,14 @@ public:
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
 	}
 	
+    /**
+    * \russian
+    * Функция инициализации статических данных xibridge
+    * @return код ошибки, если инициализация завершилась неудачно, 0 если удачно
+    * \endrussian
+    */
+    static void xi_init();
+
 /**
    * \russian
    * Отладочная функция установки версии протокола для взаимодействия с сервером
@@ -148,14 +156,6 @@ public:
 */
     Xibridge_client(const char *xi_net_uri, const char *adapter = NULL);
 
-/**
-	* \russian
-	* Функция инициализации xibridge-системы, должна вызываться перед использованием любых других функций xibridge
-	* @return код ошибки, если инициализация завершилась неудачно, 0 если удачно
-	* \endrussian
-*/
-	static uint32_t xi_init();
-	
 /**
    * \russian
    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
@@ -249,7 +249,7 @@ private:
 	static Xibridge_client * _get_client_as_free(conn_id_t conn_id);
     static uint32_t _server_base_protocol_version;
 
-	bool _send_and_receive(bvector &req);
+   	bool _send_and_receive(bvector &req);
 	void _set_last_error(uint32_t err, const char *add_text = nullptr) 
 	{ 
 		_last_error = err;

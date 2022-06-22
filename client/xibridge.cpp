@@ -1,15 +1,7 @@
-﻿#include "../config_xi.h"
-#include <zf_log.h>
-#include "../common/defs.h"
+﻿#include "../common/defs.h"
 #include "xibridge.h"
 #include "../common/defs.h"
 #include "xibridge_client.h"
-
-
-// to make log level controlled
-#if defined(BUILD_SHARED_LIBS_XI)
-    ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
-#endif
 
 xibridge_version_t xibridge_version()
 {
@@ -23,20 +15,7 @@ xibridge_version_t xibridge_get_max_protocol_version()
 
 uint32_t xibridge_init()
 {
-	uint32_t res  = Xibridge_client::xi_init();
-    if (res == 0)
-    {
-        xibridge_set_base_protocol_version({1, 0, 0});
-#if defined(BUILD_SHARED_LIBS_XI)
-   #ifdef _DEBUG
-        //zf_log_set_output_level(ZF_LOG_DEBUG);
-        zf_log_set_output_level(ZF_LOG_DEBUG);
-   #else
-        zf_log_set_output_level(ZF_LOG_WARN);
-   #endif
-#endif
-    }
-    return res;
+	return 0;
 }
 
 uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver)
@@ -54,6 +33,7 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
     uint32_t res_err;
     if (pconn == nullptr) return ERR_NULLPTR_PARAM;
     *pconn = xibridge_conn_invalid;
+    Xibridge_client::xi_init();
 	Xibridge_client * cl = new Xibridge_client(xi_net_uri);
 
     
@@ -140,6 +120,7 @@ uint32_t xibridge_enumerate_adapter_devices(
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
     *pcount = 0;
     *ppresult = nullptr;
+    Xibridge_client::xi_init();
     Xibridge_client * cl = new Xibridge_client(addr, adapter == NULL ? "" : adapter);
    
     // making opening logic more complex

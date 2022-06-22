@@ -6,8 +6,8 @@
 
 // to run with ximc-xinet-server
 // !!! select the right address every time as tested
-static const char * const _DEV_IP = "xi-net://172.16.130.55/1f50";
-static const char *const _IP = "172.16.130.55";
+static const char * const _DEV_IP = "xi-net://172.16.130.73/1f50";
+static const char *const _IP = "172.16.130.73";
 
 
 PACK(

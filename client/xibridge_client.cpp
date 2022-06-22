@@ -1,8 +1,10 @@
 ﻿#include <bindy/bindy-static.h>
+#include <zf_log.h>
 #include "../common/defs.h"
 #include "xibridge_client.h" 
 #include "../common/protocols.h"
 #include "bindy_helper.h" 
+#include "../config_xi.h"
 
 typedef struct
 {
@@ -27,6 +29,12 @@ static err_def_t _err_strings[] =
 	{ ERR_PCKT_INV, "Invalid data packet." },
     { 0, "" }
  }; 
+
+// to make log level controlled
+#if defined(BUILD_SHARED_LIBS_XI)
+ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
+#endif
+
 
 static bool is_protocol_verified_version_t(const xibridge_version_t& ver)
 {
@@ -55,13 +63,24 @@ Xibridge_client * Xibridge_client::_get_client_as_free(conn_id_t conn_id)
 	return Bindy_helper::_map.at((conn_id_t)conn_id);
 }
 
-uint32_t Xibridge_client::xi_init()
+void Xibridge_client::xi_init()
 {
     uint32_t ret_err = 0;
     bindy::Bindy *_ex = Bindy_helper::instance_bindy();
-	if (_ex == nullptr)
-        ret_err = ERR_NO_BINDY;
-	return ret_err;
+	if (_ex != nullptr)
+    {
+        
+            xi_set_base_protocol_version({ 1, 0, 0 });
+#if defined(BUILD_SHARED_LIBS_XI)
+#ifdef _DEBUG
+            //zf_log_set_output_level(ZF_LOG_DEBUG);
+            zf_log_set_output_level(ZF_LOG_DEBUG);
+#else
+            zf_log_set_output_level(ZF_LOG_WARN);
+#endif
+#endif
+ 
+    }
 }
 
 uint32_t  Xibridge_client::xi_set_base_protocol_version(xibridge_version_t ver)
@@ -272,7 +291,6 @@ bool Xibridge_client::decrement_server_protocol_version()
 bool Xibridge_client::open_connection()
 {
     clr_errors();
-	xi_init();
     _conn_id = Bindy_helper::instance() -> connect(this);
     if (_conn_id == conn_id_invalid)
     {
