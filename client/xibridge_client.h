@@ -80,14 +80,7 @@ public:
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
 	}
 	
-    /**
-    * \russian
-    * Функция инициализации статических данных xibridge
-    * @return код ошибки, если инициализация завершилась неудачно, 0 если удачно
-    * \endrussian
-    */
-    static void xi_init();
-
+   
 /**
    * \russian
    * Отладочная функция установки версии протокола для взаимодействия с сервером
@@ -289,6 +282,7 @@ private:
 */
 	char _host[XI_URI_HOST_LEN+1];
     char _adapter[XI_URI_HOST_LEN + 1];
+	
 };
 
 #endif

@@ -33,7 +33,6 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
     uint32_t res_err;
     if (pconn == nullptr) return ERR_NULLPTR_PARAM;
     *pconn = xibridge_conn_invalid;
-    Xibridge_client::xi_init();
 	Xibridge_client * cl = new Xibridge_client(xi_net_uri);
 
     
@@ -120,7 +119,6 @@ uint32_t xibridge_enumerate_adapter_devices(
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
     *pcount = 0;
     *ppresult = nullptr;
-    Xibridge_client::xi_init();
     Xibridge_client * cl = new Xibridge_client(addr, adapter == NULL ? "" : adapter);
    
     // making opening logic more complex

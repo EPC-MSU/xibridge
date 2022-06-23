@@ -298,7 +298,7 @@ private:
 /*
 * Virtual constructor
 */
-extern AProtocol *create_appropriate_protocol(int version_number, uint32_t *perror);
+extern AProtocol *create_appropriate_protocol(uint32_t version_number, uint32_t *perror);
 
 #endif
 

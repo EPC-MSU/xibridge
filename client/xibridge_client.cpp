@@ -4,7 +4,7 @@
 #include "xibridge_client.h" 
 #include "../common/protocols.h"
 #include "bindy_helper.h" 
-#include "../config_xi.h"
+
 
 typedef struct
 {
@@ -35,13 +35,36 @@ static err_def_t _err_strings[] =
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 #endif
 
+//to set final log level
+void _log_level()
+{
+#if defined(BUILD_SHARED_LIBS_XI)
+#ifdef _DEBUG
+	//zf_log_set_output_level(ZF_LOG_DEBUG);
+	zf_log_set_output_level(ZF_LOG_DEBUG);
+#else
+	zf_log_set_output_level(ZF_LOG_WARN);
+#endif
+#endif
+  
+}
+
+uint32_t Xibridge_client::_server_base_protocol_version = 3;
+
+// this simple class to make some base init actions - cross platform
+class xi_init
+{
+private:
+	xi_init() { _log_level(); Xibridge_client::xi_set_base_protocol_version({ 1, 0, 0 }); };
+	static xi_init _xi_i;
+};
+
+xi_init xi_init::_xi_i;
 
 static bool is_protocol_verified_version_t(const xibridge_version_t& ver)
 {
     return ver.major > 0 && ver.major <= DEFAULT_PROTO_VERSION && ver.minor == 0 && ver.bagfix == 0;
 }
-
-uint32_t Xibridge_client::_server_base_protocol_version = 3;
 
 const char *Xibridge_client::xi_get_err_expl(uint32_t err_no)
 {
@@ -61,26 +84,6 @@ Xibridge_client * Xibridge_client::_get_client_as_free(conn_id_t conn_id)
 	}
 		
 	return Bindy_helper::_map.at((conn_id_t)conn_id);
-}
-
-void Xibridge_client::xi_init()
-{
-    uint32_t ret_err = 0;
-    bindy::Bindy *_ex = Bindy_helper::instance_bindy();
-	if (_ex != nullptr)
-    {
-        
-            xi_set_base_protocol_version({ 1, 0, 0 });
-#if defined(BUILD_SHARED_LIBS_XI)
-#ifdef _DEBUG
-            //zf_log_set_output_level(ZF_LOG_DEBUG);
-            zf_log_set_output_level(ZF_LOG_DEBUG);
-#else
-            zf_log_set_output_level(ZF_LOG_WARN);
-#endif
-#endif
- 
-    }
 }
 
 uint32_t  Xibridge_client::xi_set_base_protocol_version(xibridge_version_t ver)

@@ -518,7 +518,7 @@ bool Protocol3::translate_response(uint32_t pckt, const bvector& res_data)
 	return  false;
 }
 
-AProtocol *create_appropriate_protocol(int version_number, uint32_t * perror)
+AProtocol *create_appropriate_protocol(uint32_t version_number, uint32_t * perror)
 {
 	AProtocol * p = nullptr;
 	switch (version_number)
