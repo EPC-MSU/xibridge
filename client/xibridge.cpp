@@ -13,11 +13,6 @@ xibridge_version_t xibridge_get_max_protocol_version()
 	return Xibridge_client::xi_get_max_protocol_version();
 }
 
-uint32_t xibridge_init()
-{
-	return 0;
-}
-
 uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver)
 {
 	return Xibridge_client::xi_set_base_protocol_version(ver);

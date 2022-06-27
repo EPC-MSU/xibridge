@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
 OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
+OPTION(BUILD_XITEST "Build xibridge test project" OFF)
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     # It is required to build a rpath framework
@@ -71,9 +72,14 @@ SET(SOURCES
          )
 	 
 #add_custom_target(tests) # Note: without 'ALL'
-IF(NOT HAS_PARENT) 
+IF(BUILD_XITEST) 
   ADD_EXECUTABLE(xitest  test/test_main.cpp test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
   TARGET_LINK_LIBRARIES(xitest bindy zf_log)
+  target_compile_options(xitest PRIVATE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+          -Werror>
+     $<$<CXX_COMPILER_ID:MSVC>:
+          /WX>)
 ENDIF()  
 #add_dependencies(tests test_executable)
 if (BUILD_SHARED_LIBS_XI)
