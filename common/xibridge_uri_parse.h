@@ -1,11 +1,11 @@
 /**
     *\russian
-    * ����������� ������ � uri xibridge � ��������� �� ������������ ��� ������
-    * uri ���� "xi-net://server.org/09" ��� "xi-net://192.168.06.08/00000000BBBBAAAA00000009" (������������� ���������� - �� 24 ���� � Hex-���������)  
-	* @param[in] uri ������ � uri, �������  ������ ������������� 0, � ��� �� ������ ���� ������������� � ����������� ��������
-	* @param[out] parsed-uri ��������� �� ��������� ��� ������������ uri
-	* @return 0 - �����, 1 - ������ 
-	*\endrussian
+    * Разбирает uri устройства xibridge  
+    * примеры uriЖ "xi-net://server.org/09" или "xi-net://192.168.06.08/00000000BBBBAAAA00000009"  
+    * @param[in] uri устройства в виде строки
+    * @param[out] parsed-uri структура для разобранного uri
+    * @return 0 - успех, 1 - не удалось разобрать
+    *\endrussian
 */
 #include "defs.h"
 uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_uri)
@@ -37,22 +37,23 @@ uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_u
                end_s = strchr(p, 0);
                if (end_s == 0) return 1;
                char sdev[24 + 1];  // hex-symbols;
-			   if (portable_snprintf(sdev, 24 +1 ,  "%024s", p) > 0)
-			   {
-				   unsigned int vid, pid, id, reserved;
-				   if (sscanf(sdev, "%8x%4x%4x%8x", &reserved, &vid, &pid, &id)
+	       memset (sdev, '0', 24);
+	       if (portable_snprintf(sdev, 24 + 1 ,  "%24s", p) > 0)
+               {
+                     unsigned int vid, pid, id, reserved;
+		     if (sscanf(sdev, "%8x%4x%4x%8x", &reserved, &vid, &pid, &id)
 					   == 4)
-				   {
-					   parsed_uri->uri_device_id.reserve = (uint16_t)reserved;
-					   parsed_uri->uri_device_id.VID = (uint16_t)vid;
-					   parsed_uri->uri_device_id.PID = (uint16_t)pid;
-					   parsed_uri->uri_device_id.id = (uint32_t)id;
-					   return 0;
-				   }
-			   }
+		     {
+	                  parsed_uri->uri_device_id.reserve = (uint16_t)reserved;
+			   parsed_uri->uri_device_id.VID = (uint16_t)vid;
+			   parsed_uri->uri_device_id.PID = (uint16_t)pid;
+			   parsed_uri->uri_device_id.id = (uint32_t)id;
+			   return 0;
+		     }
+	       }
 			   
-			}
+	              }
 		}
-	}
-	return 1;
+}
+return 1;
 }
