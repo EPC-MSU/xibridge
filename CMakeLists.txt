@@ -74,24 +74,25 @@ SET(SOURCES
 #add_custom_target(tests) # Note: without 'ALL'
 IF(BUILD_XITEST) 
   ADD_EXECUTABLE(xitest  test/test_main.cpp test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
+  if(MSVC)
+     target_compile_options(xitest PRIVATE /W3 /WX)
+  else()
+     target_compile_options(xitest PRIVATE -Wall -Wextra -Werror)
+  endif()
   TARGET_LINK_LIBRARIES(xitest bindy zf_log)
-  target_compile_options(xitest PRIVATE
-     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-          -Werror>
-     $<$<CXX_COMPILER_ID:MSVC>:
-          /WX>)
-ENDIF()  
-#add_dependencies(tests test_executable)
+ENDIF() 
+ 
+#add_dependencies
 if (BUILD_SHARED_LIBS_XI)
   ADD_LIBRARY(xibridge SHARED ${SOURCES})
 else()
   ADD_LIBRARY(xibridge STATIC ${SOURCES})
 endif()
+if(MSVC)
+  target_compile_options(xibridge PRIVATE /W3 /WX)
+else()
+  target_compile_options(xibridge PRIVATE -Wall -Wextra -Werror)
+endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
 
-target_compile_options(xibridge PRIVATE
-     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-          -Werror>
-     $<$<CXX_COMPILER_ID:MSVC>:
-          /WX>)
 
