@@ -2,12 +2,6 @@
 #include <zf_log.h>
 #include <../common/protocols.h>
 
-
-/* 
-* The next definition is replaced to xibridge
-*/
-// // ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
-
 /*
 * extern functions to be used in test
 */
@@ -93,14 +87,14 @@ int main(int argc, char *argv[])
 	if (!test_xibridge_uri_parse())
 		ret = false;
 	
-	//if (!test_connect_2())
-	//	ret = false;
+	if (!test_connect_2())
+		ret = false;
 	
 	// if it is something wrong at protocol matching check stage or 
 	// server interaction stage - 
 	// there is nothing more to do - exit with error
 	if (!ret) return 1;
-	//test_connect_2_threads();
+	test_connect_2_threads();
 
     if (!test_connect_1())
     {
