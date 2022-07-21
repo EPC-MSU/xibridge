@@ -227,7 +227,7 @@ MBuf& MBuf::operator << (const MBuf & src)
 {
 	size_t _len = src.realSize();
 	size_t _dlen = restOfSize(-1);
-	if (_dlen < _len) ovrflow++;
+	if (_dlen < _len || _dlen == SIZE_MAX) ovrflow++;
 	else
 	{
 		memcpy(pdata, (uint8_t *)src, _len);
@@ -295,7 +295,8 @@ bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
 
 size_t MBuf::memread(uint8_t *dest, size_t dlen, size_t len)
 {
-	if (len < 0 || len > dlen || restOfSize(-1) < len) return -1;
+	size_t rest = restOfSize(-1);
+	if ( len > dlen || rest < len  || rest == SIZE_MAX ) return SIZE_MAX;
 	memcpy(dest, pdata, len);
 	pdata += len;
 	return len;
@@ -319,7 +320,7 @@ bool MBuf::tot_seek(int offset)
 size_t MBuf::restOfSize(int from_pos) const
 {
 	if (from_pos == -1) from_pos = (int)(pdata - origin_data);
-	if (from_pos < 0 || from_pos >= (int)dlen) return -1;
+	if (from_pos < 0 || from_pos >= (int)dlen) return SIZE_MAX;
 	return (dlen - from_pos);
 }
 
@@ -329,7 +330,7 @@ bvector MBuf::to_vector(bool rest) const
 	if (rest)
 	{
 		if (dlen != 0)
-		  ret.assign(pdata, pdata + restOfSize(-1));
+		    ret.assign(pdata, pdata + restOfSize(-1));
 	}
     else if (_rdon && pdata == origin_data)// non-read buffer all to vector
     {

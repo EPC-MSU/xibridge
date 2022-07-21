@@ -137,12 +137,12 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
 	return true;
 }
 
-bvector Protocol1::create_cmd_request(DevId devid, uint32_t tmout, const bvector *data, uint32_t resp_length)
+bvector Protocol1::create_cmd_request(DevId devid, uint32_t /*tmout*/, const bvector *data, uint32_t /*resp_length*/)
 {
     return create_client_request(pkt1_raw, devid, 0, data);
 }
 
-bvector Protocol2::create_cmd_request(DevId devid, uint32_t tmout, const bvector *data, uint32_t resp_length)
+bvector Protocol2::create_cmd_request(DevId devid, uint32_t /*tmout*/, const bvector *data, uint32_t resp_length)
 {
     bvector data_and_length;
     auto data_cbeg = data -> cbegin();
@@ -155,7 +155,7 @@ bvector Protocol2::create_cmd_request(DevId devid, uint32_t tmout, const bvector
     return create_client_request(pkt2_cmd_req, devid._dev_id, 0,  &data_and_length);
 }
 
-bvector Protocol3::create_cmd_request(DevId devid, uint32_t tmout, const bvector *data, uint32_t resp_length)
+bvector Protocol3::create_cmd_request(DevId devid, uint32_t /*tmout*/, const bvector *data, uint32_t resp_length)
 {
 	bvector data_and_length;
 	add_uint32_2_bvector(data_and_length, data == nullptr ? 0: (uint32_t)data -> size());
@@ -165,7 +165,7 @@ bvector Protocol3::create_cmd_request(DevId devid, uint32_t tmout, const bvector
 }
 
 bool Protocol1::get_spec_data(MBuf&  mbuf,
-	bvector &res_data,
+	bvector &/*res_data*/,
 	bvector &data,
 	uint32_t pckt)
 {
@@ -181,7 +181,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		{
 						 mbuf.mseek(8+4); //according to protocol
 						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == -1)
+						 if (mbuf.wasBroken() || len == SIZE_MAX)
 						 {
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
@@ -219,7 +219,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		{
 						 mbuf.mseek(8);
 						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == -1)
+						 if (mbuf.wasBroken() || len == SIZE_MAX)
 						 {
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
@@ -271,7 +271,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 }
 
 bool Protocol2::get_spec_data(MBuf&  mbuf,
-	bvector &res_data,
+	bvector &/*res_data*/,
 	bvector &data,
 	uint32_t pckt)
 {
@@ -288,7 +288,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 						 mbuf.mseek(8);
                          //mbuf >> r; get data as is!!!
 						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == -1)
+						 if (mbuf.wasBroken() || len == SIZE_MAX)
 						 {
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
@@ -321,7 +321,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 						 //mbuf >> r; get data as is!!!
 						 //mbuf >> r;
 						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == -1)
+						 if (mbuf.wasBroken() || len == SIZE_MAX)
 						 {
 							 *_perror = ERR_PCKT_FMT;
 							 return false;
@@ -353,7 +353,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 }
 
 bool Protocol3::get_spec_data(MBuf&  mbuf,
-	bvector &res_data,
+	bvector &/*res_data*/,
 	bvector &data,
 	uint32_t pckt)
 {
@@ -369,7 +369,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 							 mbuf.mseek(8);
 							 mbuf >> size;
 							 size_t len = mbuf.restOfSize(-1);
-							 if (mbuf.wasBroken() || len != (int)size)
+							 if (mbuf.wasBroken() || len != (size_t)size)
 							 {
 								 *_perror = ERR_PCKT_FMT;
 								 return false;
@@ -397,7 +397,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 		{
 							  mbuf >> size;
 							  size_t len = mbuf.restOfSize(-1);
-							  if (mbuf.wasBroken() || len != (int)size)
+							  if (mbuf.wasBroken() || len != (size_t)size)
 							  {
 								  *_perror = ERR_PCKT_FMT;
 								  return false;
@@ -494,7 +494,7 @@ bvector Protocol3::create_client_request(uint32_t pckt, DevId devid, uint32_t tm
 	return mbuf.to_vector();
 }
 
-bool Protocol1::translate_response(uint32_t pckt, const bvector& res_data)
+bool Protocol1::translate_response(uint32_t /*pckt*/, const bvector& res_data)
 {
 	if (res_data.size() > 0) return res_data[0] != 0;
 	return  true;
