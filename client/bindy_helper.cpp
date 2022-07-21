@@ -102,7 +102,6 @@ bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
 	{
 		return false;
 	}
-	bindy::Bindy *pb = instance_bindy();
 	try
 	{
 		_pbindy -> send_data(conn_id, data);
