@@ -84,7 +84,7 @@ bool cmd_schema::is_match(const uint8_t *data, int len, uint32_t proto, uint32_t
 			if (hex32 != dev_num) return false;
 			break;
 		case 'x':
-			if (mbuf.restOfSize(-1) < 0) return false;
+			if (mbuf.restOfSize(-1) == SIZE_MAX) return false;
 			break;
 		case 'l':
 			mbuf >> hex32;
