@@ -41,7 +41,6 @@ void AHex::put_stream1_4(uint8_t **ptr, uint32_t val)
     {
 		for (int i = 0; i < (int)_tsize; i++)
 		{
-			uint8_t v = (uint8_t)((val >> ((_tsize - 1 - 3) * 8)));
 			*p++ = (uint8_t)((val >> ((_tsize-1-i) * 8)) & 0xFF);
 		}
     }
@@ -251,7 +250,7 @@ MBuf& MBuf::operator >> (HexIDev3 &hidev)
 
 size_t MBuf::memwrite(const uint8_t *data, size_t len)
 {
-	if (_rdon || len < 0) return 0;
+	if (_rdon || len == SIZE_MAX) return 0;
 
 	if (dlen - (pdata - origin_data)  < len) { ovrflow++; return 0; }
 
@@ -262,7 +261,7 @@ size_t MBuf::memwrite(const uint8_t *data, size_t len)
 
 bool MBuf::meminsert_start(const uint8_t *what, size_t len)
 {
-	if (_rdon || len < 0) return false;
+	if (_rdon || len == SIZE_MAX) return false;
 	const uint8_t * temp_origin = origin_data;
 	int cur_pos = (int)(pdata - origin_data);
 	dlen += len;
