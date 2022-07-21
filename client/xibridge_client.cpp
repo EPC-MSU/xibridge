@@ -8,7 +8,7 @@
 
 typedef struct
 {
-    int code;
+    uint32_t code;
     const char *text;
  
 } err_def_t;
@@ -40,7 +40,6 @@ void _log_level()
 {
 #if defined(BUILD_SHARED_LIBS_XI)
 #ifdef _DEBUG
-	//zf_log_set_output_level(ZF_LOG_DEBUG);
 	zf_log_set_output_level(ZF_LOG_DEBUG);
 #else
 	zf_log_set_output_level(ZF_LOG_WARN);
@@ -165,9 +164,9 @@ bool Xibridge_client::exec_enumerate(
 
 Xibridge_client::Xibridge_client(const char *xi_net_uri, const char *adapter) :
 _server_protocol_version(_server_base_protocol_version),
+_conn_id(conn_id_invalid),
 _send_tmout((uint32_t)TIMEOUT),
-_recv_tmout((uint32_t)TIMEOUT),
-_conn_id(conn_id_invalid)
+_recv_tmout((uint32_t)TIMEOUT)
 {
   // bindy will be used to create  _bindy = new Bindy(key_file_path, false, false) // some init actions // call_back - to resv messages//
   // client 

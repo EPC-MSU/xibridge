@@ -187,8 +187,6 @@ static bool test_request_proto3()
 
 bool test_protocols()
 {
-	zf_log_set_output_level(ZF_LOG_DEBUG);
-
 	ZF_LOGD("test_protocols...");
 	bool ret = test_request_proto1();
 	if (!test_request_proto2())

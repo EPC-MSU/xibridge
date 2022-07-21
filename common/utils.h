@@ -111,7 +111,7 @@ class HexIDev3 : public AHex
 {
 public:
     HexIDev3(uint32_t id = 0, uint16_t pid = 0, uint16_t vid = 0, uint32_t reserve = 0, bool lit_end = false) :
-		_id_value(id, lit_end), _id_pid(pid, lit_end), _id_vid(vid, lit_end), _reserve(reserve){
+		_id_value(id, lit_end), _reserve(reserve), _id_pid(pid, lit_end), _id_vid(vid, lit_end) {
 		_lend = lit_end; _tsize = 12;
 	}
     void get_stream(MBuf& mbuf);
