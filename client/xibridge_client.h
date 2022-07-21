@@ -31,7 +31,7 @@
 * Server errors
 */
 
-#define ERR_DEVICE_LOST -5
+#define ERR_DEVICE_LOST 0xfffb
 
 /*
 Packet-Fmt errors
