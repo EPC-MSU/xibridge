@@ -44,7 +44,7 @@ label_noconn:
 			return res_err;
 		}
         cl->clr_errors();
-		bool open_ok = cl->open_device();
+		cl->open_device();
 		res_err = cl->get_last_error();
 		if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
         {
@@ -53,7 +53,7 @@ label_noconn:
             cl->clr_errors();
 			cl->disconnect();
 			if (!cl->open_connection()) goto label_noconn;
-			open_ok = cl->open_device();
+			cl->open_device();
 			res_err = cl->get_last_error();
             break;
         }
@@ -129,7 +129,7 @@ label_noconn:
 			delete cl;
             return res_err;
 		}
-        bool result = cl->exec_enumerate(ppresult, pcount);
+        cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
 		
 		if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
@@ -139,7 +139,7 @@ label_noconn:
 			cl->clr_errors();
 			cl->disconnect();
             if (!cl->open_connection()) goto label_noconn;
- 			result = cl->exec_enumerate(ppresult, pcount);
+ 			cl->exec_enumerate(ppresult, pcount);
 			res_err = cl->get_last_error();
 			break;  
 		}
