@@ -1,4 +1,5 @@
-﻿#include "../common/defs.h"
+﻿#include <iostream>
+#include "../common/defs.h"
 #include <zf_log.h>
 #include <../common/protocols.h>
 
@@ -6,8 +7,8 @@
 * extern functions to be used in test
 */
 extern bool test_protocols(); 
-extern bool test_connect_1();
-extern bool test_connect_2();
+extern bool test_connect_1(const char *ip, uint32_t dev_num);
+extern bool test_connect_2(const char *ip, uint32_t dev_num);
 extern void test_connect_2_threads();
 extern void test_connect_1_threads();
 
@@ -86,20 +87,38 @@ int main(int argc, char *argv[])
 
 	if (!test_xibridge_uri_parse())
 		ret = false;
-	
-	//if (!test_connect_2())
-	//	ret = false;
-	
-	// if it is something wrong at protocol matching check stage or 
-	// server interaction stage - 
-	// there is nothing more to do - exit with error
-	if (!ret) return 1;
-	//test_connect_2_threads();
 
-    if (!test_connect_1())
+    if (!ret) return 1;
+
+    std::cout << "Enter ip-address for ximc xinet-serever if you intend to test xibridge with it (or leave empty if not):\n";
+
+    std::string ip_s;
+    uint32_t dev_num;
+    std::cin >> ip_s;
+    const char *_ip = ip_s.data();
+    if (!ip_s.empty())
     {
-        ret = false;
-    }    if (!ret) return 1;
-	test_connect_1_threads();
-	return 0;
+        std::cout << "Enter device serial number to be used with ximc-server:\n";
+        std::cin >> dev_num;
+        if (!test_connect_1(ip_s.data(), dev_num))
+        {
+            ret = false;
+        }    if (!ret) return 1;
+        test_connect_1_threads();
+    }
+
+    std::cout << "Enter ip-address for urpc xinet-serever if you intend to test xibridge with it (or leave empty if not):\n";
+    if (!ip_s.empty())
+    {
+        std::cout << "Enter device serial number to be used with urpc-server:\n";
+        std::cin >> dev_num;
+
+        if (!test_connect_2(ip_s.data(), dev_num))
+        {
+            ret = false;
+        }    if (!ret) return 1;
+        test_connect_2_threads();
+    }
+
+   return 0;
 }

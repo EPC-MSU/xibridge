@@ -6,8 +6,8 @@
 
 // to run with ximc-xinet-server
 // !!! select the right address every time as tested
-static const char * const _DEV_IP = "xi-net://172.16.129.251/1f50";
-static const char *const _IP = "172.16.129.251";
+static char  _DEV_IP[256];
+//static const char *const _IP = "172.16.129.251";
 
 
 PACK(
@@ -28,20 +28,13 @@ struct _geng_re
 
 typedef struct _geng_re re_geng;
 
-bool test_connect_1()
+bool test_connect_1(const char *ip, uint32_t dev_num)
 {
-	/*
-    uint32_t err = xibridge_init();
-
-    if (err)
-    {
-        ZF_LOGE("Cannot initalize xibridge system: %s", xibridge_get_err_expl(err));
-        return false;
-    }
-	*/
+	
+    sprintf(_DEV_IP, "xi-net://%s/%ux", ip, dev_num);
     char  *pdata; uint32_t count;
 
-    xibridge_enumerate_adapter_devices(_IP, "", &pdata, &count);
+    xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
     ZF_LOGD("Count of enumerated devices: %u", count);
     if (count)
     {
@@ -81,7 +74,7 @@ bool test_connect_1()
     xibridge_close_device_connection(&conn);
     //char  *pdata; uint32_t count;
 
-    xibridge_enumerate_adapter_devices(_IP, "", &pdata, &count);
+    xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
     ZF_LOGD("Count of enumerated devices: %u", count);
     if (count)
     {
@@ -99,16 +92,7 @@ bool test_connect_1()
 
 static void thread_body(int thread_num)
 {
-	/*
-    uint32_t err = xibridge_init();
-
-	if (err != 0)
-	{
-	  ZF_LOGE("Thread %u: cannot initalize xibridge system!", thread_num);
-	  return;
-	}
-	*/
-
+	
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
     xibridge_conn_t conn;
 	uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
