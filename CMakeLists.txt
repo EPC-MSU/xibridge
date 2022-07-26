@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(xibridge)
 OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
 OPTION(BUILD_XITEST "Build xibridge test project" OFF)
+OPTION(BUILD_XIEXAMPLE "Build xibridge example@ project" OFF)
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     # It is required to build a rpath framework
@@ -70,20 +71,7 @@ SET(SOURCES
 		client/xibridge.cpp
 		client/version.rc
          )
-	 
-#add_custom_target(tests) # Note: without 'ALL'
-IF(BUILD_XITEST) 
-  ADD_EXECUTABLE(xitest  test/test_main.cpp test/test_proto.cpp test/xinet_server_test_1.cpp test/xinet_server_test_2.cpp ${SOURCES}) # Note: without 'ALL'
-  if(MSVC)
-     target_compile_options(xitest PRIVATE /W3 /WX)
-  else()
-     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
-        target_compile_options(bindy PRIVATE -Wall -Wextra -Werror)
-   endif()
-  endif()
-  TARGET_LINK_LIBRARIES(xitest bindy zf_log)
-ENDIF() 
- 
+
 #add_dependencies
 if (BUILD_SHARED_LIBS_XI)
   ADD_LIBRARY(xibridge SHARED ${SOURCES})
@@ -96,5 +84,31 @@ else()
   target_compile_options(xibridge PRIVATE -Wall -Wextra -Werror)
 endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
+
+#add_custom_target(tests) # Note: without 'ALL'
+IF(BUILD_XITEST) 
+  ADD_EXECUTABLE(xitest  test/xitest.cpp test/test_proto.cpp ${SOURCES}) # Note: without 'ALL'
+  if(MSVC)
+     target_compile_options(xitest PRIVATE /W3 /WX)
+  else()
+     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
+        target_compile_options(xitest PRIVATE -Wall -Wextra -Werror)
+   endif()
+  endif()
+  TARGET_LINK_LIBRARIES(xitest bindy zf_log)
+ENDIF() 
+
+IF(BUILD_XIEXAMPLE)
+    ADD_EXECUTABLE(xiexample  example/xiexample.cpp example/xinet_server_test_1.cpp example/xinet_server_test_2.cpp)
+    TARGET_LINK_LIBRARIES(xiexample LINK_PRIVATE xibridge)
+    TARGET_LINK_LIBRARIES(xiexample zf_log)
+    if(MSVC)
+     target_compile_options(xiexample PRIVATE /W3 /WX)
+    else()
+     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
+        target_compile_options(xiexample PRIVATE -Wall -Wextra -Werror)
+     endif()
+    endif()	 
+ENDIF()
 
 

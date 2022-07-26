@@ -30,25 +30,14 @@ bool test_connect_2(const char * ip, uint32_t dev_num)
 		return false;
 	}
     
-    // urmc_get_identity_information_t  info;
-	Hex32  urpc_res;
-	MBuf mresp(resp, 72+4);
+  	uint32_t urpc_res = (uint32_t)resp;
 	
-	mresp >> urpc_res;
-	ZF_LOGD("Urpc return code: %d\n", (int)urpc_res);
-
-    char man[16 + 1];
-    memset(man, 0, 16 + 1);
-	mresp.memread((uint8_t *)man, 16, 16);
-	ZF_LOGD("Manufacture: %s\n", man);
-	
-    memset(man, 0, 16 + 1);
-	mresp.memread((uint8_t *)man, 16, 16);
-	ZF_LOGD("Product name: %s\n", man);
-
-    memset(man, 0, 16 + 1);
-	mresp.memread((uint8_t *)man, 16, 16);
-	ZF_LOGD("Controller: %s\n", man);
+	ZF_LOGD("Urpc return code: %d\n", (int)(urpc_res >> 24));
+	urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + sizeof(uint32_t));
+   
+	ZF_LOGD("Manufacture: %s\n", (char *)info.Manufacturer);
+    ZF_LOGD("Product name: %s\n", (char *)info.ProductName);
+	ZF_LOGD("Controller: %s\n", (char *)info.ControllerName);
 
     uint32_t gets_err = xibridge_device_request_response(&conn, (const unsigned char *)"gets", 4, resp, 48 + 4);
     if (gets_err)
