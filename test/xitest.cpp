@@ -69,12 +69,15 @@ bool test_xibridge_uri_parse()
 		ZF_LOGE("xi-net://abcd/1: invalid device reserve %u", parsed.uri_device_id.reserve);
 		ret = false;
 	}
-
-	return ret;
+    if (ret)
+    {
+        ZF_LOGD("test_xibridge_uri_parse OK");
+    }
+    return ret;
 }
 
 
-int main(int argc, char *argv[])
+int main(int /*argc*/, char ** /*argv[]*/)
 {
 	zf_log_set_output_level(ZF_LOG_DEBUG);
 

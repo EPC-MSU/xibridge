@@ -31,7 +31,7 @@ typedef struct _geng_re re_geng;
 bool test_connect_1(const char *ip, uint32_t dev_num)
 {
 	
-    sprintf(_DEV_IP, "xi-net://%s/%ux", ip, dev_num);
+    sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
     char  *pdata; uint32_t count;
 
     xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
@@ -48,7 +48,7 @@ bool test_connect_1(const char *ip, uint32_t dev_num)
     xibridge_free_enumerate_devices(pdata);
 
     xibridge_conn_t conn;
-    //xibridge_set_base_protocol_version({ 1, 0, 0 });
+
     uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {
@@ -95,14 +95,12 @@ static void thread_body(int thread_num)
 	
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
     xibridge_conn_t conn;
-	uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
+	xibridge_open_device_connection(_DEV_IP, &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
 	ZF_LOGD("Thread %u: sending gets... \n", thread_num);
-	//move_settings_calb_t resp_s;
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    //uint32_t serial;
     status_t status;
-    err = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 3, (uint8_t *)&status, sizeof(status_t));
+    uint32_t err = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 3, (uint8_t *)&status, sizeof(status_t));
 
 	ZF_LOGD("Thread %u: gets return %s\n", thread_num,
 		err == 0 ? "true" : "false");
@@ -134,4 +132,6 @@ void test_connect_1_threads()
 	{
 		delete pthreads[i];
 	}
+    // to finish all threads
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }

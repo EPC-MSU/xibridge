@@ -30,7 +30,7 @@ bool test_connect_2(const char * ip, uint32_t dev_num)
 		return false;
 	}
     
-  	uint32_t urpc_res = (uint32_t)resp;
+  	uint32_t urpc_res = (uint32_t)*resp;
 	
 	ZF_LOGD("Urpc return code: %d\n", (int)(urpc_res >> 24));
 	urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + sizeof(uint32_t));
@@ -55,7 +55,7 @@ static void thread_body(int thread_num)
 {
 	xibridge_conn_t conn;
 	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
-    uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
+    xibridge_open_device_connection(_DEV_IP, &conn);
 	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
 	unsigned char resp[72+4];
 	ZF_LOGD("Thread %u: sending ginf... \n", thread_num);
@@ -89,4 +89,8 @@ void test_connect_2_threads()
 	{
 		delete pthreads[i];
 	}
+
+    // to finish all threads
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
 }

@@ -15,7 +15,7 @@ extern bool test_connect_2(const char *ip, uint32_t dev_num);
 extern void test_connect_2_threads();
 extern void test_connect_1_threads();
 
-int main(int argc, char *argv[])
+int main(int /*argc*/, char ** /*argv[]*/)
 {
 	zf_log_set_output_level(ZF_LOG_DEBUG);
 	bool ret = true;
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     std::cin >> ip_s;
     if (!ip_s.empty() && ip_s[0] != 'N' && ip_s[0] != 'n' )
     {
-        std::cout << "Enter device serial number to be used with ximc-server:\n";
+        std::cout << "Enter device serial number to be used with ximc-server (decimal unsigned number):\n";
         std::cin >> dev_num;
         if (!test_connect_1(ip_s.data(), dev_num))
         {
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     std::cin >> ip_s;
 	if (!ip_s.empty() && ip_s[0] != 'N' && ip_s[0] != 'n' )
     {
-        std::cout << "Enter device serial number to be used with urpc-server:\n";
+        std::cout << "Enter device serial number to be used with urpc-server  (decimal unsigned number):\n";
         std::cin >> dev_num;
 
         if (!test_connect_2(ip_s.data(), dev_num))
@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
 		if (!ret) return 1;
         test_connect_2_threads();
     }
-
-   return 0;
+    
+    std::cout << "All is done OK. Press some char key, <-| to exit\n";
+    char key;
+    std::cin >> key;
+    return 0;
 }

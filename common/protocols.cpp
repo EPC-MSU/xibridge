@@ -402,7 +402,8 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 								  *_perror = ERR_PCKT_FMT;
 								  return false;
 							  }
-							  data = mbuf.to_vector(true);
+                              data = mbuf.to_vector(true);
+                              return true;
 		}
 		case pkt3_open_resp:
 		case pkt3_close_resp:
