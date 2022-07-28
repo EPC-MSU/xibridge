@@ -1,7 +1,7 @@
 #include <zf_log.h>
-#include "../common/defs.h"
+#include "../misc/defs.h"
 #include <bindy/bindy-static.h>
-#include "../common/utils.h"
+#include "../misc/utils.h"
 #include "bindy_helper.h"
 
 

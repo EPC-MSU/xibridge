@@ -3,8 +3,8 @@
 #include <map>
 #include <mutex> 
 
-#include "../common/defs.h"
-#include "../common/protocols.h"
+#include "../misc/defs.h"
+#include "../misc/protocols.h"
 #include "xibridge_client.h"
 
 /**
