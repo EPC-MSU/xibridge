@@ -66,8 +66,8 @@ ADD_SUBDIRECTORY_ZF_LOG()
 SET(SOURCES
         client/xibridge_client.cpp
 		client/bindy_helper.cpp
-        common/protocols.cpp
-        common/utils.cpp
+        misc/protocols.cpp
+        misc/utils.cpp
 		client/xibridge.cpp
 		client/version.rc
          )
