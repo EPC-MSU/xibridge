@@ -24,6 +24,11 @@ IF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     ENDIF()
 ENDIF()
 
+#to build test and xiexample in bin/folder and avoid ld errors
+IF (NOT MSVC)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+ENDIF()  
+
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_SYSTEM_VERSION} EQUAL 6.1)
     # HACK: Make cryptopp replace missing (till Windows 8) GetOverlappedResultEx() on Windows7 with somehting compatible
     ADD_DEFINITIONS(-D_WIN32_WINNT=0x0601)
