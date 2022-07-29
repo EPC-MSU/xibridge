@@ -1,8 +1,8 @@
 ﻿#include <bindy/bindy-static.h>
 #include <zf_log.h>
-#include "../misc/defs.h"
+#include "../common/defs.h"
 #include "xibridge_client.h" 
-#include "../misc/protocols.h"
+#include "../common/protocols.h"
 #include "bindy_helper.h" 
 
 
@@ -160,7 +160,7 @@ bool Xibridge_client::exec_enumerate(
     }
 }
 
-#include "../misc/xibridge_uri_parse.h"
+#include "../common/xibridge_uri_parse.h"
 
 Xibridge_client::Xibridge_client(const char *xi_net_uri, const char *adapter) :
 _server_protocol_version(_server_base_protocol_version),

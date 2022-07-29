@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
 OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
-OPTION(BUILD_XITEST "Build xibridge test project" OFF)
+OPTION(BUILD_TEST "Build xibridge test project" OFF)
 OPTION(BUILD_XIEXAMPLE "Build xibridge example@ project" OFF)
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
@@ -66,8 +66,8 @@ ADD_SUBDIRECTORY_ZF_LOG()
 SET(SOURCES
         client/xibridge_client.cpp
 		client/bindy_helper.cpp
-        misc/protocols.cpp
-        misc/utils.cpp
+        common/protocols.cpp
+        common/utils.cpp
 		client/xibridge.cpp
 		client/version.rc
          )
@@ -86,22 +86,21 @@ endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
 
 #add_custom_target(tests) # Note: without 'ALL'
-IF(BUILD_XITEST) 
-  ADD_EXECUTABLE(xitest  test/xitest.cpp test/test_proto.cpp ${SOURCES}) # Note: without 'ALL'
+IF(BUILD_TEST) 
+  ADD_EXECUTABLE(test  test/test.cpp test/test_proto.cpp ${SOURCES}) # Note: without 'ALL'
   if(MSVC)
-     target_compile_options(xitest PRIVATE /W3 /WX)
+     target_compile_options(test PRIVATE /W3 /WX)
   else()
      if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
-        target_compile_options(xitest PRIVATE -Wall -Wextra -Werror)
+        target_compile_options(test PRIVATE -Wall -Wextra -Werror)
    endif()
   endif()
-  TARGET_LINK_LIBRARIES(xitest bindy zf_log)
+  TARGET_LINK_LIBRARIES(test bindy zf_log)
 ENDIF() 
 
 IF(BUILD_XIEXAMPLE)
-    ADD_EXECUTABLE(xiexample  example/xiexample.cpp example/xinet_server_test_1.cpp example/xinet_server_test_2.cpp)
-    TARGET_LINK_LIBRARIES(xiexample LINK_PRIVATE xibridge)
-    TARGET_LINK_LIBRARIES(xiexample zf_log)
+    ADD_EXECUTABLE(xiexample  xiexample/xiexample.cpp xiexample/xinet_server_test_1.cpp xiexample/xinet_server_test_2.cpp)
+    TARGET_LINK_LIBRARIES(xiexample xibridge zf_log)
     if(MSVC)
      target_compile_options(xiexample PRIVATE /W3 /WX)
     else()

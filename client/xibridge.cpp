@@ -1,6 +1,6 @@
-﻿#include "../misc/defs.h"
+﻿#include "../common/defs.h"
 #include "xibridge.h"
-#include "../misc/defs.h"
+#include "../common/defs.h"
 #include "xibridge_client.h"
 
 xibridge_version_t xibridge_version()
