@@ -103,10 +103,7 @@ xibridge_version_t Xibridge_client::xi_get_connection_protocol_version(const xib
 }
 
 
-bool Xibridge_client::exec_enumerate(  
-	                                     char **result,
-                                         uint32_t *pcount
-                                     )
+bool Xibridge_client::exec_enumerate(char **result, uint32_t *pcount)
 {
     clr_errors();
     uint32_t answer_proto_version = _server_protocol_version;
@@ -193,8 +190,22 @@ _recv_tmout((uint32_t)TIMEOUT)
    clr_errors();
 }
 
+void Xibridge_client::_set_last_error(uint32_t err, 
+	                                  const char *add_text)
+{
+	_last_error = err;
+	const char *stand_text = xi_get_err_expl(err);
+	if (stand_text == nullptr || add_text == nullptr) return;
+	if (strstr(stand_text, "%s") != nullptr)
+	{
+		_complex_error = add_text;
+	}
+}
+
 uint32_t Xibridge_client::xi_read_connection_buffer(const xibridge_conn_t *pconn, 
-                                                     uint8_t *buf, uint32_t size, uint32_t* preal_read)
+                                                    uint8_t *buf, 
+													uint32_t size, 
+													uint32_t* preal_read)
 {
 	if (pconn == nullptr)
 	{
@@ -222,7 +233,8 @@ uint32_t Xibridge_client::xi_read_connection_buffer(const xibridge_conn_t *pconn
 }
 
 uint32_t Xibridge_client::xi_write_connection(const xibridge_conn_t *pconn,
-	const uint8_t *buf, uint32_t size)
+	                                          const uint8_t *buf, 
+											  uint32_t size)
 {
 	if (pconn == nullptr)
 	{
@@ -386,10 +398,10 @@ bvector Xibridge_client::send_data_and_receive(bvector data, uint32_t resp_lengt
 }
 
 uint32_t Xibridge_client::xi_request_response(const xibridge_conn_t *pconn, 
-	                                            const unsigned char *req, 
-												uint32_t req_len, 
-												unsigned char *resp, 
-												uint32_t resp_len)
+	                                          const unsigned char *req, 
+											  uint32_t req_len, 
+											  unsigned char *resp, 
+											  uint32_t resp_len)
 {
 	if (pconn == nullptr)
 	{

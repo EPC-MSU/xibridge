@@ -47,9 +47,7 @@ typedef struct _sm
 
 
 /**
-* \russian
-* Абстракный класс для поддержки различных протоколов обмена
-  \endrussian
+    * abstruct class to provide using of several types of protocols  
 */
 class AProtocol
 {
@@ -291,7 +289,6 @@ private:
 
    
 	static cmd_schema _cmd_shemas[12];
-	
 };
 
 

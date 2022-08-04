@@ -53,9 +53,9 @@ const cmd_schema &cmd_schema::get_schema(uint32_t pckt, const cmd_schema *_ss)
 }
 
 // structure to connect packet type and command schema
-//  command schema ia a string like this "v_p_0_d_0_0_x"
-//  v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
-//   l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit numver
+// command schema ia a string like this "v_p_0_d_0_0_x"
+// v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
+// l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit numver
 bool cmd_schema::is_match(const uint8_t *data, int len, uint32_t proto, uint32_t dev_num) const
 {
 	MBuf mbuf(data, len);
@@ -172,38 +172,35 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 	// 16 bytes has already read from mbuf
 	Hex32 count,  r;
     Hex32 devnum(0, true);
-    
+	size_t len;
 	if (_is_server)
 	{
 		switch (pckt)
 		{
 		case pkt1_raw:
-		{
-						 mbuf.mseek(8+4); //according to protocol
-						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == SIZE_MAX)
-						 {
-							 *_perror = ERR_PCKT_FMT;
-							 return false;
-						 }
-						 data.assign(mbuf.cur_data(), mbuf.cur_data()+len);
-						
-						 return true;
-		}
+
+			mbuf.mseek(8 + 4); //according to protocol
+			len = mbuf.restOfSize(-1);
+			if (mbuf.wasBroken() || len == SIZE_MAX)
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+			return true;
+
 		case pkt1_open_req:
-		{
-						  return true;
-		}
+			return true;
+
 		case pkt1_close_req:
-		{
-						  return true;
-		}
+			return true;
+
 		case pkt1_enum_req:
-			              
-			              return true;
+			return true;
 		default:
 			*_perror = ERR_PCKT_INV;
 			return false;
+
 		}
 	}
 	else
@@ -211,58 +208,50 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 		switch (pckt)
 		{
 		case pkt1_error_ntf:
-		{
-						*_perror = ERR_DEVICE_LOST;
-						return false;
-		}
+
+			*_perror = ERR_DEVICE_LOST;
+			return false;
 		case pkt1_raw:
-		{
-						 mbuf.mseek(8);
-						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == SIZE_MAX)
-						 {
-							 *_perror = ERR_PCKT_FMT;
-							 return false;
-						 }
-                   		 data = mbuf.to_vector(true);
-						 return true;
-		}
+			mbuf.mseek(8);
+			len = mbuf.restOfSize(-1);
+			if (mbuf.wasBroken() || len == SIZE_MAX)
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			data = mbuf.to_vector(true);
+			return true;
 		case pkt1_open_resp:
 		case pkt1_close_resp:
-		{              
-						 mbuf.mseek(8);
-						 size_t len = mbuf.restOfSize(-1);
-						 if (len != sizeof (uint32_t))
-						 {
-							 *_perror = ERR_PCKT_FMT;
-							 return false;
-						 }
-                         mbuf >> r;
-						 _res_err = (uint32_t)r;
-					     return true;
-		}
+
+			mbuf.mseek(8);
+			len = mbuf.restOfSize(-1);
+			if (len != sizeof (uint32_t))
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			mbuf >> r;
+			_res_err = (uint32_t)r;
+			return true;
+
 		case pkt1_enum_resp:
-		{
-                         mbuf.mseek(-4);
-						 mbuf >> count;
-						 _res_err = (uint32_t)count;
-                         for (int i = 0; i < (int)count; i++)
-                         {
-                             mbuf >> devnum;
-                             // according to protocol1
-                             DevId devid(devnum);
-                             add_dev_id_bvector_net_order(data, devid._dev_id);
-                             // according to protocol1
-                             mbuf.mseek(180 - sizeof(uint32_t));
-                         }
-                         
-	                     // according to protocol desc - the length of 				
-						 if (mbuf.wasBroken()) 
-						     *_perror = ERR_PCKT_FMT;
-					     return !mbuf.wasBroken();
-					    
-		}
-		
+     	    mbuf.mseek(-4);
+			mbuf >> count;
+			_res_err = (uint32_t)count;
+			for (int i = 0; i < (int)count; i++)
+			{
+				mbuf >> devnum;
+				// according to protocol1
+				DevId devid(devnum);
+				add_dev_id_bvector_net_order(data, devid._dev_id);
+				// according to protocol1
+				mbuf.mseek(180 - sizeof(uint32_t));
+			}
+			// according to protocol desc - the length of 				
+			if (mbuf.wasBroken())
+				*_perror = ERR_PCKT_FMT;
+			return !mbuf.wasBroken();
 		default:
 			*_perror = ERR_PCKT_INV;
 			return false;
@@ -276,36 +265,29 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 	uint32_t pckt)
 {
 	// 16 bytes or 16 bytes + 8 (extended identifier) has already read from mbuf
-
-
-    Hex32 r;
+	size_t len;
+	Hex32 r;
 	if (_is_server)
 	{
 		switch (pckt)
 		{
 		case pkt2_cmd_req:
-		{
-						 mbuf.mseek(8);
-                         //mbuf >> r; get data as is!!!
-						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == SIZE_MAX)
-						 {
-							 *_perror = ERR_PCKT_FMT;
-							 return false;
-						 }
-                         _res_err = 0;
-						 data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
 
-						 return true;
-		}
+			mbuf.mseek(8);
+			//mbuf >> r; get data as is!!!
+			len = mbuf.restOfSize(-1);
+			if (mbuf.wasBroken() || len == SIZE_MAX)
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			_res_err = 0;
+			data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
+			return true;
 		case pkt2_open_req:
-		{
-					     return true;
-		}
+			return true;
 		case pkt2_close_req:
-		{
-					     return true;
-		}
+			return true;
 		default:
 			*_perror = ERR_PCKT_INV;
 			return false;
@@ -316,35 +298,29 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
 		switch (pckt)
 		{
 		case pkt2_cmd_resp:
-		{
-						 mbuf.mseek(8);
-						 //mbuf >> r; get data as is!!!
-						 //mbuf >> r;
-						 size_t len = mbuf.restOfSize(-1);
-						 if (mbuf.wasBroken() || len == SIZE_MAX)
-						 {
-							 *_perror = ERR_PCKT_FMT;
-							 return false;
-						 }
-						 _res_err = 0;
-						 data = mbuf.to_vector(true);
-						 return true;
-		}
+
+			mbuf.mseek(8);
+			len = mbuf.restOfSize(-1);
+			if (mbuf.wasBroken() || len == SIZE_MAX)
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			_res_err = 0;
+			data = mbuf.to_vector(true);
+			return true;
 		case pkt2_open_resp:
 		case pkt2_close_resp:
-		{
-						mbuf.mseek(8);
-						size_t len = mbuf.restOfSize(-1);
-						if (len != sizeof (uint32_t))
-						{
-							*_perror = ERR_PCKT_FMT;
-							return false;
-						}
-                        mbuf >> r;
-                        _res_err = r;
-						return true;
-		}
-		
+			mbuf.mseek(8);
+			len = mbuf.restOfSize(-1);
+			if (len != sizeof (uint32_t))
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			mbuf >> r;
+			_res_err = r;
+			return true;
 		default:
 			*_perror = ERR_PCKT_INV;
 			return false;
@@ -360,30 +336,27 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 	// 16 bytes has already read from mbuf
 	Hex32 size, r;
 	HexIDev3 dev;
+	size_t len;
 	if (_is_server)
 	{
 		switch (pckt)
 		{
 		case pkt3_cmd_req:
-		{
-							 mbuf.mseek(8);
-							 mbuf >> size;
-							 size_t len = mbuf.restOfSize(-1);
-							 if (mbuf.wasBroken() || len != (size_t)size)
-							 {
-								 *_perror = ERR_PCKT_FMT;
-								 return false;
-							 }
-							 data = mbuf.to_vector(true);
-
-							 return true;
-		}
+			mbuf.mseek(8);
+			mbuf >> size;
+			len = mbuf.restOfSize(-1);
+			if (mbuf.wasBroken() || len != (size_t)size)
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			data = mbuf.to_vector(true);
+			return true;
 		case pkt3_open_req:
 		case pkt3_close_req:
 		case pkt3_enum_req:
 		case pkt3_ver_req:
-							 return true;
-			                  
+			return true;
 		default:
 			*_perror = ERR_PCKT_INV;
 			return false;
@@ -394,55 +367,45 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
 		switch (pckt)
 		{
 		case pkt3_cmd_resp:
-		{
-							  mbuf >> size;
-							  size_t len = mbuf.restOfSize(-1);
-							  if (mbuf.wasBroken() || len != (size_t)size)
-							  {
-								  *_perror = ERR_PCKT_FMT;
-								  return false;
-							  }
-                              data = mbuf.to_vector(true);
-                              return true;
-		}
+			mbuf >> size;
+			len = mbuf.restOfSize(-1);
+			if (mbuf.wasBroken() || len != (size_t)size)
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			data = mbuf.to_vector(true);
+			return true;
 		case pkt3_open_resp:
 		case pkt3_close_resp:
 		case pkt3_ver_resp:
 		case pkt3_error_resp:
-		{
-
-							  mbuf.mseek(8);
-							  size_t len = mbuf.restOfSize(-1);
-							  if (len != sizeof (uint32_t))
-							  {
-								  *_perror = ERR_PCKT_FMT;
-								  return false;
-							  }
-                              mbuf >> r;
-							  _res_err = r;
-							  return true;
-
-		}
+			mbuf.mseek(8);
+			len = mbuf.restOfSize(-1);
+			if (len != sizeof (uint32_t))
+			{
+				*_perror = ERR_PCKT_FMT;
+				return false;
+			}
+			mbuf >> r;
+			_res_err = r;
+			return true;
 		case pkt3_enum_resp:
-		{
+			mbuf.mseek(8);
+			mbuf >> size;
+			_res_err = (uint32_t)size;
+			for (int i = 0; i < (int)size; i++)
+			{
+				mbuf >> dev;
+				// according to protocol3
+				DevId devid(dev.toExtDevId());
+				add_dev_id_bvector_net_order(data, devid._dev_id);
+			}
 
-							   mbuf.mseek(8);
-							   mbuf >> size;
-							   _res_err = (uint32_t)size;
-							   for (int i = 0; i < (int)size; i++)
-							   {
-								   mbuf >> dev;
-								   // according to protocol3
-								   DevId devid(dev.toExtDevId());
-								   add_dev_id_bvector_net_order(data, devid._dev_id);
-								}
+			// according to protocol desc - the length of 				
+			if (mbuf.wasBroken()) *_perror = ERR_PCKT_FMT;
+			return !mbuf.wasBroken();
 
-							   // according to protocol desc - the length of 				
-							   if (mbuf.wasBroken()) *_perror = ERR_PCKT_FMT;
-							   return !mbuf.wasBroken();
-
-
-		}
 		default:
 			*_perror = ERR_PCKT_FMT;
 			return false;

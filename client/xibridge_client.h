@@ -64,7 +64,8 @@ public:
 	* @return версия xibridge
 	* \endrussian
 */
-	static xibridge_version_t xi_get_version()
+	static xibridge_version_t 
+	xi_get_version()
 	{
         return {1, 0, 0};
 	};
@@ -75,7 +76,8 @@ public:
 	* @return версия максимальной версии протокола xibridge
 	* \endrussian
 */
-    static xibridge_version_t xi_get_max_protocol_version()
+    static xibridge_version_t 
+	xi_get_max_protocol_version()
 	{
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
 	}
@@ -88,7 +90,8 @@ public:
    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
    * \endrussian
 */
-    static uint32_t xi_set_base_protocol_version(xibridge_version_t ver);
+    static uint32_t 
+	xi_set_base_protocol_version(xibridge_version_t ver);
 
 /**
    * \russian
@@ -97,7 +100,8 @@ public:
    * @return версия протокола для взаимодействия с сервером (1,2 или 3), если подключение не существует - возвращается версия протокола 3
    * \endrussian
 */
-    static xibridge_version_t xi_get_connection_protocol_version(const xibridge_conn_t *pconn);
+    static xibridge_version_t 
+	xi_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /**
    * \russian
@@ -106,7 +110,8 @@ public:
    * @return код ошибки в случае ее возникновения при закрытии подключения, 0 - если успех  
    * \endrussian
 */
-    static uint32_t xi_close_connection_device(const xibridge_conn_t *pconn);
+    static uint32_t 
+	xi_close_connection_device(const xibridge_conn_t *pconn);
     	
 /**
    * \russian
@@ -118,12 +123,11 @@ public:
    * @return код ошибки - если операция завершилась неудачно< 0 - если успех
    * \endrussian
 */
-	static uint32_t xi_read_connection_buffer(
-		                                         const xibridge_conn_t *pconn, 
-											     uint8_t *buf, 
-											     uint32_t size,
-											     uint32_t* preal_read = nullptr
-										     );
+	static uint32_t 
+	xi_read_connection_buffer(const xibridge_conn_t *pconn, 
+							  uint8_t *buf, 
+							  uint32_t size,
+						      uint32_t* preal_read = nullptr);
 
 /**
 	* \russian
@@ -134,11 +138,10 @@ public:
 	* @return код ошибки - если операция завершилась неудачно< 0 - если успех
 	* \endrussian
 */
-	static uint32_t xi_write_connection(
-		                                   const xibridge_conn_t *pconn, 
-									       const uint8_t*buf, 
-									       uint32_t size
-								       );
+	static uint32_t 
+	xi_write_connection(const xibridge_conn_t *pconn, 
+			            const uint8_t*buf, 
+						uint32_t size);
 /**
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
@@ -147,7 +150,8 @@ public:
    * @param[in] recv_timeout таймаут ответа сервера
    * \endrussian
 */
-    Xibridge_client(const char *xi_net_uri, const char *adapter = NULL);
+    Xibridge_client(const char *xi_net_uri, 
+		            const char *adapter = NULL);
 
 /**
    * \russian
@@ -160,13 +164,12 @@ public:
    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-	static uint32_t xi_request_response(
-		                                   const xibridge_conn_t *pconn, 
-		                                   const uint8_t *req, 
-										   uint32_t req_len, 
-										   uint8_t *resp, 
-										   uint32_t resp_len
-								       );
+	static uint32_t 
+	xi_request_response(const xibridge_conn_t *pconn, 
+		                const uint8_t *req, 
+						uint32_t req_len, 
+						uint8_t *resp, 
+						uint32_t resp_len);
 
 /**
    * \russian
@@ -175,7 +178,8 @@ public:
    * @return строка с ошибкой или нулевой указатель в случае неизвестного кода ошибки
    * \endrussian
 */
-	static const char * xi_get_err_expl(unsigned int err_no);
+	static const char * 
+	xi_get_err_expl(unsigned int err_no);
 
 	/**
 	* \russian
@@ -184,7 +188,8 @@ public:
 	* @param[in] presult указатель на распределенные данные, полученные в результате вызова
 	* xibridge_enumerate_adapter_devices
 	*/
-	static void xi_free_enumerate_devices(char *presult)
+	static void 
+	xi_free_enumerate_devices(char *presult)
 	{
 		if (presult != nullptr)
 		{
@@ -194,10 +199,8 @@ public:
 	
 	bool open_device();
 
-    bool exec_enumerate(
-                           char **result,
-                           uint32_t *pcount       
-                       );
+    bool exec_enumerate( char **result,
+                         uint32_t *pcount);
 
     bool open_connection();
 
@@ -243,16 +246,8 @@ private:
     static uint32_t _server_base_protocol_version;
 
    	bool _send_and_receive(bvector &req);
-	void _set_last_error(uint32_t err, const char *add_text = nullptr) 
-	{ 
-		_last_error = err;
-		const char *stand_text = xi_get_err_expl(err);
-		if (stand_text == nullptr || add_text == nullptr) return;
-		if (strstr(stand_text, "%s") != nullptr)
-		{
-			_complex_error = add_text;
-		}
-	}
+	void _set_last_error(uint32_t err, const char *add_text = nullptr);
+	
 /**
 	* Ключевые атрибуты клиента
 */
