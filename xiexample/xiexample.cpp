@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 #include "../common/defs.h"
-#include "../client/xibridge.h"
+#include "../xibridge.h"
 #include <zf_log.h>
 
 // to make log level controlled

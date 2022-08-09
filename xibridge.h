@@ -2,7 +2,10 @@
 #define  _XIBRIDGE_H
 
 #include <stdint.h>
-#include "../config_xi.h"
+
+//#include "../config_xi.h"
+
+#define BUILD_SHARED_LIBS_XI
 
 #if defined (WIN32) || defined(WIN64)
 

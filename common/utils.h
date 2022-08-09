@@ -1,7 +1,7 @@
 #ifndef _UTILS_H
 #define  _UTILS_H
 #include "defs.h"
-#include "../client/xibridge.h"
+#include "../xibridge.h"
 
 
 #ifdef _MSC_VER

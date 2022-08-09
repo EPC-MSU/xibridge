@@ -1,7 +1,7 @@
 #ifndef _PROTOCOLS_H
 #define _PROTOCOLS_H
 #include "defs.h"
-#include "../client/xibridge.h"
+#include "../xibridge.h"
 #include "utils.h"
 
 

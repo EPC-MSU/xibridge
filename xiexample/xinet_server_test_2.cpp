@@ -1,7 +1,7 @@
 #include <zf_log.h>
 #include <thread>
 #include <../common/protocols.h>
-#include <../client/xibridge.h>
+#include <../xibridge.h>
 #include "urmc-min/urmc_min.h"
 #include "../common/utils.h"
 

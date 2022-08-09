@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
-OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
+# OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
 OPTION(BUILD_TEST "Build xibridge test project" OFF)
 OPTION(BUILD_XIEXAMPLE "Build xibridge example@ project" OFF)
 
@@ -39,7 +39,8 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin
 ENDIF()
 
 
-CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
+# CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
+
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
    add_definitions( -D_CRT_SECURE_NO_WARNINGS) 
@@ -78,11 +79,14 @@ SET(SOURCES
          )
 
 #add_dependencies
-if (BUILD_SHARED_LIBS_XI)
-  ADD_LIBRARY(xibridge SHARED ${SOURCES})
-else()
-  ADD_LIBRARY(xibridge STATIC ${SOURCES})
-endif()
+   # if (BUILD_SHARED_LIBS_XI)
+
+ADD_LIBRARY(xibridge SHARED ${SOURCES})
+
+   # else()
+   #  ADD_LIBRARY(xibridge STATIC ${SOURCES})
+   #endif()
+
 if(MSVC)
   target_compile_options(xibridge PRIVATE /W3 /WX)
 else()
