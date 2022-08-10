@@ -5,6 +5,8 @@
 #include "../common/protocols.h"
 #include "bindy_helper.h"
 
+#define  VERSION {1,0,0}
+
 /*
 * Defines client errors (errors to take place at the client side)
 */
@@ -67,7 +69,7 @@ public:
 	static xibridge_version_t 
 	xi_get_version()
 	{
-        return {1, 0, 0};
+        return VERSION;
 	};
 
 /**

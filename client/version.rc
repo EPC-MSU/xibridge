@@ -1,30 +1,88 @@
-#include <windows.h>
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+/////////////////////////////////////////////////////////////////////////////
+// Russian (Russia) resources
 
-#define VOS_NT_WINDOWS32    0x00040004L
-#define VFT_APP             0x00000001L
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
 
 1 VERSIONINFO
-FILEVERSION 0,0,1,100
-PRODUCTVERSION 0,0,1,100
-FILEOS VOS_DOS_WINDOWS32
-FILETYPE VFT_APP
-{
-    BLOCK "StringFileInfo" 
-    {
-        BLOCK "040904E4" 
-        {
-            VALUE "CompanyName", "COMPANY NAME HERE\0" 
-            VALUE "FileDescription", "xibridge library\0" 
-            VALUE "FileVersion", "0.0.1\0" 
-            VALUE "InternalName", "xibridge\0" 
-            VALUE "LegalCopyright", "MIT License\0" 
-            VALUE "OriginalFilename", "xibridge.dll\0" 
-            VALUE "ProductName", "xibridge\0" 
-            VALUE "ProductVersion","0.0.1\0" 
-        }
-    }
-    BLOCK "VarFileInfo" 
-    {
-        VALUE "Translation", 1033, 1252
-    }
-}
+ FILEVERSION 0,0,1,100
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x0L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x10004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "EPC-MSU"
+            VALUE "FileDescription", "xibridge library"
+            VALUE "FileVersion", "0.0.1"
+            VALUE "InternalName", "xibridge"
+            VALUE "LegalCopyright", "MIT License"
+            VALUE "OriginalFilename", "xibridge.dll"
+            VALUE "ProductName", "xibridge"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Russian (Russia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
