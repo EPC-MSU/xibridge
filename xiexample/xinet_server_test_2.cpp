@@ -13,7 +13,7 @@ static char  _DEV_IP[256];
 bool test_connect_2(const char * ip, uint32_t dev_num)
 {
   
-    sprintf(_DEV_IP, "xi-net://%s/%ux", ip, dev_num);
+    sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
 	xibridge_conn_t conn;
     uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
