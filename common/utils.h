@@ -30,10 +30,7 @@ typedef SSIZE_T ssize_t;
 #define portable_strcasecmp strcasecmp
 
 #endif
-/*
 
-
-*/
 class AHex
 {
 public :

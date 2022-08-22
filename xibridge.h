@@ -31,22 +31,22 @@ extern "C" {
 /**
     * \russian
     * Структура для работы с расширеным идентификаторм устройства (используется в протоколе обмена версии 3 и выше)
-	* \endrussian
+    * \endrussian
 */
 PACK(
 struct _xibridge_device_t
 {
-	uint32_t reserve;
-	uint16_t VID;
-	uint16_t PID;
-	uint32_t id;
+    uint32_t reserve;
+    uint16_t VID;
+    uint16_t PID;
+    uint32_t id;
 });
 typedef struct _xibridge_device_t xibridge_device_t;
 
 /**
     * \russian
     * Структура для хранения версии библиотеки, протокола
-	* \endrussian
+    * \endrussian
 */
 PACK(
 struct _xibridge_version_t
@@ -57,15 +57,17 @@ struct _xibridge_version_t
 });
 typedef struct _xibridge_version_t xibridge_version_t;
 
-/*
-* Значение для invalid версии
+/**
+    * \russian
+    * Значение для invalid версии
+    * \endrussian
 */
 #define xibridge_version_invalid  {0, 0, 0}
 
 /**
-* \russian
-* Структура для хранения данных подключения (id подключения +  версия протокола)
-* \endrussian
+    * \russian
+    * Структура для хранения данных подключения (id подключения +  версия протокола)
+    * \endrussian
 */
 PACK(
 struct _xibridge_conn_t
@@ -75,23 +77,25 @@ struct _xibridge_conn_t
 });
 typedef struct _xibridge_conn_t xibridge_conn_t;
 
-/*
-* Значение для invalid подключения
+/**
+    * \russian
+    * Значение для invalid подключения
+    * \endrussian
 */
 #define xibridge_conn_invalid { 0, { 0, 0, 0 } }
 
 /**
-* \russian
-* Константы длин чаcтей uri
-* \endrussian
+    * \russian
+    * Константы длин чаcтей uri
+    * \endrussian
 */
 #define XI_URI_HOST_LEN 64
 #define XI_URI_SCHEMA_LEN 16
 
 /**
-*\russain
-* Структура для хранения частей uri устройства
-*\endrussain
+    *\russain
+    * Структура для хранения частей uri устройства
+    *\endrussain
 */
 PACK(
 struct _xibridge_parsed_uri{
@@ -103,18 +107,18 @@ typedef struct _xibridge_parsed_uri xibridge_parsed_uri;
 
 /** 
     * \russian
-	* Константа определяет значение базового таймаута при операциях взаимодействия с сервером 
+    * Константа определяет значение базового таймаута при операциях взаимодействия с сервером 
     * \endrussian
 */
 #define TIMEOUT 3000
 
 /** 
     * \russian
-	* Функция определения версии библиотеки 
+    * Функция определения версии библиотеки 
     * @return версия библиотеки xibridge
     * \endrussian
 */
-XI_EXPORT xibridge_version_t  \
+XI_EXPORT xibridge_version_t  
 xibridge_get_library_version();
 
 /** 
@@ -157,7 +161,7 @@ xibridge_get_connection_protocol_version(const xibridge_conn_t *pconn);
 */
 XI_EXPORT uint32_t 
 xibridge_open_device_connection(const char *xi_net_uri, 
-	                            xibridge_conn_t *pconn);
+                                xibridge_conn_t *pconn);
 
 /**
    * \russian
@@ -184,7 +188,7 @@ XI_EXPORT uint32_t
 xibridge_device_request_response(const xibridge_conn_t *pconn,
                                  const uint8_t *req,
                                  uint32_t req_len, 
-								 uint8_t *resp,
+                                 uint8_t *resp,
                                  uint32_t resp_len);
 
 /**
@@ -213,15 +217,15 @@ xibridge_get_err_expl(uint32_t err_no);
 XI_EXPORT uint32_t  
 xibridge_enumerate_adapter_devices(const char *addr, 
                                    const char *adapter,
-	                               char **ppresult,
+                                   char **ppresult,
                                    uint32_t *pcount);
 
 /**
    * \russian
    * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
    * вызываться после xibridge_enumerate_adapter_devices
-   * @param[in] presult указатель на распределенные данные, полученные в результате вызова 
-   * xibridge_enumerate_adapter_devices 
+   * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
+   * \endrussian
 */
 XI_EXPORT void 
 xibridge_free_enumerate_devices(char *presult);

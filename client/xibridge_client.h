@@ -22,69 +22,86 @@
 #define ERR_RECV_TIMEOUT 7
 #define ERR_ANOTHER_PROTOCOL 8
 
-/*
-* User's fault to pass a pointer to param
+/**
+    *\english
+    * Errors of using  
+    * \endenglish
+    *\russian
+    * Ошибки использования
+    * \endrussian
 */
 #define ERR_NULLPTR_PARAM  9
-
 #define ERR_SET_CONNECTION 10
 
-/*
-* Server errors
+/**
+    *\english
+    * Error(s) from server 
+    * \endenglish
+    *\russian
+    * Ошибки из сервера
+    * \endrussian
 */
-
 #define ERR_DEVICE_LOST 0xfffb
 
-/*
-Packet-Fmt errors
+/**
+    *\english
+    * Packet-Fmt errors
+    * \endenglish
+    *\russian
+    * Ошибки пакетов и форматов 
+    *\endrussain
 */
 
 #define ERR_PCKT_FMT 12
 #define ERR_PCKT_INV 13
 
 /**
+   *\english
    * Defines default version number of the protocol
+   * \endenglish
+   *\russian
+   * Определяет номер версии протокола по умолчанию  
+   * \endrussian
 */
 #define DEFAULT_PROTO_VERSION 3
 
 /** 
     * \english
     * Class to communicate as a client with ximc, urpc-, xibridge-server
-	* \endenglish
+    * \endenglish
     * \russian
     * Класс для взаимодействия в качестве клиента с ximc, urpc-, xibridge-сервером
-	* \endrussian
+    * \endrussian
 */
 class Xibridge_client
 {
-	friend class Bindy_helper;
+    friend class Bindy_helper;
 public:
 
 /**
-	* \russian
-	* Функция определения версии библиотеки xibridge
-	* @return версия xibridge
-	* \endrussian
-*/
-	static xibridge_version_t 
-	xi_get_version()
-	{
-        return VERSION;
-	};
-
-/**
-	* \russian
-	* Функция определения максимальной версии протокола библиотеки xibridge
-	* @return версия максимальной версии протокола xibridge
-	* \endrussian
+    * \russian
+    * Функция определения версии библиотеки xibridge
+    * @return версия xibridge
+    * \endrussian
 */
     static xibridge_version_t 
-	xi_get_max_protocol_version()
-	{
+    xbc_get_version()
+    {
+        return VERSION;
+    };
+
+/**
+    * \russian
+    * Функция определения максимальной версии протокола библиотеки xibridge
+    * @return версия максимальной версии протокола xibridge
+    * \endrussian
+*/
+    static xibridge_version_t 
+    xbc_get_max_protocol_version()
+    {
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
-	}
-	
-   
+    }
+     
 /**
    * \russian
    * Отладочная функция установки версии протокола для взаимодействия с сервером
@@ -93,7 +110,7 @@ public:
    * \endrussian
 */
     static uint32_t 
-	xi_set_base_protocol_version(xibridge_version_t ver);
+    xbc_set_base_protocol_version(xibridge_version_t ver);
 
 /**
    * \russian
@@ -103,7 +120,7 @@ public:
    * \endrussian
 */
     static xibridge_version_t 
-	xi_get_connection_protocol_version(const xibridge_conn_t *pconn);
+    xbc_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /**
    * \russian
@@ -113,8 +130,8 @@ public:
    * \endrussian
 */
     static uint32_t 
-	xi_close_connection_device(const xibridge_conn_t *pconn);
-    	
+    xbc_close_connection_device(const xibridge_conn_t *pconn);
+        
 /**
    * \russian
    * Функция чтения данных ("как есть", без парсинга по протоколу) из устройства с помощью данного подключения
@@ -125,25 +142,25 @@ public:
    * @return код ошибки - если операция завершилась неудачно< 0 - если успех
    * \endrussian
 */
-	static uint32_t 
-	xi_read_connection_buffer(const xibridge_conn_t *pconn, 
-							  uint8_t *buf, 
-							  uint32_t size,
-						      uint32_t* preal_read = nullptr);
+    static uint32_t 
+    xbc_read_connection_buffer(const xibridge_conn_t *pconn, 
+                              uint8_t *buf, 
+                              uint32_t size,
+                              uint32_t* preal_read = nullptr);
 
 /**
-	* \russian
-	* Функция записи данных ("как есть", без формирования по протоколу) в устройство с помощью данного подключения
-	* @param[in] pconn указатель на данные подключения
-	* @param[in] buf данные для отправки в устройство
-	* @param[in] size длина данных
-	* @return код ошибки - если операция завершилась неудачно< 0 - если успех
-	* \endrussian
+    * \russian
+    * Функция записи данных ("как есть", без формирования по протоколу) в устройство с помощью данного подключения
+    * @param[in] pconn указатель на данные подключения
+    * @param[in] buf данные для отправки в устройство
+    * @param[in] size длина данных
+    * @return код ошибки - если операция завершилась неудачно< 0 - если успех
+    * \endrussian
 */
-	static uint32_t 
-	xi_write_connection(const xibridge_conn_t *pconn, 
-			            const uint8_t*buf, 
-						uint32_t size);
+    static uint32_t 
+    xbc_write_connection(const xibridge_conn_t *pconn, 
+                        const uint8_t*buf, 
+                        uint32_t size);
 /**
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
@@ -153,7 +170,7 @@ public:
    * \endrussian
 */
     Xibridge_client(const char *xi_net_uri, 
-		            const char *adapter = NULL);
+                    const char *adapter = NULL);
 
 /**
    * \russian
@@ -166,12 +183,12 @@ public:
    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-	static uint32_t 
-	xi_request_response(const xibridge_conn_t *pconn, 
-		                const uint8_t *req, 
-						uint32_t req_len, 
-						uint8_t *resp, 
-						uint32_t resp_len);
+    static uint32_t 
+    xbc_request_response(const xibridge_conn_t *pconn, 
+                        const uint8_t *req, 
+                        uint32_t req_len, 
+                        uint8_t *resp, 
+                        uint32_t resp_len);
 
 /**
    * \russian
@@ -180,63 +197,63 @@ public:
    * @return строка с ошибкой или нулевой указатель в случае неизвестного кода ошибки
    * \endrussian
 */
-	static const char * 
-	xi_get_err_expl(unsigned int err_no);
+    static const char * 
+    xbc_get_err_expl(unsigned int err_no);
 
-	/**
-	* \russian
-	* Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна
-	* вызываться после xibridge_enumerate_adapter_devices
-	* @param[in] presult указатель на распределенные данные, полученные в результате вызова
-	* xibridge_enumerate_adapter_devices
-	*/
-	static void 
-	xi_free_enumerate_devices(char *presult)
-	{
-		if (presult != nullptr)
-		{
-			free (presult);
-		}
-	}
-	
-	bool open_device();
+/**
+    * \russian
+    * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна
+    * вызываться после xibridge_enumerate_adapter_devices
+    * @param[in] presult указатель на распределенные данные, полученные в результате вызова xibridge_enumerate_adapter_devices
+    * \endrussian
+*/
+    static void 
+    xbc_free_enumerate_devices(char *presult)
+    {
+        if (presult != nullptr)
+        {
+            free (presult);
+        }
+    }
+    
+    bool open_device();
 
     bool exec_enumerate( char **result,
                          uint32_t *pcount);
 
     bool open_connection();
 
-	bool is_connected();
+    bool is_connected();
 
-	void disconnect();
-	
-	bool close_connection_device();
+    void disconnect();
+    
+    bool close_connection_device();
 
     bool decrement_server_protocol_version();
 
-	conn_id_t conn_id() const { return _conn_id; }
+    conn_id_t conn_id() const { return _conn_id; }
 
-	bvector  send_data_and_receive(bvector data, uint32_t resp_length);
-	
-	uint32_t get_last_error() const { return _last_error; };
+    bvector  send_data_and_receive(bvector data, uint32_t resp_length);
+    
+    uint32_t get_last_error() const { return _last_error; };
 
-	void clr_errors() 
-	{ 
-		_last_error = 0; 
-		_complex_error  = ""; 
-	}
+    void clr_errors() 
+    { 
+        _last_error = 0; 
+        _complex_error  = ""; 
+    }
 
-	uint32_t get_resv_tmout() const { return _recv_tmout; }
+    uint32_t get_resv_tmout() const { return _recv_tmout; }
 
-	uint32_t get_proto_version_of_the_recv_message() const 
-	{ 
-		return AProtocol::get_version_of_cmd(_recv_message); 
-	}
-	
-	xibridge_conn_t to_xibridge_conn_t() const 
-	{
-		return{ (uint32_t)_conn_id, { (uint8_t)_server_protocol_version, 0, 0 } };
-	}
+    uint32_t get_proto_version_of_the_recv_message() const 
+    { 
+        return AProtocol::get_version_of_cmd(_recv_message); 
+    }
+    
+    xibridge_conn_t to_xibridge_conn_t() const 
+    {
+        return{ (uint32_t)_conn_id, { (uint8_t)_server_protocol_version, 0, 0 } };
+    }
 private:
 
 /**
@@ -244,42 +261,54 @@ private:
    * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
    * \endrussian
 */
-	static Xibridge_client * _get_client_as_free(conn_id_t conn_id);
+    static Xibridge_client * _get_client_as_free(conn_id_t conn_id);
     static uint32_t _server_base_protocol_version;
 
-   	bool _send_and_receive(bvector &req);
-	void _set_last_error(uint32_t err, const char *add_text = nullptr);
-	
+    bool _send_and_receive(bvector &req);
+    void _set_last_error(uint32_t err, const char *add_text = nullptr);
+    
 /**
-	* Ключевые атрибуты клиента
+    * \russian
+    * Ключевые атрибуты клиента
+    * \endrussian
 */
-    uint32_t _server_protocol_version; // server_protocol_version number to put to the message
-    conn_id_t _conn_id;                // bindy id of this connection (bindy id + server protocol version)
-    xibridge_device_t _dev_id;         // common device id 
-	bool _is_proto_detected; 
+    uint32_t _server_protocol_version; // номер версии протокола сервера 
+    conn_id_t _conn_id;                // уникальный номер подключения (bindy)
+    xibridge_device_t _dev_id;         // идентификатор устройства
+    bool _is_proto_detected; 
+
 /**
-	* Таймауты чтения-записи
-*/	
-    uint32_t _send_tmout;
-	uint32_t _recv_tmout;
- /**
-	* Переменные для взаимодействия  с потоком данного клиента в bindy
+    * \russian
+    * Таймауты чтения-записи
+    * \endrussian
 */  
-	std::condition_variable _is_recv; 
-	bool _is_really_recv;
-	std::mutex _mutex_recv;
-	bvector _recv_message; // for bindy-callback
+    uint32_t _send_tmout;
+    uint32_t _recv_tmout;
+
+ /**
+    * \russian
+    * Переменные для взаимодействия  с потоком данного клиента в bindy
+    * \endrussian
+*/  
+    std::condition_variable _is_recv; 
+    bool _is_really_recv;
+    std::mutex _mutex_recv;
+    bvector _recv_message; 
+
 /**
-	* Есть необходимость хранить данное состояние ошибки, в частности из-за потока bindy
+    * \russian
+    * Есть необходимость хранить данное состояние ошибки, в частности из-за потока bindy
+    * \endrussian
 */
-	uint32_t _last_error;  // last error 
-	std::string _complex_error; // last error if complex // not already used 
+    uint32_t _last_error;       // last error 
+    std::string _complex_error; // last error if complex // not already used 
+
 /*
     *  Храним uri подключения для возможных логов  в процессе работы  
 */
-	char _host[XI_URI_HOST_LEN+1];
+    char _host[XI_URI_HOST_LEN+1];
     char _adapter[XI_URI_HOST_LEN + 1];
-	
+    
 };
 
 #endif

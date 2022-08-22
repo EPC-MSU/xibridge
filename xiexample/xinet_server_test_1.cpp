@@ -30,7 +30,7 @@ typedef struct _geng_re re_geng;
 
 bool test_connect_1(const char *ip, uint32_t dev_num)
 {
-	
+    
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
     char  *pdata; uint32_t count;
 
@@ -87,51 +87,51 @@ bool test_connect_1(const char *ip, uint32_t dev_num)
     }
     xibridge_free_enumerate_devices(pdata);
 
-	return true;
+    return true;
 }
 
 static void thread_body(int thread_num)
 {
-	
-	ZF_LOGD("Thread %u: openning connection... \n", thread_num);
+    
+    ZF_LOGD("Thread %u: openning connection... \n", thread_num);
     xibridge_conn_t conn;
-	xibridge_open_device_connection(_DEV_IP, &conn);
-	ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
-	ZF_LOGD("Thread %u: sending gets... \n", thread_num);
+    xibridge_open_device_connection(_DEV_IP, &conn);
+    ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
+    ZF_LOGD("Thread %u: sending gets... \n", thread_num);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     status_t status;
     uint32_t err = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 3, (uint8_t *)&status, sizeof(status_t));
 
-	ZF_LOGD("Thread %u: gets return %s\n", thread_num,
-		err == 0 ? "true" : "false");
-	ZF_LOGD("Thread %u: closing connection %u... \n", thread_num, conn.conn_id);
+    ZF_LOGD("Thread %u: gets return %s\n", thread_num,
+        err == 0 ? "true" : "false");
+    ZF_LOGD("Thread %u: closing connection %u... \n", thread_num, conn.conn_id);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	xibridge_close_device_connection(&conn);
-	ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
+    xibridge_close_device_connection(&conn);
+    ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
 }
 
 void test_connect_1_threads()
 {
 #define TH_NUM 10
 
-	std::thread *pthreads[TH_NUM];
+    std::thread *pthreads[TH_NUM];
 
-	for (auto i = 0; i < TH_NUM; i++)
-	{
-		pthreads[i] = new std::thread(thread_body, i);
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
+    for (auto i = 0; i < TH_NUM; i++)
+    {
+        pthreads[i] = new std::thread(thread_body, i);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 
-	for (auto i = 0; i < TH_NUM; i++)
-	{
-		pthreads[i]->join();
-	}
+    for (auto i = 0; i < TH_NUM; i++)
+    {
+        pthreads[i]->join();
+    }
 
-	for (auto i = 0; i < TH_NUM; i++)
-	{
-		delete pthreads[i];
-	}
+    for (auto i = 0; i < TH_NUM; i++)
+    {
+        delete pthreads[i];
+    }
     // to finish all threads
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }

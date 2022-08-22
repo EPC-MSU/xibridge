@@ -38,7 +38,6 @@ typedef struct _sm
 	const char * schema;
 	/* *
 	   * Checks if data matches the schema 
-	
 	*/
 	bool is_match(const uint8_t *data, int len, uint32_t proto, uint32_t dev_num) const;
 	static const struct _sm &get_schema(uint32_t pckt, const struct _sm * _ss);
@@ -290,7 +289,6 @@ private:
    
 	static cmd_schema _cmd_shemas[12];
 };
-
 
 /*
 * Virtual constructor

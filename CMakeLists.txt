@@ -1,8 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
+# not used, left in comments
 # OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
-OPTION(BUILD_TEST "Build xibridge test project" OFF)
+OPTION(BUILD_TEST "Build xibridge test project" ON)
 OPTION(BUILD_XIEXAMPLE "Build xibridge example@ project" OFF)
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
@@ -38,7 +39,7 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 ENDIF()
 
-
+# not used, left in comments
 # CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
 
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
@@ -52,7 +53,7 @@ SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 FUNCTION(ADD_SUBDIRECTORY_BINDY)
     SET(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
     SET(BUILD_EXAMPLE OFF CACHE INTERNAL "")
-	SET(USE_JOINT_ZFLOG_FROM_ROOT_PROJECT ON CACHE INTERNAL "")
+    SET(USE_JOINT_ZFLOG_FROM_ROOT_PROJECT ON CACHE INTERNAL "")
     ADD_SUBDIRECTORY(vendor/bindy)
 ENDFUNCTION()
 ADD_SUBDIRECTORY_BINDY()
@@ -62,25 +63,25 @@ GET_DIRECTORY_PROPERTY(HAS_PARENT PARENT_DIRECTORY)
 FUNCTION(ADD_SUBDIRECTORY_ZF_LOG)
 IF(NOT HAS_PARENT) 
     SET(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
-	add_definitions(-DZF_LOG_EXTERN_GLOBAL_OUTPUT_LEVEL)
+    add_definitions(-DZF_LOG_EXTERN_GLOBAL_OUTPUT_LEVEL)
     ADD_SUBDIRECTORY(vendor/zf_log)
     remove_definitions(-DZF_LOG_EXTERN_GLOBAL_OUTPUT_LEVEL)
-ENDIF()	
+ENDIF() 
 ENDFUNCTION()
 ADD_SUBDIRECTORY_ZF_LOG()
 
 SET(SOURCES
         client/xibridge_client.cpp
-		client/bindy_helper.cpp
+        client/bindy_helper.cpp
         common/protocols.cpp
         common/utils.cpp
-		client/xibridge.cpp
-		client/version.rc
+        client/xibridge.cpp
+        client/version.rc
          )
 
+# not used, left in comments
 #add_dependencies
    # if (BUILD_SHARED_LIBS_XI)
-
 ADD_LIBRARY(xibridge SHARED ${SOURCES})
 
    # else()
@@ -94,17 +95,17 @@ else()
 endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
 
-#add_custom_target(tests) # Note: without 'ALL'
+#add_custom_target(unittests) # Note: without 'ALL'
 IF(BUILD_TEST) 
-  ADD_EXECUTABLE(test  test/test.cpp test/test_proto.cpp ${SOURCES}) # Note: without 'ALL'
+  ADD_EXECUTABLE(unittests  test/test.cpp ${SOURCES}) # Note: without 'ALL'
   if(MSVC)
-     target_compile_options(test PRIVATE /W3 /WX)
+     target_compile_options(unittests PRIVATE /W3 /WX)
   else()
      if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
-        target_compile_options(test PRIVATE -Wall -Wextra -Werror)
+        target_compile_options(unittests PRIVATE -Wall -Wextra -Werror)
    endif()
   endif()
-  TARGET_LINK_LIBRARIES(test bindy zf_log)
+  TARGET_LINK_LIBRARIES(unittests bindy zf_log)
 ENDIF() 
 
 IF(BUILD_XIEXAMPLE)
@@ -116,7 +117,7 @@ IF(BUILD_XIEXAMPLE)
      if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
         target_compile_options(xiexample PRIVATE -Wall -Wextra -Werror)
      endif()
-    endif()	 
+    endif()  
 ENDIF()
 
 
