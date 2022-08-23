@@ -77,11 +77,14 @@ class Xibridge_client
 {
     friend class Bindy_helper;
 public:
-
-/**
+ /**
+   * \english
+    * Function to get library version 
+    * @return xibridge library version
+    * \endenglish
     * \russian
-    * Функция определения версии библиотеки xibridge
-    * @return версия xibridge
+    * Функция получения версии библиотеки 
+    * @return версия библиотеки xibridge
     * \endrussian
 */
     static xibridge_version_t 
@@ -90,19 +93,26 @@ public:
         return VERSION;
     };
 
-/**
-    * \russian
-    * Функция определения максимальной версии протокола библиотеки xibridge
-    * @return версия максимальной версии протокола xibridge
-    * \endrussian
+/** 
+   * \english
+   * Function to get last protocol version
+   * @return last supported protocol version
+   * \endenglish
+   * Функция определения последней версии протокола, поддерживаемого библиотекой
+   * @return последняя поддерживаемая версия протокола
+   * \endrussian
 */
     static xibridge_version_t 
-    xbc_get_max_protocol_version()
+    xbc_get_last_protocol_version()
     {
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
     }
      
 /**
+   * \english
+   * Debug function to set protocol version to dial with the server
+   * @return error code - faulted, 0 - success
+   * \endenglish
    * \russian
    * Отладочная функция установки версии протокола для взаимодействия с сервером
    * @param ver[in] версия протокола для взаимодействия с сервером (1, 2, 3) 
@@ -113,20 +123,30 @@ public:
     xbc_set_base_protocol_version(xibridge_version_t ver);
 
 /**
+   * \english
+   * Function to get the current protocol version to deal with the server via the specified connection
+   * @param[in] pconn connection identifier pointer
+   * @return current protocol version to deal with the server
+   * \endenglish
    * \russian
    * Функция запроса версии протокола для взаимодействия с сервером по данному подключению
-   * @param pconn указатель на данные подключения
-   * @return версия протокола для взаимодействия с сервером (1,2 или 3), если подключение не существует - возвращается версия протокола 3
+   * @param[in] pconn указатель на указатель на идентификатор подключения
+   * @return версия протокола для взаимодействия с сервером 
    * \endrussian
 */
     static xibridge_version_t 
     xbc_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /**
+   * \english
+   * Function closes a device connection
+   * @param[out] pconn pointer to the connection data
+   * @return error code if fault, 0 if success  
+   * \endenglish
    * \russian
-   * Функция закрытия данного подключения
-   * @param[in] pconn указатель на данные закрываемого подключения
-   * @return код ошибки в случае ее возникновения при закрытии подключения, 0 - если успех  
+   * Функция закрытия подключения к устройству 
+   * @param[out] pconn указатель на данные подключения
+   * @return код ошибки в случае неудачной оперции закрытия, 0 - в случае успеха  
    * \endrussian
 */
     static uint32_t 
@@ -173,6 +193,15 @@ public:
                     const char *adapter = NULL);
 
 /**
+   * \english
+   * Function executes request-response operation, accounts a protocol kind applied at this device connection
+   * @param[in] pconn pointer to the connection data 
+   * @param[in] req request data
+   * @param[in] req_len request data length
+   * @param[out] resp buffer to accept response data
+   * @param[in] resp_len the length of data to be recorded
+   * @return error code if fault, 0 if success
+   * \endenglish
    * \russian
    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
    * @param[in] pconn указатель на данные подключения
@@ -191,21 +220,30 @@ public:
                         uint32_t resp_len);
 
 /**
+   * \english
+   * Function retunts error explanation text 
+   * @param[in] err_no error code
+   * @return char string containing error explanation text or nullptr in case of unknown error code
+   * \endenglish
    * \russian
    * Функция возвращает текст ошибки по ее коду
    * @param[in] err_no код ошибки
-   * @return строка с ошибкой или нулевой указатель в случае неизвестного кода ошибки
+   * @return строка с ошибкой или NULL, если код ошибки неизвестен
    * \endrussian
 */
     static const char * 
     xbc_get_err_expl(unsigned int err_no);
 
 /**
-    * \russian
-    * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна
-    * вызываться после xibridge_enumerate_adapter_devices
-    * @param[in] presult указатель на распределенные данные, полученные в результате вызова xibridge_enumerate_adapter_devices
-    * \endrussian
+   * \english
+   * Function releases memory allocated by xibridge_enumerate_adapter_devices function call,
+   * must be called after ibridge_enumerate_adapter_devices calling
+   * \endenglish
+   * \russian
+   * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
+   * вызываться после xibridge_enumerate_adapter_devices
+   * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
+   * \endrussian
 */
     static void 
     xbc_free_enumerate_devices(char *presult)

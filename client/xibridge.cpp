@@ -8,9 +8,9 @@ xibridge_version_t xibridge_version()
     return Xibridge_client::xbc_get_version();
 }
 
-xibridge_version_t xibridge_get_max_protocol_version()
+xibridge_version_t xibridge_get_last_protocol_version()
 {
-    return Xibridge_client::xbc_get_max_protocol_version();
+    return Xibridge_client::xbc_get_last_protocol_version();
 }
 
 uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver)
@@ -32,7 +32,7 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_
 
     
     // making opening logic more complex
-    uint32_t ncount = xibridge_get_max_protocol_version().major;
+    uint32_t ncount = xibridge_get_last_protocol_version().major;
     while (ncount--)
     {
 
@@ -109,15 +109,14 @@ uint32_t xibridge_enumerate_adapter_devices(
                                                 uint32_t *pcount
                                             )
 {
-
     uint32_t res_err;
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
     *pcount = 0;
     *ppresult = nullptr;
-    Xibridge_client * cl = new Xibridge_client(addr, adapter == NULL ? "" : adapter);
+    Xibridge_client * cl = new Xibridge_client(addr, adapter == nullptr ? "" : adapter);
    
     // making opening logic more complex
-    uint32_t ncount = xibridge_get_max_protocol_version().major;
+    uint32_t ncount = xibridge_get_last_protocol_version().major;
     while (ncount--)
     {
         cl->clr_errors();
@@ -146,15 +145,14 @@ label_noconn:
      
         else if (res_err == ERR_RECV_TIMEOUT || res_err == ERR_NO_PROTOCOL)  // may another protocol
         {
-                cl->decrement_server_protocol_version();
-                cl->disconnect();
+            cl->decrement_server_protocol_version();
+            cl->disconnect();
         }
         else
         {
             // emumerated just fine or not - going out
             break;
         }
-        
     }
     cl->disconnect();
     delete cl;
@@ -164,5 +162,4 @@ label_noconn:
 void xibridge_free_enumerate_devices(char *presult)
 {
     Xibridge_client::xbc_free_enumerate_devices(presult);
-
 }

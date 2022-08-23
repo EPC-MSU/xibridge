@@ -4,11 +4,9 @@
 #include "ximc-min/ximc_min.h"
 #include "../common/utils.h"
 
-// to run with ximc-xinet-server
-// !!! select the right address every time as tested
-static char  _DEV_IP[256];
-//static const char *const _IP = "172.16.129.251";
+#define TH_NUM 10
 
+static char  _DEV_IP[256];
 
 PACK(
 struct _gets_re
@@ -28,7 +26,7 @@ struct _geng_re
 
 typedef struct _geng_re re_geng;
 
-bool test_connect_1(const char *ip, uint32_t dev_num)
+bool xinet_version_1_usage_example(const char *ip, uint32_t dev_num)
 {
     
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
@@ -72,8 +70,7 @@ bool test_connect_1(const char *ip, uint32_t dev_num)
     err_op = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
     ZF_LOGD("Nom voltage: %u", settings.settings.NomVoltage);
     xibridge_close_device_connection(&conn);
-    //char  *pdata; uint32_t count;
-
+    
     xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
     ZF_LOGD("Count of enumerated devices: %u", count);
     if (count)
@@ -111,10 +108,8 @@ static void thread_body(int thread_num)
     ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
 }
 
-void test_connect_1_threads()
+void xinet_1_threads()
 {
-#define TH_NUM 10
-
     std::thread *pthreads[TH_NUM];
 
     for (auto i = 0; i < TH_NUM; i++)

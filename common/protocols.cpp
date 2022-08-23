@@ -1,7 +1,10 @@
 ﻿#include "protocols.h"
 #include "../client/xibridge_client.h"
 
-// staic data init
+/*
+ *staic data init
+*/
+
 cmd_schema Protocol1::_cmd_shemas[9]=
 {
 { pkt1_raw, "v_p_0_d_0_0_x" },

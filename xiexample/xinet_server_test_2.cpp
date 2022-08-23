@@ -5,12 +5,11 @@
 #include "urmc-min/urmc_min.h"
 #include "../common/utils.h"
 
-// to run with urpc-xinet-server !!! the local urpc-connect
-// to run with ximc-xinet-server
-// !!! select the right address every time as tested
+#define TH_NUM 5
+
 static char  _DEV_IP[256];
 
-bool test_connect_2(const char * ip, uint32_t dev_num)
+bool xinet_version_2_usage_example(const char * ip, uint32_t dev_num)
 {
   
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
@@ -68,10 +67,8 @@ static void thread_body(int thread_num)
     ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
 }
 
-void test_connect_2_threads()
+void xinet_2_threads()
 {
-#define TH_NUM 5
-
     std::thread *pthreads[TH_NUM];
 
     for (auto i = 0; i < TH_NUM; i++)
@@ -92,5 +89,4 @@ void test_connect_2_threads()
 
     // to finish all threads
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
 }

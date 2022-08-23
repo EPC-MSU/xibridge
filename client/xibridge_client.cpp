@@ -60,7 +60,7 @@ private:
 
 xbc_init xbc_init::_xbc_i;
 
-static bool is_protocol_verified_version_t(const xibridge_version_t& ver)
+static bool is_protocol_supported_version(const xibridge_version_t& ver)
 {
     return ver.major > 0 && ver.major <= DEFAULT_PROTO_VERSION && ver.minor == 0 && ver.bagfix == 0;
 }
@@ -87,7 +87,7 @@ Xibridge_client * Xibridge_client::_get_client_as_free(conn_id_t conn_id)
 
 uint32_t  Xibridge_client::xbc_set_base_protocol_version(xibridge_version_t ver)
 {
-    if (!is_protocol_verified_version_t(ver)) return ERR_NO_PROTOCOL;
+    if (!is_protocol_supported_version(ver)) return ERR_NO_PROTOCOL;
     _server_base_protocol_version = (uint32_t)ver.major;
     return 0;
 }
@@ -294,7 +294,7 @@ bool Xibridge_client::decrement_server_protocol_version()
      }
     else
     {
-        _server_protocol_version = xibridge_get_max_protocol_version().major;
+        _server_protocol_version = xibridge_get_last_protocol_version().major;
     }
     return false;
 }

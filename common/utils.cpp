@@ -16,7 +16,6 @@ uint32_t AHex::_get_stream1_4(uint8_t **ptr)
 	}
 	else
 	{
-		
 		for (int i = 0; i < (int)_tsize; i++)
 		{
 			val <<= 8;
@@ -47,7 +46,6 @@ void AHex::put_stream1_4(uint8_t **ptr, uint32_t val)
     *ptr += _tsize;
  }
 
-
 void Hex8::_get_stream(uint8_t **ptr)
 {
 	value = **ptr;
@@ -75,7 +73,6 @@ void Hex24::_get_stream(uint8_t ** ptr)
 {
 	_get_stream1_4(ptr);
 }
-
 
 void HexIDev3::get_stream(MBuf & stream)
 {
@@ -164,8 +161,6 @@ MBuf& MBuf::operator << (Hex24 v)
 {
 	if (!_rdon)
 	{
-
-
 		if (dlen - (pdata - origin_data)  < 3) ovrflow++;
 		else
 		{
@@ -221,7 +216,6 @@ MBuf& MBuf::operator << (Hex8 v)
 	return *this;
 }
 
- 
 MBuf& MBuf::operator << (const MBuf & src)
 {
 	size_t _len = src.realSize();
@@ -235,8 +229,7 @@ MBuf& MBuf::operator << (const MBuf & src)
 	return *this;
 }
 
-  
-MBuf& MBuf::operator << (const HexIDev3 &hidev)
+ MBuf& MBuf::operator << (const HexIDev3 &hidev)
 {
     hidev.put_stream(*this);
     return *this;
@@ -276,7 +269,6 @@ bool MBuf::meminsert_start(const uint8_t *what, size_t len)
 	return true;
 }
 
-
 bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
 {
 	if (_rdon) return false;
@@ -290,7 +282,6 @@ bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
 	delete[] temp_origin;
 	return true;
 }
-
 
 size_t MBuf::memread(uint8_t *dest, size_t dlen, size_t len)
 {
@@ -342,7 +333,6 @@ bvector MBuf::to_vector(bool rest) const
 	}
 	return ret;
 }
-
 
 bvector &add_value_2_bvector_net_order(bvector & bv, uint32_t val, size_t size)
 {

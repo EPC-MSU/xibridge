@@ -5,8 +5,8 @@
 #include "utils.h"
 
 
-/**
-    * C++ struct to keep device identifiers with implicit constructors
+/*
+    *struct to keep device identifiers with implicit constructors
 */
 struct DevId {
 	
@@ -26,7 +26,7 @@ struct DevId {
 };
 
   
-/** 
+/* 
     * structure to connect packet type and command schema
     * command schema ia a string like this "v_p_0_d_0_0_x"
     * v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
@@ -87,17 +87,15 @@ protected:
 		bvector &data,
 		uint32_t pckt) = 0;
 
-	//virtual bvector create_cmd_req_proxy(DevId devid, uint32_t tmout, const bvector & data) = 0;
-	
 	bool _is_server;
 		
-    uint32_t _res_err;   //at response stage the result of an operation or error from other side
+    uint32_t _res_err;   // at response stage the result of an operation or error from other side
 
 	uint32_t  * _perror; // pointer to error field to write error code
 
 };
 
-/**
+/*
 * \russian
 * Класс Protocol1
 * Для создания-обработки сообщений по протоколу версии 1(ximc-сервер)
