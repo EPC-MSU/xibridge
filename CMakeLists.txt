@@ -1,10 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(xibridge)
-# not used, left in comments
-# OPTION(BUILD_SHARED_LIBS_XI "Build shared libraries" ON)
+
 OPTION(BUILD_TEST "Build xibridge test project" ON)
 OPTION(BUILD_XIEXAMPLE "Build xibridge example@ project" OFF)
+
+#set the right version here !
+SET (XIBRIDGE_VERSION_MAJOR 1)
+SET (XIBRIDGE_VERSION_MINOR 0)
+SET (XIBRIDGE_VERSION_PATCH 0) 
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     # It is required to build a rpath framework
@@ -39,9 +43,9 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 ENDIF()
 
-# not used, left in comments
-# CONFIGURE_FILE(config_xi.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config_xi.h)
-
+CONFIGURE_FILE(client/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/client/version.h)
+CONFIGURE_FILE(client/version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/client/version.rc)
+  
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
    add_definitions( -D_CRT_SECURE_NO_WARNINGS) 
@@ -76,17 +80,9 @@ SET(SOURCES
         common/protocols.cpp
         common/utils.cpp
         client/xibridge.cpp
-        client/version.rc
-         )
+    )
 
-# not used, left in comments
-#add_dependencies
-   # if (BUILD_SHARED_LIBS_XI)
-ADD_LIBRARY(xibridge SHARED ${SOURCES})
-
-   # else()
-   #  ADD_LIBRARY(xibridge STATIC ${SOURCES})
-   #endif()
+ADD_LIBRARY(xibridge SHARED ${SOURCES} client/version.rc)
 
 if(MSVC)
   target_compile_options(xibridge PRIVATE /W3 /WX)

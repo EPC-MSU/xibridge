@@ -95,7 +95,8 @@ void  Bindy_helper::disconnect(conn_id_t conn_id)
     }
 }
 
-bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
+bool Bindy_helper::send_bindy_data(conn_id_t conn_id, 
+                                   bvector data)
 {
     if (!is_connected(conn_id))
     {
@@ -118,7 +119,8 @@ bool Bindy_helper::send_bindy_data(conn_id_t conn_id, bvector data)
     }
 }
 
-void Bindy_helper::callback_data_bindy(conn_id_t conn_id, bvector data) 
+void Bindy_helper::callback_data_bindy(conn_id_t conn_id, 
+                                       bvector data) 
 {
     _map_mutex.lock();
         

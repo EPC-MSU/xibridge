@@ -149,7 +149,6 @@ bool Xibridge_client::exec_enumerate(char **result, uint32_t *pcount)
   
        *pcount = num_devs;
         return true;
-        
     }
     else
     {
@@ -396,10 +395,10 @@ bvector Xibridge_client::send_data_and_receive(bvector data,
 }
 
 uint32_t Xibridge_client::xbc_request_response(const xibridge_conn_t *pconn, 
-                                              const unsigned char *req, 
-                                              uint32_t req_len, 
-                                              unsigned char *resp, 
-                                              uint32_t resp_len)
+                                               const unsigned char *req, 
+                                               uint32_t req_len, 
+                                               unsigned char *resp, 
+                                               uint32_t resp_len)
 {
     if (pconn == nullptr)
     {

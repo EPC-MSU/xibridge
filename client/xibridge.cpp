@@ -23,7 +23,8 @@ xibridge_version_t xibridge_get_connection_protocol_version(const xibridge_conn_
     return Xibridge_client::xbc_get_connection_protocol_version(pconn);
 }
 
-uint32_t xibridge_open_device_connection(const char *xi_net_uri,  xibridge_conn_t *pconn)
+uint32_t xibridge_open_device_connection(const char *xi_net_uri,  
+                                         xibridge_conn_t *pconn)
 {
     uint32_t res_err;
     if (pconn == nullptr) return ERR_NULLPTR_PARAM;
@@ -85,13 +86,11 @@ uint32_t xibridge_close_device_connection(const xibridge_conn_t *pconn)
 }
 
 
-uint32_t xibridge_device_request_response(
-                                              const xibridge_conn_t *pconn, 
-                                              const uint8_t *req, 
-                                              uint32_t req_len, 
-                                              uint8_t *resp, 
-                                              uint32_t resp_len
-                                          )
+uint32_t xibridge_device_request_response(const xibridge_conn_t *pconn, 
+                                          const uint8_t *req, 
+                                          uint32_t req_len, 
+                                          uint8_t *resp, 
+                                          uint32_t resp_len)
 {
     return Xibridge_client::xbc_request_response(pconn, req, req_len, resp, resp_len);
 }
@@ -102,12 +101,10 @@ const char * xibridge_get_err_expl(uint32_t err_no)
 }
 
 // to do - adapter using 
-uint32_t xibridge_enumerate_adapter_devices(
-                                                const char *addr, 
-                                                const char *adapter,
-                                                char **ppresult,
-                                                uint32_t *pcount
-                                            )
+uint32_t xibridge_enumerate_adapter_devices(const char *addr, 
+                                            const char *adapter,
+                                            char **ppresult,
+                                            uint32_t *pcount)
 {
     uint32_t res_err;
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;

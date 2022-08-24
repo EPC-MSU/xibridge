@@ -26,7 +26,8 @@ uint32_t AHex::_get_stream1_4(uint8_t **ptr)
     return val;
 }
 
-void AHex::put_stream1_4(uint8_t **ptr, uint32_t val)
+void AHex::put_stream1_4(uint8_t **ptr, 
+                         uint32_t val)
 {
     uint8_t *p = *ptr;
     if (littleEndian())
@@ -108,7 +109,9 @@ xibridge_device_t HexIDev3::toExtDevId() const
 	return exdevid;
 }
 
-MBuf::MBuf(const uint8_t *readyd, size_t size, bool readonly) :
+MBuf::MBuf(const uint8_t *readyd, 
+           size_t size, 
+           bool readonly) :
 ovrflow(0),
 _rdon(readonly)
 {
@@ -116,7 +119,8 @@ _rdon(readonly)
 	memcpy(pdata, readyd, size);
 }
 
-MBuf::MBuf(int size, bool readonly) :
+MBuf::MBuf(int size, 
+           bool readonly) :
 ovrflow(0),
 _rdon(readonly)
 {
@@ -241,7 +245,8 @@ MBuf& MBuf::operator >> (HexIDev3 &hidev)
     return *this;
 }
 
-size_t MBuf::memwrite(const uint8_t *data, size_t len)
+size_t MBuf::memwrite(const uint8_t *data, 
+                      size_t len)
 {
 	if (_rdon || len == SIZE_MAX) return 0;
 
@@ -252,7 +257,8 @@ size_t MBuf::memwrite(const uint8_t *data, size_t len)
 	return len;
 }
 
-bool MBuf::meminsert_start(const uint8_t *what, size_t len)
+bool MBuf::meminsert_start(const uint8_t *what, 
+                           size_t len)
 {
 	if (_rdon || len == SIZE_MAX) return false;
 	const uint8_t * temp_origin = origin_data;
@@ -269,7 +275,8 @@ bool MBuf::meminsert_start(const uint8_t *what, size_t len)
 	return true;
 }
 
-bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
+bool MBuf::meminsert_start(uint8_t num1, 
+                           uint8_t num2)
 {
 	if (_rdon) return false;
 	const uint8_t * temp_origin = origin_data;
@@ -283,7 +290,9 @@ bool MBuf::meminsert_start(uint8_t num1, uint8_t num2)
 	return true;
 }
 
-size_t MBuf::memread(uint8_t *dest, size_t dlen, size_t len)
+size_t MBuf::memread(uint8_t *dest, 
+                     size_t dlen, 
+                     size_t len)
 {
 	size_t rest = restOfSize(-1);
 	if ( len > dlen || rest < len  || rest == SIZE_MAX ) return SIZE_MAX;
@@ -334,7 +343,9 @@ bvector MBuf::to_vector(bool rest) const
 	return ret;
 }
 
-bvector &add_value_2_bvector_net_order(bvector & bv, uint32_t val, size_t size)
+bvector &add_value_2_bvector_net_order(bvector & bv, 
+                                       uint32_t val, 
+                                       size_t size)
 {
     for (int i = 0; i < (int)size; i++)
     {
@@ -343,17 +354,20 @@ bvector &add_value_2_bvector_net_order(bvector & bv, uint32_t val, size_t size)
     return bv;
 }
 
-bvector &add_uint32_2_bvector(bvector & bv, uint32_t val)
+bvector &add_uint32_2_bvector(bvector & bv, 
+                              uint32_t val)
 {
     return add_value_2_bvector_net_order(bv, val, sizeof(uint32_t));
 }
 
-bvector &add_uint16_2_bvector(bvector & bv, uint16_t val)
+bvector &add_uint16_2_bvector(bvector & bv, 
+                              uint16_t val)
 {
     return add_value_2_bvector_net_order(bv,(uint32_t) val, sizeof(uint16_t));
 }
 
-bvector &add_dev_id_bvector_net_order(bvector & bv, const xibridge_device_t &devid)
+bvector &add_dev_id_bvector_net_order(bvector & bv, 
+                                      const xibridge_device_t &devid)
 {
     add_uint32_2_bvector(bv, devid.reserve);
     add_uint16_2_bvector(bv, devid.VID);
@@ -364,7 +378,10 @@ bvector &add_dev_id_bvector_net_order(bvector & bv, const xibridge_device_t &dev
 
 static const char *_xinet_pre = "xi-net://";
 
-bool xi_net_dev_uris(MBuf& result, const char *server, const bvector& data_devid, int count)
+bool xi_net_dev_uris(MBuf& result, 
+                     const char *server, 
+                     const bvector& data_devid, 
+                     int count)
 {
     uint8_t str_dev_id[sizeof(xibridge_device_t) * 2];
     MBuf read_buf(data_devid.data(),(int) data_devid.size());

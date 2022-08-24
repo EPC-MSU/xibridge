@@ -115,7 +115,8 @@ void  test_protocols()
     test_request_proto3();
 }
 
-extern uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_uri);
+extern uint32_t xibridge_parse_uri_dev12(const char *uri, 
+                                         xibridge_parsed_uri *parsed_uri);
 
 void test_xibridge_uri_parse()
 {

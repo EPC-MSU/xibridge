@@ -4,8 +4,8 @@
 #include "../xibridge.h"
 #include "../common/protocols.h"
 #include "bindy_helper.h"
+#include "version.h"
 
-#define  VERSION {1,0,0}
 
 /*
 * Defines client errors (errors to take place at the client side)
@@ -22,7 +22,7 @@
 #define ERR_RECV_TIMEOUT 7
 #define ERR_ANOTHER_PROTOCOL 8
 
-/**
+/*
     *\english
     * Errors of using  
     * \endenglish
@@ -33,7 +33,7 @@
 #define ERR_NULLPTR_PARAM  9
 #define ERR_SET_CONNECTION 10
 
-/**
+/*
     *\english
     * Error(s) from server 
     * \endenglish
@@ -43,7 +43,7 @@
 */
 #define ERR_DEVICE_LOST 0xfffb
 
-/**
+/*
     *\english
     * Packet-Fmt errors
     * \endenglish
@@ -55,7 +55,7 @@
 #define ERR_PCKT_FMT 12
 #define ERR_PCKT_INV 13
 
-/**
+/*
    *\english
    * Defines default version number of the protocol
    * \endenglish
@@ -65,7 +65,7 @@
 */
 #define DEFAULT_PROTO_VERSION 3
 
-/** 
+/* 
     * \english
     * Class to communicate as a client with ximc, urpc-, xibridge-server
     * \endenglish
@@ -90,10 +90,10 @@ public:
     static xibridge_version_t 
     xbc_get_version()
     {
-        return VERSION;
+        return XIBRIDGE_VERSION;
     };
 
-/** 
+/*
    * \english
    * Function to get last protocol version
    * @return last supported protocol version
@@ -108,7 +108,7 @@ public:
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
     }
      
-/**
+/*
    * \english
    * Debug function to set protocol version to dial with the server
    * @return error code - faulted, 0 - success
@@ -122,7 +122,7 @@ public:
     static uint32_t 
     xbc_set_base_protocol_version(xibridge_version_t ver);
 
-/**
+/*
    * \english
    * Function to get the current protocol version to deal with the server via the specified connection
    * @param[in] pconn connection identifier pointer
@@ -137,7 +137,7 @@ public:
     static xibridge_version_t 
     xbc_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
-/**
+/*
    * \english
    * Function closes a device connection
    * @param[out] pconn pointer to the connection data
@@ -152,7 +152,7 @@ public:
     static uint32_t 
     xbc_close_connection_device(const xibridge_conn_t *pconn);
         
-/**
+/*
    * \russian
    * Функция чтения данных ("как есть", без парсинга по протоколу) из устройства с помощью данного подключения
    * @param[in] pconn указатель на данные подключения
@@ -164,11 +164,11 @@ public:
 */
     static uint32_t 
     xbc_read_connection_buffer(const xibridge_conn_t *pconn, 
-                              uint8_t *buf, 
-                              uint32_t size,
-                              uint32_t* preal_read = nullptr);
+                               uint8_t *buf, 
+                               uint32_t size,
+                               uint32_t* preal_read = nullptr);
 
-/**
+/*
     * \russian
     * Функция записи данных ("как есть", без формирования по протоколу) в устройство с помощью данного подключения
     * @param[in] pconn указатель на данные подключения
@@ -179,9 +179,9 @@ public:
 */
     static uint32_t 
     xbc_write_connection(const xibridge_conn_t *pconn, 
-                        const uint8_t*buf, 
-                        uint32_t size);
-/**
+                         const uint8_t*buf, 
+                         uint32_t size);
+/*
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
    * @param[in] xi_net_uri строка с uri устройства, начинающаяся "xi-net://..." илт строка с адресом (даже пустым) - только для сетевого для подключения 
@@ -192,7 +192,7 @@ public:
     Xibridge_client(const char *xi_net_uri, 
                     const char *adapter = NULL);
 
-/**
+/*
    * \english
    * Function executes request-response operation, accounts a protocol kind applied at this device connection
    * @param[in] pconn pointer to the connection data 
@@ -214,12 +214,12 @@ public:
 */
     static uint32_t 
     xbc_request_response(const xibridge_conn_t *pconn, 
-                        const uint8_t *req, 
-                        uint32_t req_len, 
-                        uint8_t *resp, 
-                        uint32_t resp_len);
+                         const uint8_t *req, 
+                         uint32_t req_len, 
+                         uint8_t *resp, 
+                         uint32_t resp_len);
 
-/**
+/*
    * \english
    * Function retunts error explanation text 
    * @param[in] err_no error code
@@ -234,7 +234,7 @@ public:
     static const char * 
     xbc_get_err_expl(unsigned int err_no);
 
-/**
+/*
    * \english
    * Function releases memory allocated by xibridge_enumerate_adapter_devices function call,
    * must be called after ibridge_enumerate_adapter_devices calling
@@ -294,7 +294,10 @@ public:
     }
 private:
 
-/**
+/*
+  * \english
+  * Returns pointer to a client by connection id
+  * \endenglish
    * \russian
    * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
    * \endrussian
@@ -305,7 +308,10 @@ private:
     bool _send_and_receive(bvector &req);
     void _set_last_error(uint32_t err, const char *add_text = nullptr);
     
-/**
+/*
+    * \english
+    * Base client attributes
+    * \endenglish
     * \russian
     * Ключевые атрибуты клиента
     * \endrussian
@@ -315,7 +321,10 @@ private:
     xibridge_device_t _dev_id;         // идентификатор устройства
     bool _is_proto_detected; 
 
-/**
+/*
+    * \english
+    * Read and write timeout values
+    * \endenglish
     * \russian
     * Таймауты чтения-записи
     * \endrussian
@@ -323,7 +332,10 @@ private:
     uint32_t _send_tmout;
     uint32_t _recv_tmout;
 
- /**
+ /*
+    * \english
+    * Variables to deal with the client thread in the bindy 
+    * \endenglish
     * \russian
     * Переменные для взаимодействия  с потоком данного клиента в bindy
     * \endrussian
@@ -333,7 +345,10 @@ private:
     std::mutex _mutex_recv;
     bvector _recv_message; 
 
-/**
+/*
+    * \english
+    * This to keep an error state partially becouse of a thread in bindy
+    *\ endenglish
     * \russian
     * Есть необходимость хранить данное состояние ошибки, в частности из-за потока bindy
     * \endrussian
@@ -342,7 +357,12 @@ private:
     std::string _complex_error; // last error if complex // not already used 
 
 /*
-    *  Храним uri подключения для возможных логов  в процессе работы  
+    * \english
+    * Keep connection addresses to have an opportunity to use them in some logging 
+    * \endenglish
+    * \russian
+    *  Храним uri подключения для возможных логов  в процессе работы
+    * \endrussian
 */
     char _host[XI_URI_HOST_LEN+1];
     char _adapter[XI_URI_HOST_LEN + 1];

@@ -16,7 +16,7 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 ## Windows
 
-Библиотеку, тестовый проект и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
+Библиотеку, тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
 проектов:
 
 * cкачать и установить cmake (https://cmake.org) и MS Visual Studio (13 и выше);
@@ -55,8 +55,7 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 
 Выпуск релиза:
 
-* Поменять версию VERSION в client/xibridge_client.h;
-* В Windows окрыть решешие xibridge.sln и поменять версию продукта в проекте xibridge (version.rc); 
+* Поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
 * Повесить тег vX.X.X на коммит, сделать push;
 * Собрать библиотеку под всеми архитектурами: win32, win64, debian linux, бинарные результаты сборки добавить в архив в 
   соответствующие папки;
