@@ -23,7 +23,6 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 * запустить cmake-gui;
 * указать путь до каталога xibridge (с CMakeLists.txt) и такой же путь (до каталога xibridge) в поле для выходной сборочной директории;
 * Configure > Visual Studio 12 2013, x64;
-* если нужен тестовый проект, поставить галочку BUILD_TEST;
 * если нужен пример использования, поставить галочку BUILD_XIEXAMPLE; 
 * Generate;
 * собрать сгенерированный проект в Visual Studio
@@ -33,7 +32,6 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 Библиотеку собрать, как и все наши проекты на CMake\make:
 
 * `cmake CMakeLists.txt`
-* если нужен тестовый проект, указать дополнительный параметр при запуске cmake: -DBUILD_TEST=On;
 * если нужен пример использования, указать дополнительный параметр при запуске cmake: -DBUILD_XIEXAMPLE=On;
 * `make`
 
@@ -55,8 +53,9 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 
 Выпуск релиза:
 
-* Поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
-* Повесить тег vX.X.X на коммит, сделать push;
-* Собрать библиотеку под всеми архитектурами: win32, win64, debian linux, бинарные результаты сборки добавить в архив в 
+* убедиться, что на windows и Linux все собирается и работает;
+* поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
+* повесить тег vX.X.X на коммит, сделать push;
+* собрать библиотеку под всеми архитектурами: win32, win64, debian linux, бинарные результаты сборки добавить в архив в 
   соответствующие папки;
-* Назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом v.X.X.X .
+* назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом v.X.X.X .
