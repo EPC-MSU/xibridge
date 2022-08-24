@@ -43,8 +43,8 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 ENDIF()
 
-CONFIGURE_FILE(client/version.h.in client/version.h)
-CONFIGURE_FILE(client/version.rc.in client/version.rc)
+CONFIGURE_FILE(client/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/client/version.h)
+CONFIGURE_FILE(client/version_config.rc.in ${CMAKE_CURRENT_BINARY_DIR}/client/version.rc)
   
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
