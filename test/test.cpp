@@ -27,7 +27,6 @@ static void test_request_proto1()
     TEST_MSG("?test_request_proto1?");
 
     uint32_t err;
-    bool ret = true;
     Protocol1 proto(&err, false);
     TEST_CHECK (proto.create_version_request(0).size() == 0);
     bvector  reqw = proto.create_open_request(1, 1000);
@@ -55,7 +54,6 @@ static void test_request_proto2()
 {
     TEST_MSG("?test_request_proto2?");
     uint32_t err;
-    bool ret = true;
     Protocol2 proto(&err, false);
     TEST_CHECK(proto.create_version_request(0).size() == 0);
   
@@ -81,7 +79,6 @@ static void test_request_proto3()
 {
     TEST_MSG("?test_request_proto3?");
     uint32_t err;
-    bool ret = true;
     Protocol3 proto(&err, false);
     bvector reqw = proto.create_version_request(0);
     const cmd_schema & cm0 = cmd_schema::get_schema(PROTO_3_VER, proto.get_cmd_shema());
