@@ -87,8 +87,7 @@ public:
     * @return версия библиотеки xibridge
     * \endrussian
 */
-    static xibridge_version_t 
-    xbc_get_version()
+    static xibridge_version_t xbc_get_version()
     {
         return XIBRIDGE_VERSION;
     };
@@ -102,8 +101,7 @@ public:
    * @return последняя поддерживаемая версия протокола
    * \endrussian
 */
-    static xibridge_version_t 
-    xbc_get_last_protocol_version()
+    static xibridge_version_t xbc_get_last_protocol_version()
     {
         return{ DEFAULT_PROTO_VERSION, 0, 0 };
     }
@@ -119,8 +117,7 @@ public:
    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
    * \endrussian
 */
-    static uint32_t 
-    xbc_set_base_protocol_version(xibridge_version_t ver);
+    static uint32_t xbc_set_base_protocol_version(xibridge_version_t ver);
 
 /*
    * \english
@@ -134,8 +131,7 @@ public:
    * @return версия протокола для взаимодействия с сервером 
    * \endrussian
 */
-    static xibridge_version_t 
-    xbc_get_connection_protocol_version(const xibridge_conn_t *pconn);
+    static xibridge_version_t xbc_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /*
    * \english
@@ -149,8 +145,7 @@ public:
    * @return код ошибки в случае неудачной оперции закрытия, 0 - в случае успеха  
    * \endrussian
 */
-    static uint32_t 
-    xbc_close_connection_device(const xibridge_conn_t *pconn);
+    static uint32_t xbc_close_connection_device(const xibridge_conn_t *pconn);
         
 /*
    * \russian
@@ -162,11 +157,12 @@ public:
    * @return код ошибки - если операция завершилась неудачно< 0 - если успех
    * \endrussian
 */
-    static uint32_t 
-    xbc_read_connection_buffer(const xibridge_conn_t *pconn, 
-                               uint8_t *buf, 
-                               uint32_t size,
-                               uint32_t* preal_read = nullptr);
+    static uint32_t xbc_read_connection_buffer(
+        const xibridge_conn_t *pconn, 
+        uint8_t *buf, 
+        uint32_t size,
+        uint32_t* preal_read = nullptr
+    );
 
 /*
     * \russian
@@ -177,10 +173,11 @@ public:
     * @return код ошибки - если операция завершилась неудачно< 0 - если успех
     * \endrussian
 */
-    static uint32_t 
-    xbc_write_connection(const xibridge_conn_t *pconn, 
-                         const uint8_t*buf, 
-                         uint32_t size);
+    static uint32_t xbc_write_connection(
+        const xibridge_conn_t *pconn, 
+        const uint8_t*buf, 
+        uint32_t size
+    );
 /*
    * \russian
    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
@@ -189,8 +186,7 @@ public:
    * @param[in] recv_timeout таймаут ответа сервера
    * \endrussian
 */
-    Xibridge_client(const char *xi_net_uri, 
-                    const char *adapter = NULL);
+    Xibridge_client(const char *xi_net_uri, const char *adapter = NULL);
 
 /*
    * \english
@@ -212,12 +208,13 @@ public:
    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-    static uint32_t 
-    xbc_request_response(const xibridge_conn_t *pconn, 
-                         const uint8_t *req, 
-                         uint32_t req_len, 
-                         uint8_t *resp, 
-                         uint32_t resp_len);
+    static uint32_t xbc_request_response(
+        const xibridge_conn_t *pconn, 
+        const uint8_t *req, 
+        uint32_t req_len, 
+        uint8_t *resp, 
+        uint32_t resp_len
+    );
 
 /*
    * \english
@@ -231,8 +228,7 @@ public:
    * @return строка с ошибкой или NULL, если код ошибки неизвестен
    * \endrussian
 */
-    static const char * 
-    xbc_get_err_expl(unsigned int err_no);
+    static const char *xbc_get_err_expl(unsigned int err_no);
 
 /*
    * \english
@@ -245,8 +241,7 @@ public:
    * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
    * \endrussian
 */
-    static void 
-    xbc_free_enumerate_devices(char *presult)
+    static void xbc_free_enumerate_devices(char *presult)
     {
         if (presult != nullptr)
         {
@@ -256,8 +251,7 @@ public:
     
     bool open_device();
 
-    bool exec_enumerate( char **result,
-                         uint32_t *pcount);
+    bool exec_enumerate( char **result, uint32_t *pcount);
 
     bool open_connection();
 

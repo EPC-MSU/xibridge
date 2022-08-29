@@ -122,8 +122,7 @@ typedef struct _xibridge_parsed_uri xibridge_parsed_uri;
     * @return версия библиотеки xibridge
     * \endrussian
 */
-XI_EXPORT xibridge_version_t  
-xibridge_get_library_version();
+XI_EXPORT xibridge_version_t xibridge_get_library_version();
 
 /** 
    * \english
@@ -134,8 +133,7 @@ xibridge_get_library_version();
    * @return последняя поддерживаемая версия протокола
    * \endrussian
 */
-XI_EXPORT xibridge_version_t 
-xibridge_get_last_protocol_version();
+XI_EXPORT xibridge_version_t xibridge_get_last_protocol_version();
 
 /**
    * \english
@@ -148,8 +146,7 @@ xibridge_get_last_protocol_version();
    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
    * \endrussian
 */
-XI_EXPORT uint32_t 
-xibridge_set_base_protocol_version(xibridge_version_t ver);
+XI_EXPORT uint32_t xibridge_set_base_protocol_version(xibridge_version_t ver);
 
 /**
    * \english
@@ -163,8 +160,7 @@ xibridge_set_base_protocol_version(xibridge_version_t ver);
    * @return версия протокола для взаимодействия с сервером 
    * \endrussian
 */
-XI_EXPORT xibridge_version_t  
-xibridge_get_connection_protocol_version(const xibridge_conn_t *pconn);
+XI_EXPORT xibridge_version_t xibridge_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /**
  * \english
@@ -182,9 +178,10 @@ xibridge_get_connection_protocol_version(const xibridge_conn_t *pconn);
    * @return код ошибки в случае неудачной оперции открытия, 0 - в случае успеха  
    * \endrussian
 */
-XI_EXPORT uint32_t 
-xibridge_open_device_connection(const char *xi_net_uri, 
-                                xibridge_conn_t *pconn);
+XI_EXPORT uint32_t xibridge_open_device_connection(
+              const char *xi_net_uri, 
+              xibridge_conn_t *pconn
+          );
 
 /**
    * \english
@@ -198,8 +195,7 @@ xibridge_open_device_connection(const char *xi_net_uri,
    * @return код ошибки в случае неудачной оперции закрытия, 0 - в случае успеха  
    * \endrussian
 */
-XI_EXPORT uint32_t  
-xibridge_close_device_connection(const xibridge_conn_t *pconn);
+XI_EXPORT uint32_t xibridge_close_device_connection(const xibridge_conn_t *pconn);
 
 /**
    * \english
@@ -221,12 +217,13 @@ xibridge_close_device_connection(const xibridge_conn_t *pconn);
    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
    * \endrussian
 */
-XI_EXPORT uint32_t 
-xibridge_device_request_response(const xibridge_conn_t *pconn,
-                                 const uint8_t *req,
-                                 uint32_t req_len, 
-                                 uint8_t *resp,
-                                 uint32_t resp_len);
+XI_EXPORT uint32_t xibridge_device_request_response(
+              const xibridge_conn_t *pconn,
+              const uint8_t *req,
+              uint32_t req_len, 
+              uint8_t *resp,
+              uint32_t resp_len
+          );
 
 /**
    * \english
@@ -240,8 +237,7 @@ xibridge_device_request_response(const xibridge_conn_t *pconn,
    * @return строка с ошибкой или NULL, если код ошибки неизвестен
    * \endrussian
 */
-XI_EXPORT const char * 
-xibridge_get_err_expl(uint32_t err_no);
+XI_EXPORT const char *xibridge_get_err_expl(uint32_t err_no);
 
 /**
    * \english
@@ -265,11 +261,12 @@ xibridge_get_err_expl(uint32_t err_no);
    * @return код ошибки в случае неудачного определения списка устройства или 0 в случае успеха
    * \endrussian
 */
-XI_EXPORT uint32_t  
-xibridge_enumerate_adapter_devices(const char *addr, 
-                                   const char *adapter,
-                                   char **ppresult,
-                                   uint32_t *pcount);
+XI_EXPORT uint32_t xibridge_enumerate_adapter_devices(
+              const char *addr, 
+              const char *adapter,
+              char **ppresult,
+              uint32_t *pcount
+          );
 
 /**
    * \english
@@ -282,8 +279,7 @@ xibridge_enumerate_adapter_devices(const char *addr,
    * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
    * \endrussian
 */
-XI_EXPORT void 
-xibridge_free_enumerate_devices(char *presult);
+XI_EXPORT void xibridge_free_enumerate_devices(char *presult);
 
 #if defined(__cplusplus)
 };

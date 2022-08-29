@@ -20,36 +20,31 @@ public:
     ~Bindy_helper()
     { shutdown_bindy(); }
 
-    static bindy::Bindy * 
-    instance_bindy();
+    static bindy::Bindy *instance_bindy();
 
-    conn_id_t 
-    connect(Xibridge_client *pcl);
+    conn_id_t connect(Xibridge_client *pcl);
 
-    static void 
-    shutdown_bindy();
+    static void shutdown_bindy();
     
-    static Bindy_helper *
-    instance() 
+    static Bindy_helper *instance() 
     { return &_bhelper; }
     
-    bool 
-    is_connected(conn_id_t conn_id) const;
+    bool is_connected(conn_id_t conn_id) const;
 
-    bool 
-    send_bindy_data(conn_id_t conn_id, 
-                    bvector data);
-    void 
-    disconnect(conn_id_t conn_id);
+    bool send_bindy_data(
+        conn_id_t conn_id, 
+        bvector data
+    );
+    void disconnect(conn_id_t conn_id);
 
 private:
     static std::mutex _global_mutex;  // mutex of  global resource initialization
 
-    static void 
-    callback_data_bindy(conn_id_t conn_id, 
-                        std::vector<uint8_t> data);
-    static void 
-    on_bindy_disconnect(conn_id_t conn_id);
+    static void callback_data_bindy(
+               conn_id_t conn_id, 
+               std::vector<uint8_t> data
+           );
+    static void on_bindy_disconnect(conn_id_t conn_id);
 
     static bindy::Bindy *_pbindy;
     static std::mutex _map_mutex;

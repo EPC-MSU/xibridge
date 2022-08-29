@@ -199,9 +199,9 @@ void Xibridge_client::_set_last_error(uint32_t err,
 }
 
 uint32_t Xibridge_client::xbc_read_connection_buffer(const xibridge_conn_t *pconn, 
-                                                    uint8_t *buf, 
-                                                    uint32_t size, 
-                                                    uint32_t* preal_read)
+                                                     uint8_t *buf, 
+                                                     uint32_t size, 
+                                                     uint32_t* preal_read)
 {
     if (pconn == nullptr)
     {
@@ -229,8 +229,8 @@ uint32_t Xibridge_client::xbc_read_connection_buffer(const xibridge_conn_t *pcon
 }
 
 uint32_t Xibridge_client::xbc_write_connection(const xibridge_conn_t *pconn,
-                                              const uint8_t *buf, 
-                                              uint32_t size)
+                                               const uint8_t *buf, 
+                                               uint32_t size)
 {
     if (pconn == nullptr)
     {
