@@ -74,12 +74,16 @@ ENDIF()
 ENDFUNCTION()
 ADD_SUBDIRECTORY_ZF_LOG()
 
+SET (COMMON_SOURCES 
+        common/protocols.cpp
+        common/utils.cpp
+    ) 	
+
 SET(SOURCES
         client/xibridge_client.cpp
         client/bindy_helper.cpp
-        common/protocols.cpp
-        common/utils.cpp
         client/xibridge.cpp
+		${COMMON_SOURCES}
     )
 
 ADD_LIBRARY(xibridge SHARED ${SOURCES} client/version.rc)
@@ -90,6 +94,19 @@ else()
   target_compile_options(xibridge PRIVATE -Wall -Wextra -Werror)
 endif()
 TARGET_LINK_LIBRARIES(xibridge bindy zf_log)
+
+#to build server_simu needed in tests # Note: without 'ALL'
+IF(BUILD_TEST) 
+  ADD_EXECUTABLE(server_simu  test/server_simu/server_simu.cpp ${COMMON_SOURCES}) # Note: without 'ALL'
+  if(MSVC)
+     target_compile_options(server_simu PRIVATE /W3 /WX)
+  else()
+     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
+        target_compile_options(server_simu PRIVATE -Wall -Wextra -Werror)
+   endif()
+  endif()
+  TARGET_LINK_LIBRARIES(server_simu bindy zf_log)
+ENDIF() 
 
 #add_custom_target(unittests) # Note: without 'ALL'
 IF(BUILD_TEST) 

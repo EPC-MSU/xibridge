@@ -39,13 +39,31 @@ typedef struct _sm
 /* 
     * Checks if data matches the schema 
 */
-    bool 
-    is_match(const uint8_t *data, 
-             int len, uint32_t proto, 
-             uint32_t dev_num) const;
-    static const struct _sm 
-    &get_schema(uint32_t pckt, 
-                const struct _sm * _ss);
+    bool is_match(
+        const uint8_t *data, 
+        int len, uint32_t proto, 
+        uint32_t dev_num
+    ) const;
+ /*
+    * Gets command data length according to the schema when command needs no data
+ */
+    uint32_t get_plain_command_length() const;
+
+/*
+  * Generates byte vector data according to the schema when command needs no data
+*/
+    bvector gen_plain_command(
+        uint32_t pckt, 
+        uint32_t proto, 
+        const HexIDev3 * pdev, 
+        uint32_t zero_one, 
+        uint32_t some
+    );
+
+    static const struct _sm &get_schema(
+                            uint32_t pckt, 
+                            const struct _sm * _ss
+                        );
 
 } cmd_schema;
 

@@ -2,6 +2,7 @@
 #include "../common/defs.h"
 #include <../common/protocols.h>
 #include "../vendor/acutest/include/acutest.h"
+#include <bindy/bindy-static.h>
 
 /*
 * Commnads ids - needed for testing
@@ -129,9 +130,29 @@ void test_xibridge_uri_parse()
     TEST_CHECK(parsed.uri_device_id.reserve == 0xDF);
 }
 
+/*
+ server simulation object
+
+
+*/
+
+
+void test_server_3()
+{
+
+    char *pdevs;
+    uint32_t count;
+
+    uint32_t result = xibridge_enumerate_adapter_devices("127.0.0.1",
+        "",
+        &pdevs,
+        &count);
+}
 
 void test_main()
 {
+    test_server_3();
+
     TEST_MSG("Starting test_main...");
     test_protocols();
     test_xibridge_uri_parse();

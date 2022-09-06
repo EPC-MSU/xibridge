@@ -56,6 +56,73 @@ const cmd_schema &cmd_schema::get_schema(uint32_t pckt,
     return _ss[i];
 }
 
+
+uint32_t cmd_schema::get_plain_command_length() const
+{
+    std::string sc(schema);
+    int l = 0;
+    for (auto ch : sc)
+    {
+        if (ch == '_') continue;
+        switch (ch)
+        {
+        case 'v':
+        case '0':
+        case 'p':
+        case 'd':
+        case 'b':
+        case 'u':
+            l += sizeof(uint32_t);
+            break;
+        case 'I':
+            l += sizeof(uint32_t)* 3;
+            break;
+
+        default:
+            return -1; // non plain command
+            break;
+        }
+    }
+    return l;
+}
+
+bvector cmd_schema::gen_plain_command(uint32_t pckt, uint32_t proto, const HexIDev3 * pdev, uint32_t zero_one, uint32_t some)
+{
+    uint32_t length = get_plain_command_length();
+    if (length == -1) return bvector();
+    std::string sc(schema);
+    MBuf mbuf(length);
+    for (auto ch : sc)
+    {
+        if (ch == '_') continue;
+        switch (ch)
+        {
+        case 'v':
+            mbuf << Hex32(proto);
+            break;
+        case  '0':
+            mbuf << Hex32((uint32_t)0);
+            break;
+        case 'p':
+            mbuf << Hex32(pckt);
+            break;
+        case 'd':
+            mbuf << Hex32(pdev->toExtDevId().id);
+            break;
+        case 'b':
+            mbuf << Hex32(zero_one);
+            break;
+        case 'u':
+            mbuf << Hex32(some);
+            break;
+        case 'I':
+            mbuf << *pdev;
+            break;
+        }
+    }
+    return mbuf.to_vector();
+}
+
 // structure to connect packet type and command schema
 // command schema ia a string like this "v_p_0_d_0_0_x"
 // v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
