@@ -1,6 +1,7 @@
 #ifndef _UTILS_H
 #define  _UTILS_H
 #include "defs.h"
+#include "protocols.h"
 #include "../xibridge.h"
 
 
@@ -170,24 +171,15 @@ private:
 */
 
 class MBuf;
+class DevId;
 class HexIDev3 : public AHex
 {
 public:
     HexIDev3(
-        uint32_t id = 0, 
-        uint16_t pid = 0, 
-        uint16_t vid = 0, 
-        uint32_t reserve = 0, 
+        const DevId *pdevid = nullptr,
         bool lit_end = false
-    ) :
-        _id_value(id, lit_end), 
-        _reserve(reserve), _id_pid(pid, lit_end), 
-        _id_vid(vid, lit_end) 
-    {
-        _lend = lit_end; 
-        _tsize = 12;
-    }
-
+        );
+        
     void get_stream(MBuf& mbuf);
     
     void put_stream(MBuf& mbuf) const ;
@@ -195,7 +187,7 @@ public:
     virtual bool littleEndian() const 
     { return _lend; }
 
-    xibridge_device_t toExtDevId() const; 
+    DevId toDevId() const; 
     
 private:
     Hex32 _id_value, _reserve;

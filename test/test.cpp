@@ -131,11 +131,8 @@ void test_xibridge_uri_parse()
 }
 
 /*
- server simulation object
-
-
+ * server simulator must be started to do this test
 */
-
 
 void test_server_3()
 {
@@ -151,7 +148,7 @@ void test_server_3()
 
 void test_main()
 {
-    test_server_3();
+    //test_server_3();
 
     TEST_MSG("Starting test_main...");
     test_protocols();

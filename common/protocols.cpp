@@ -86,7 +86,11 @@ uint32_t cmd_schema::get_plain_command_length() const
     return l;
 }
 
-bvector cmd_schema::gen_plain_command(uint32_t pckt, uint32_t proto, const HexIDev3 * pdev, uint32_t zero_one, uint32_t some)
+bvector cmd_schema::gen_plain_command(uint32_t pckt, 
+                                      uint32_t proto, 
+                                      const DevId &dev, 
+                                      uint32_t zero_one, 
+                                      uint32_t some) const
 {
     uint32_t length = get_plain_command_length();
     if (length == -1) return bvector();
@@ -107,7 +111,7 @@ bvector cmd_schema::gen_plain_command(uint32_t pckt, uint32_t proto, const HexID
             mbuf << Hex32(pckt);
             break;
         case 'd':
-            mbuf << Hex32(pdev->toExtDevId().id);
+            mbuf << Hex32(dev.id());
             break;
         case 'b':
             mbuf << Hex32(zero_one);
@@ -116,7 +120,7 @@ bvector cmd_schema::gen_plain_command(uint32_t pckt, uint32_t proto, const HexID
             mbuf << Hex32(some);
             break;
         case 'I':
-            mbuf << *pdev;
+            mbuf << HexIDev3(&dev);
             break;
         }
     }
@@ -128,8 +132,9 @@ bvector cmd_schema::gen_plain_command(uint32_t pckt, uint32_t proto, const HexID
 // v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
 // l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit numver
 bool cmd_schema::is_match(const uint8_t *data, 
-                          int len, uint32_t proto, 
-                          uint32_t dev_num) const
+                          int len, 
+                          uint32_t proto, 
+                          const DevId & dev_num) const
 {
     MBuf mbuf(data, len);
     Hex32 hex32; HexIDev3 hdev3;
@@ -154,7 +159,7 @@ bool cmd_schema::is_match(const uint8_t *data,
             break;
         case 'd':
             mbuf >> hex32;
-            if (hex32 != dev_num) return false;
+            if (hex32 != dev_num.id()) return false;
             break;
         case 'x':
             if (mbuf.restOfSize(-1) == SIZE_MAX) return false;
@@ -178,6 +183,14 @@ bool cmd_schema::is_match(const uint8_t *data,
         }
     }
     return !mbuf.wasBroken();
+}
+
+uint32_t AProtocol::get_pckt_of_cmd(const bvector& cmd)
+{
+    Hex32 x, p;
+    MBuf b(cmd.data(), cmd.size());
+    b >> x >> p;
+    return p;
 }
 
 bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
@@ -210,7 +223,7 @@ bool AProtocol::get_data_from_bindy_callback(MBuf& cmd,
     return true;
 }
 
-bvector Protocol1::create_cmd_request(DevId devid, 
+bvector Protocol1::create_cmd_request(const DevId &devid, 
                                       uint32_t /*tmout*/, 
                                       const bvector *data, 
                                       uint32_t /*resp_length*/)
@@ -218,7 +231,7 @@ bvector Protocol1::create_cmd_request(DevId devid,
     return create_client_request(pkt1_raw, devid, 0, data);
 }
 
-bvector Protocol2::create_cmd_request(DevId devid, 
+bvector Protocol2::create_cmd_request(const DevId &devid, 
                                       uint32_t /*tmout*/, 
                                       const bvector *data, 
                                       uint32_t resp_length)
@@ -231,10 +244,10 @@ bvector Protocol2::create_cmd_request(DevId devid,
         add_uint32_2_bvector(data_and_length, resp_length - (uint32_t)(sizeof(uint32_t))); // minus answer code length according to Protocol2
         data_and_length.insert(data_and_length.end(), data_cbeg + URPC_CID_SIZE, data->cend());
     }
-    return create_client_request(pkt2_cmd_req, devid._dev_id, 0,  &data_and_length);
+    return create_client_request(pkt2_cmd_req, devid, 0,  &data_and_length);
 }
 
-bvector Protocol3::create_cmd_request(DevId devid, 
+bvector Protocol3::create_cmd_request(const DevId &devid, 
                                       uint32_t /*tmout*/, 
                                       const bvector *data, 
                                       uint32_t resp_length)
@@ -326,7 +339,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
                 mbuf >> devnum;
                 // according to protocol1
                 DevId devid(devnum);
-                add_dev_id_bvector_net_order(data, devid._dev_id);
+                add_dev_id_bvector_net_order(data, devid.to_xibridge_device_t());
                 // according to protocol1
                 mbuf.mseek(180 - sizeof(uint32_t));
             }
@@ -480,8 +493,8 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
             {
                 mbuf >> dev;
                 // according to protocol3
-                DevId devid(dev.toExtDevId());
-                add_dev_id_bvector_net_order(data, devid._dev_id);
+                DevId devid = dev.toDevId();
+                add_dev_id_bvector_net_order(data, devid.to_xibridge_device_t());
             }
 
             // according to protocol desc - the length of               
@@ -526,13 +539,13 @@ bvector Protocol2::create_client_request(uint32_t pckt,
 }
 
 bvector Protocol3::create_client_request(uint32_t pckt, 
-                                         DevId devid, 
+                                         const DevId &devid, 
                                          uint32_t tmout, 
                                          const bvector * data)
 {
     MBuf mbuf(64 + (data == nullptr ? 0 : (int)data -> size()));
     mbuf << Hex32(version()) << Hex32(pckt) << Hex32(tmout);
-    HexIDev3 _idev(devid._dev_id.id, devid._dev_id.PID, devid._dev_id.VID, devid._dev_id.reserve);
+    HexIDev3 _idev(&devid);
     if (pckt == pkt3_close_req || pckt == pkt3_open_req || pckt == pkt3_cmd_req)
     {
 

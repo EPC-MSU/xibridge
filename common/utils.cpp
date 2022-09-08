@@ -75,6 +75,22 @@ void Hex24::_get_stream(uint8_t ** ptr)
     _get_stream1_4(ptr);
 }
 
+HexIDev3::HexIDev3(const DevId *pdevid,
+                   bool lit_end) 
+{
+    if (pdevid != nullptr)
+    {
+        _id_value = Hex32(pdevid->id(), lit_end);
+        _id_pid = Hex32(pdevid->PID(), lit_end);
+        _id_vid = Hex32(pdevid->VID(), lit_end);
+        _reserve = Hex32(pdevid->reserve(), lit_end);
+    }
+    _lend = lit_end;
+    _tsize = 12;
+}
+
+
+
 void HexIDev3::get_stream(MBuf & stream)
 {
     if (littleEndian())
@@ -99,14 +115,12 @@ void HexIDev3::put_stream(MBuf & stream) const
     }
 }
 
-xibridge_device_t HexIDev3::toExtDevId() const
+DevId HexIDev3::toDevId() const
 {
-    xibridge_device_t exdevid;
-    exdevid.reserve = _reserve;
-    exdevid.id = (uint32_t)_id_value;
-    exdevid.PID = (unsigned short)_id_pid;
-    exdevid.VID = (unsigned short)_id_vid;
-    return exdevid;
+    return DevId((uint32_t)_id_value,
+        (uint16_t)_id_pid,
+        (uint16_t)_id_vid,
+        (uint32_t)_reserve);
 }
 
 MBuf::MBuf(const uint8_t *readyd, 
@@ -389,7 +403,7 @@ bool xi_net_dev_uris(MBuf& result,
     {
         HexIDev3 devid;
         read_buf >> devid;
-        xibridge_device_t dev = devid.toExtDevId();
+        xibridge_device_t dev = devid.toDevId().to_xibridge_device_t();
         portable_snprintf((char *)str_dev_id, sizeof(xibridge_device_t)* 2, "%X%X%X%X", dev.reserve, dev.VID, dev.PID, dev.id);
         result.memwrite((const uint8_t *)_xinet_pre, (int)strlen(_xinet_pre));
         result.memwrite((const uint8_t *)server, (int)strlen(server));

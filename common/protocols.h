@@ -6,21 +6,69 @@
 
 
 /*
-    *struct to keep device identifiers with implicit constructors
+    * class to keep device identifiers with implicit constructors
 */
-struct DevId {
+class DevId {
+public:
     
     DevId(const xibridge_device_t &e_id) :
         _dev_id(e_id)
     {
     };
 
+    DevId(
+        uint32_t id = 0,
+        uint16_t pid = 0,
+        uint16_t vid = 0,
+        uint32_t reserve = 0)
+    {
+        _dev_id.id = id;
+        _dev_id.PID = pid;
+        _dev_id.VID = vid;
+        _dev_id.reserve = reserve;
+    }
+
+    /*
     DevId(uint32_t just_id = 0)
     {
         _dev_id.id = just_id;
         _dev_id.PID = _dev_id.VID = 0;
         _dev_id.reserve = 0;
     }
+    */
+
+    bool operator == (const DevId& devid)
+    {
+        return _dev_id.id == devid._dev_id.id && _dev_id.PID == devid._dev_id.PID
+            && _dev_id.VID == devid._dev_id.VID && _dev_id.reserve == devid._dev_id.reserve;
+    }
+
+    uint32_t id() const 
+    { 
+        return _dev_id.id; 
+    }
+
+    uint32_t PID() const
+    {
+        return _dev_id.PID;
+    }
+
+    uint32_t VID() const
+    {
+        return _dev_id.VID;
+    }
+
+    uint32_t reserve() const
+    {
+        return _dev_id.reserve;
+    }
+
+    xibridge_device_t to_xibridge_device_t()  const
+    {
+        return _dev_id;
+    }
+
+private:
 
     xibridge_device_t _dev_id;
 };
@@ -41,8 +89,9 @@ typedef struct _sm
 */
     bool is_match(
         const uint8_t *data, 
-        int len, uint32_t proto, 
-        uint32_t dev_num
+        int len,
+        uint32_t proto, 
+        const DevId& devid
     ) const;
  /*
     * Gets command data length according to the schema when command needs no data
@@ -55,10 +104,10 @@ typedef struct _sm
     bvector gen_plain_command(
         uint32_t pckt, 
         uint32_t proto, 
-        const HexIDev3 * pdev, 
+        const DevId &pdev, 
         uint32_t zero_one, 
         uint32_t some
-    );
+    ) const;
 
     static const struct _sm &get_schema(
                             uint32_t pckt, 
@@ -71,6 +120,7 @@ typedef struct _sm
 /*
     * Abstruct class to provide using of several types of protocols  
 */
+class MBuf;
 class AProtocol
 {
 public:
@@ -91,22 +141,25 @@ public:
         uint32_t &pckt_type
     );
 
-    static uint32_t get_version_of_cmd(const bvector& cmd) 
+    static uint32_t get_version_of_cmd(const bvector& cmd)
     { 
         return (uint32_t)(cmd.size() > 3 ? cmd[3] : 0); 
     }
 
+    static uint32_t get_pckt_of_cmd(const bvector& cmd);
+    
     virtual bvector create_client_request(uint32_t pckt, 
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr
             ) = 0;
+
     virtual bvector create_open_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout
             ) = 0;
     virtual bvector create_close_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout
             ) = 0;
     virtual bvector create_version_request(uint32_t /*tmout*/) 
@@ -116,7 +169,7 @@ public:
     { return bvector(); }
     
     virtual bvector create_cmd_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
@@ -176,16 +229,16 @@ public:
 
     virtual bvector create_client_request(
                 uint32_t pckt, 
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr
     )
     {
-        return create_client_request(pckt, devid._dev_id.id, tmout, data);
+        return create_client_request(pckt, devid.id(), tmout, data);
     }
     
     virtual bvector create_open_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t /*tmout*/
     )
     {
@@ -193,7 +246,7 @@ public:
     }
 
     virtual bvector create_close_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t /*tmout*/
     )
     {
@@ -206,7 +259,7 @@ public:
     }
 
     virtual bvector create_cmd_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
@@ -274,16 +327,16 @@ public:
     };
     virtual bvector create_client_request(
                 uint32_t pckt, 
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr
             )
     {
-        return create_client_request(pckt, devid._dev_id.id, tmout, data);
+        return create_client_request(pckt, devid.id(), tmout, data);
     }
     
     virtual bvector create_open_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t /*tmout*/
             )
     {
@@ -291,7 +344,7 @@ public:
     };
 
     virtual bvector create_close_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t /*tmout*/
             )
     {
@@ -307,7 +360,7 @@ public:
     );
 
     virtual bvector create_cmd_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
@@ -370,12 +423,12 @@ public:
 
     virtual bvector create_client_request(
                 uint32_t pckt, 
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector* data = nullptr
             );
     virtual bvector create_open_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t /*tmout*/
             )
     {
@@ -383,7 +436,7 @@ public:
     }
 
     virtual bvector create_close_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t /*tmout*/
             )
     {
@@ -409,7 +462,7 @@ public:
             );
 
     virtual bvector create_cmd_request(
-                DevId devid, 
+                const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
