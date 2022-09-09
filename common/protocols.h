@@ -102,7 +102,6 @@ typedef struct _sm
   * Generates byte vector data according to the schema when command needs no data
 */
     bvector gen_plain_command(
-        uint32_t pckt, 
         uint32_t proto, 
         const DevId &pdev, 
         uint32_t zero_one, 

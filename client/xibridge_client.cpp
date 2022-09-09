@@ -102,7 +102,6 @@ xibridge_version_t Xibridge_client::xbc_get_connection_protocol_version(const xi
     return {cl == nullptr ? (uint8_t)_server_base_protocol_version : (uint8_t)cl->_server_protocol_version, 0, 0};
 }
 
-
 bool Xibridge_client::exec_enumerate(char **result, uint32_t *pcount)
 {
     clr_errors();

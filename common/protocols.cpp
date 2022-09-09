@@ -86,8 +86,7 @@ uint32_t cmd_schema::get_plain_command_length() const
     return l;
 }
 
-bvector cmd_schema::gen_plain_command(uint32_t pckt, 
-                                      uint32_t proto, 
+bvector cmd_schema::gen_plain_command(uint32_t proto, 
                                       const DevId &dev, 
                                       uint32_t zero_one, 
                                       uint32_t some) const
@@ -108,7 +107,7 @@ bvector cmd_schema::gen_plain_command(uint32_t pckt,
             mbuf << Hex32((uint32_t)0);
             break;
         case 'p':
-            mbuf << Hex32(pckt);
+            mbuf << Hex32(pkt_type);
             break;
         case 'd':
             mbuf << Hex32(dev.id());
