@@ -96,7 +96,7 @@ typedef struct _sm
  /*
     * Gets command data length according to the schema when command needs no data
  */
-    uint32_t get_plain_command_length() const;
+    int get_plain_command_length() const;
 
 /*
   * Generates byte vector data according to the schema when command needs no data

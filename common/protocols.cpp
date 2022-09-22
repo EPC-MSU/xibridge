@@ -57,7 +57,7 @@ const cmd_schema &cmd_schema::get_schema(uint32_t pckt,
 }
 
 
-uint32_t cmd_schema::get_plain_command_length() const
+int cmd_schema::get_plain_command_length() const
 {
     std::string sc(schema);
     int l = 0;
@@ -72,10 +72,10 @@ uint32_t cmd_schema::get_plain_command_length() const
         case 'd':
         case 'b':
         case 'u':
-            l += sizeof(uint32_t);
+            l += (int)sizeof(uint32_t);
             break;
         case 'I':
-            l += sizeof(uint32_t)* 3;
+            l += (int) (sizeof(uint32_t)* 3);
             break;
 
         default:
@@ -91,7 +91,7 @@ bvector cmd_schema::gen_plain_command(uint32_t proto,
                                       uint32_t zero_one, 
                                       uint32_t some) const
 {
-    uint32_t length = get_plain_command_length();
+    int length = get_plain_command_length();
     if (length == -1) return bvector();
     std::string sc(schema);
     MBuf mbuf(length);
