@@ -157,6 +157,5 @@ void test_main()
 
 TEST_LIST = {
     { "test", test_main },
-    
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
