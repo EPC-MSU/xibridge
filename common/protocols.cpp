@@ -45,6 +45,8 @@ cmd_schema Protocol3::_cmd_shemas[12] =
 { pkt3_error_resp, nullptr }
 };
 
+const int Protocol2::URPC_CID_SIZE = 4;
+
 const cmd_schema &cmd_schema::get_schema(uint32_t pckt, 
                                          const cmd_schema *_ss)
 {

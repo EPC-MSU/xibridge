@@ -391,7 +391,7 @@ private:
     };
 
     static cmd_schema _cmd_shemas[7];
-    static const int URPC_CID_SIZE = 4;
+    static const int URPC_CID_SIZE; //  = 4
     virtual bvector create_client_request(
                 uint32_t pckt, 
                 uint32_t serial, 
