@@ -208,6 +208,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
 
 int initialization()
 {
+#if defined(WIN32) || defined(WIN64)
     WSADATA wsaData;
 
     int iResult;
@@ -218,6 +219,7 @@ int initialization()
         ZF_LOGE("WSAStartup failed: %d\n", iResult);
         return 1;
     }
+#endif
     return 0;
 }
 
@@ -254,9 +256,9 @@ void start_server()
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
-void main()
+int main()
 {
     zf_log_set_output_level(ZF_LOG_DEBUG);
     start_server();
-   
+    return 0;
 }
