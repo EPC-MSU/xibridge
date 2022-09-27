@@ -131,7 +131,7 @@ bvector cmd_schema::gen_plain_command(uint32_t proto,
 // structure to connect packet type and command schema
 // command schema ia a string like this "v_p_0_d_0_0_x"
 // v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
-// l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit numver
+// l - 32-bit length + byte array of this length, b - 0 or 1 32-bit, u -any 32-bit number
 bool cmd_schema::is_match(const uint8_t *data, 
                           int len, 
                           uint32_t proto, 
