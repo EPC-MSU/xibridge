@@ -30,7 +30,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
             ret = false;
         }    
         if (!ret) return 1;
-        xinet_1_threads();
+        //xinet_1_threads();
     }
 
     std::cout << "Enter ip-address for urpc xinet-server if you intend to test xibridge with it (or type 'N' if not):\n";
@@ -45,7 +45,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
             ret = false;
         }    
         if (!ret) return 1;
-        xinet_2_threads();
+        //xinet_2_threads();
     }
     
     std::cout << "All is done OK. Press some char key, <-| to exit\n";

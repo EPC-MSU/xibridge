@@ -32,7 +32,7 @@ cmd_schema  Protocol2 ::_cmd_shemas[7] =
 cmd_schema Protocol3::_cmd_shemas[12] =
 {
 { pkt3_ver_req, "v_p_0_0_0_0_0_0" },
-{ pkt3_ver_resp, "v_p_0_0_0_0_0_0_d" },
+{ pkt3_ver_resp, "v_p_0_0_0_0_0_0_u" },
 { pkt3_cmd_req, "v_p_0_I_0_0_l_u" },
 { pkt3_cmd_resp, "v_p_0_I_0_0_l" },
 { pkt3_open_req, "v_p_0_I_0_0" },

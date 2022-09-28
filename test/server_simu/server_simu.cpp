@@ -121,6 +121,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                                  resp << Hex32(dev, true); resp.mseek(180 - sizeof(uint32_t));
                             }
                             pb->send_data(conn_id, resp.to_vector());
+                            ZF_LOGD("Answered with 3 devices (enum resp protocol 1) to client conn_id: %u", conn_id);
                             break;
         }
         case PROTO_1_RAW:
@@ -130,37 +131,36 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             const cmd_schema cmd_schema_simple = { PROTO_1_RAW_RESP, "v_p_0_d_0_0_0" };
                             bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 0);
                             pb->send_data(conn_id, answer);
-                            ZF_LOGD("Answered 0 to client conn_id: %u", conn_id);
-
+                            ZF_LOGD("Answered 0 to client conn_id: %u (protocol1)", conn_id);
                             break;
         }
         case PROTO_1_OPEN:
         {
-                             ZF_LOGD("From %u received Protocol1 open device request packet.", conn_id);
-                             mbuf >> z >> ddev;
-                             const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_1_OPEN_RESP, p1.get_cmd_shema());
-                             uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
-                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
-                             pb->send_data(conn_id, answer);
-                             ZF_LOGD(one_zero ? "New connection added conn_id=%u + ... (protocol 1)" : "Sent No to conn_id=%u!", conn_id);
-                             break;
+                            ZF_LOGD("From %u received Protocol1 open device request packet.", conn_id);
+                            mbuf >> z >> ddev;
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_1_OPEN_RESP, p1.get_cmd_shema());
+                            uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD(one_zero ? "New connection added conn_id=%u + ... (protocol 1)" : "Sent No to conn_id=%u!", conn_id);
+                            break;
         }
         case PROTO_1_CLOSE:
         {
-                              ZF_LOGD("From %u received Protocol1 open device request packet.", conn_id);
-                              mbuf >> z >> ddev;
-                              const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_1_CLOSE_RESP, p1.get_cmd_shema());
-                              bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
-                              pb->send_data(conn_id, answer);
-                              ZF_LOGD("To connection %u close device response packet sent (protocol 1).", conn_id);
-                              break;
+                            ZF_LOGD("From %u received Protocol1 open device request packet.", conn_id);
+                            mbuf >> z >> ddev;
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_1_CLOSE_RESP, p1.get_cmd_shema());
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD("To connection %u close device response packet sent (protocol 1).", conn_id);
+                            break;
 
         }
 
         default:
         {
-                   ZF_LOGD("Unknown packet code.");
-                   break;
+                            ZF_LOGD("Unknown packet code (protocol 1).");
+                            break;
         }
         }
     }
@@ -176,37 +176,37 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             const cmd_schema cmd_schema_simple = { PROTO_2_CMD_RESP, "v_p_0_d_0_0_0" };
                             bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 0);
                             pb->send_data(conn_id, answer);
-                            ZF_LOGD("Answered 0 to client conn_id: %u", conn_id);
+                            ZF_LOGD("Answered 0 to client conn_id: %u (protocol 2)", conn_id);
                             break;
         }
         case PROTO_2_OPEN:
         {
-                             ZF_LOGD("From %u received Protocol2 open device request packet.", conn_id);
-                             mbuf >> z >> ddev;
-                             const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_2_OPEN_RESP, p2.get_cmd_shema());
-                             uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
-                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
-                             pb->send_data(conn_id, answer);
-                             ZF_LOGD(one_zero ? "New connection added conn_id = %u + ...(protocol 2)" : "Sent No to conn_id = %u!", conn_id);
-                             break;
+                            ZF_LOGD("From %u received Protocol2 open device request packet.", conn_id);
+                            mbuf >> z >> ddev;
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_2_OPEN_RESP, p2.get_cmd_shema());
+                            uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD(one_zero ? "New connection added conn_id = %u + ...(protocol 2)" : "Sent No to conn_id = %u!", conn_id);
+                            break;
         }
         case PROTO_2_CLOSE:
         {
-                              ZF_LOGD("From %u received Protocol2 open device request packet.", conn_id);
-                              mbuf >> z >> ddev;
-                              const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_2_CLOSE_RESP, p2.get_cmd_shema());
-                              bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
-                              pb->send_data(conn_id, answer);
-                              ZF_LOGD("To connection %u close device response packet sent (protocol 2).", conn_id);
-                              break;
+                            ZF_LOGD("From %u received Protocol2 open device request packet.", conn_id);
+                            mbuf >> z >> ddev;
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_2_CLOSE_RESP, p2.get_cmd_shema());
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD("To connection %u close device response packet sent (protocol 2).", conn_id);
+                            break;
 
         }
 
 
         default:
         {
-                   ZF_LOGD("Unknown packet code.");
-                   break;
+                            ZF_LOGD("Unknown packet code (protocol 2).");
+                            break;
         }
         }
     }
@@ -218,57 +218,72 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
         {
         case PROTO_3_ENUM:
         {
-                             ZF_LOGD("From %u received Protocol1 enum request packet.", conn_id);
-                             // according to simple scenario - sending 3 serials
-                             const cmd_schema cmd_schema_simple = { 0, "v_p_0_u" };
-                             int len = cmd_schema_simple.get_plain_command_length();
-                             uint32_t nd = (uint32_t)sizeof(server_simu::serials) / sizeof(uint32_t);
-                             MBuf 
-                             resp << Hex32(3) << Hex32(PROTO_3_ENUM_RESP) << Hex32(uint32_t(0x0)) << Hex32(nd);
-                             for (auto dev : server_simu::serials)
-                             {
-                                 resp << Hex32(dev, true); resp.mseek(180 - sizeof(uint32_t));
-                             }
-                             pb->send_data(conn_id, resp.to_vector());
-                             break;
+                            ZF_LOGD("From %u received Protocol1 enum request packet.", conn_id);
+                            // according to simple scenario - sending 3 serials
+                            const cmd_schema cmd_schema_simple = { 0, "v_p_0_0_0_0_0_0_u" };
+                            int len = cmd_schema_simple.get_plain_command_length();
+                            uint32_t nd = (uint32_t)sizeof(server_simu::serials) / sizeof(uint32_t);
+                            MBuf resp(len + nd * sizeof(xibridge_device_t));
+                            resp << Hex32(3) << Hex32(PROTO_3_ENUM_RESP) << Hex32(nd);
+                            for (auto dev : server_simu::serials)
+                            {
+                                DevId d(dev);
+                                resp << HexIDev3(&d);
+                            }
+                            resp << Hex32((uint32_t)0x0);
+                            pb->send_data(conn_id, resp.to_vector());
+                            ZF_LOGD("Answered with 3 devices (enum resp protocol 3) to client conn_id: %u", conn_id);
+                            break;
         }
         case PROTO_3_CMD:
         {
                             ZF_LOGD("From %u received Protocol3 command request packet.", conn_id);
                             mbuf >> z >> ddev;
-                            const cmd_schema cmd_schema_simple = { PROTO_3_CMD_RESP, "v_p_0_I_0_0_0" };
-                            bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 0);
+                            const cmd_schema cmd_schema_simple = { PROTO_3_CMD_RESP, "v_p_0_I_0_0_u_0" };
+                            bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 1);
                             pb->send_data(conn_id, answer);
-                          
+                            ZF_LOGD("Answered just with no data to client conn_id: %u (protocol 3)", conn_id);
                             break;
         }
 
         case PROTO_3_OPEN:
         {
-                             ZF_LOGD("From %u received Protocol3 open device request packet.", conn_id);
-                             mbuf >> z >> ddev;
-                             const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_OPEN_RESP, p3.get_cmd_shema());
-                             uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
-                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
-                             pb->send_data(conn_id, answer);
-                             ZF_LOGD(one_zero ? "New connection added conn_id = %u + ...(protocol 3)" : "Sent No to conn_id = %u!", conn_id);
-                             break;
+                            ZF_LOGD("From %u received Protocol3 open device request packet.", conn_id);
+                            mbuf >> z >> ddev;
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_OPEN_RESP, p3.get_cmd_shema());
+                            uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD(one_zero ? "New connection added conn_id = %u + ...(protocol 3)" : "Sent No to conn_id = %u!", conn_id);
+                            break;
         }
         case PROTO_3_CLOSE:
         {
-                              ZF_LOGD("From %u received Protocol3 open device request packet.", conn_id);
-                              mbuf >> z >> ddev;
-                              const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_CLOSE_RESP, p3.get_cmd_shema());
-                              bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
-                              pb->send_data(conn_id, answer);
-                              break;
+                            ZF_LOGD("From %u received Protocol3 close device request packet.", conn_id);
+                            mbuf >> z >> ddev;
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_CLOSE_RESP, p3.get_cmd_shema());
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD("To connection %u close device response packet sent (protocol 3).", conn_id);
+                            break;
 
         }
+        case PROTO_3_VER:
+        {
+                            ZF_LOGD("From %u received Protocol3 server version request packet.", conn_id);
+                            const cmd_schema & cm1 = cmd_schema::get_schema(PROTO_3_VER_RESP, p3.get_cmd_shema());
+                            bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 0, 3);
+                            pb->send_data(conn_id, answer);
+                            ZF_LOGD("To connection %u server version response packet sent (protocol 3).", conn_id);
+                            break;
+                              
+        }
+
 
         default:
         {
-                   ZF_LOGD("Unknown packet code.");
-                   break;
+                            ZF_LOGD("Unknown packet code (protocol 3).");
+                            break;
         }
         }
     }
