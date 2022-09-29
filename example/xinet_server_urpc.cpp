@@ -9,7 +9,7 @@
 
 static char  _DEV_IP[256];
 
-bool xinet_version_2_usage_example(const char * ip, uint32_t dev_num)
+bool xinet_urpc_usage_example(const char * ip, uint32_t dev_num)
 {
   
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
@@ -31,12 +31,12 @@ bool xinet_version_2_usage_example(const char * ip, uint32_t dev_num)
     
     uint32_t urpc_res = (uint32_t)*resp;
     
-    ZF_LOGD("Urpc return code: %d\n", (int)(urpc_res >> 24));
+    printf("Urpc return code: %d\n", (int)(urpc_res >> 24));
     urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + sizeof(uint32_t));
    
-    ZF_LOGD("Manufacture: %s\n", (char *)info.Manufacturer);
-    ZF_LOGD("Product name: %s\n", (char *)info.ProductName);
-    ZF_LOGD("Controller: %s\n", (char *)info.ControllerName);
+    printf("Manufacture: %s\n", (char *)info.Manufacturer);
+    printf("Product name: %s\n", (char *)info.ProductName);
+    printf("Controller: %s\n", (char *)info.ControllerName);
 
     uint32_t gets_err = xibridge_device_request_response(&conn, (const unsigned char *)"gets", 4, resp, 48 + 4);
     if (gets_err)
@@ -53,21 +53,21 @@ bool xinet_version_2_usage_example(const char * ip, uint32_t dev_num)
 static void thread_body(int thread_num)
 {
     xibridge_conn_t conn;
-    ZF_LOGD("Thread %u: openning connection... \n", thread_num);
+    printf("Thread %u: openning connection... \n", thread_num);
     xibridge_open_device_connection(_DEV_IP, &conn);
-    ZF_LOGD("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
+    printf("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
     unsigned char resp[72+4];
-    ZF_LOGD("Thread %u: sending ginf... \n", thread_num);
+    printf("Thread %u: sending ginf... \n", thread_num);
     uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, 72+4);
     
-    ZF_LOGD("Thread %u: ginf return %s\n", thread_num, 
+    printf("Thread %u: ginf return %s\n", thread_num, 
              ginf_err == 0 ? "true" : "false");
-    ZF_LOGD("Thread %u: closing connection %u... \n", thread_num, conn.conn_id);
+    printf("Thread %u: closing connection %u... \n", thread_num, conn.conn_id);
     xibridge_close_device_connection(&conn);
-    ZF_LOGD("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
+    printf("Thread %u: Connection %u closed \n", thread_num, conn.conn_id);
 }
 
-void xinet_2_threads()
+void xinet_urpc_threads()
 {
     std::thread *pthreads[TH_NUM];
 

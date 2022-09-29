@@ -5,16 +5,16 @@
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
-extern bool xinet_version_1_usage_example(const char *ip, uint32_t dev_num);
-extern bool xinet_version_2_usage_example(const char *ip, uint32_t dev_num);
-extern void xinet_2_threads();
-extern void xinet_1_threads();
+extern bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num);
+extern bool xinet_urpc_usage_example(const char *ip, uint32_t dev_num);
+extern void xinet_ximc_threads();
+extern void xinet_urpc_threads();
 
 int main(int /*argc*/, char ** /*argv[]*/)
 {
-    zf_log_set_output_level(ZF_LOG_DEBUG);
+    zf_log_set_output_level(ZF_LOG_WARN);
     bool ret = true;
-    ZF_LOGD("Starting test_main...");
+    std::cout << "Starting..." << std::endl;
 
     std::cout << "Enter ip-address for ximc xinet-server if you intend to test xibridge with it (or type 'N' if not):\n";
 
@@ -25,7 +25,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
     {
         std::cout << "Enter device serial number to be used with ximc-server (decimal unsigned number):\n";
         std::cin >> dev_num;
-        if (!xinet_version_1_usage_example(ip_s.data(), dev_num))
+        if (!xinet_ximc_usage_example(ip_s.data(), dev_num))
         {
             ret = false;
         }    
@@ -40,12 +40,12 @@ int main(int /*argc*/, char ** /*argv[]*/)
         std::cout << "Enter device serial number to be used with urpc-server  (decimal unsigned number):\n";
         std::cin >> dev_num;
 
-        if (!xinet_version_2_usage_example(ip_s.data(), dev_num))
+        if (!xinet_urpc_usage_example(ip_s.data(), dev_num))
         {
             ret = false;
         }    
         if (!ret) return 1;
-        //xinet_2_threads();
+        //xinet_2_threads();  
     }
     
     std::cout << "All is done OK. Press some char key, <-| to exit\n";

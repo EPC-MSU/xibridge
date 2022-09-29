@@ -122,7 +122,7 @@ IF(BUILD_TEST)
 ENDIF() 
 
 IF(BUILD_XIBRIDGE_EXAMPLE)
-    ADD_EXECUTABLE(example  example/example.cpp example/xinet_server_test_1.cpp example/xinet_server_test_2.cpp)
+    ADD_EXECUTABLE(example  example/example.cpp example/xinet_server_ximc.cpp example/xinet_server_urpc.cpp)
     TARGET_LINK_LIBRARIES(example xibridge zf_log)
     if(MSVC)
      target_compile_options(example PRIVATE /W3 /WX)
