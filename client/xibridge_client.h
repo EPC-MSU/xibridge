@@ -41,16 +41,8 @@
     * Ошибки из сервера
     * \endrussian
 */
+#define ERR_DEVICE_OPEN 0xffbc
 #define ERR_DEVICE_LOST 0xfffb
-
-/*
-    *\english
-    * Packet-Fmt errors
-    * \endenglish
-    *\russian
-    * Ошибки пакетов и форматов 
-    *\endrussain
-*/
 
 #define ERR_PCKT_FMT 12
 #define ERR_PCKT_INV 13

@@ -25,6 +25,7 @@ static err_def_t _err_strings[] =
     { ERR_RECV_TIMEOUT, "Receive data timeout." },
     { ERR_ANOTHER_PROTOCOL, "Another protocol is to be tested [internal flag]." },
     { ERR_DEVICE_LOST, "Server tells that the device connected is lost." },
+    { ERR_DEVICE_OPEN, "Server tells that the device cannot be opened." },
     { ERR_PCKT_FMT, "Invalid data format." },
     { ERR_PCKT_INV, "Invalid data packet." },
     { 0, "" }
@@ -343,7 +344,12 @@ bool Xibridge_client::open_device()
         {
             return false;
         }
-        return proto -> translate_response(pckt, res_data);
+        if (!proto->translate_response(pckt, res_data))
+        {
+            _last_error = ERR_DEVICE_OPEN;
+            return false;
+        }
+        return true;
     }
     else
     {

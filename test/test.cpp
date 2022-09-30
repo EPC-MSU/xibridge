@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include "../common/defs.h"
+#include "../client/xibridge_client.h"
 #include <../common/protocols.h>
 #include "../vendor/acutest/include/acutest.h"
 #include <bindy/bindy-static.h>
@@ -66,7 +67,7 @@ typedef struct _geng_re re_geng;
 
 static void test_request_proto1()
 {
-    TEST_MSG("?test_request_proto1?");
+    printf("?test_request_proto1?\n");
 
     uint32_t err;
     Protocol1 proto(&err, false);
@@ -94,7 +95,7 @@ static void test_request_proto1()
 
 static void test_request_proto2()
 {
-    TEST_MSG("?test_request_proto2?");
+    printf("?test_request_proto2?\n");
     uint32_t err;
     Protocol2 proto(&err, false);
     TEST_CHECK(proto.create_version_request(0).size() == 0);
@@ -119,7 +120,7 @@ static void test_request_proto2()
 
 static void test_request_proto3()
 {
-    TEST_MSG("?test_request_proto3?");
+    printf("?test_request_proto3?\n");
     uint32_t err;
     Protocol3 proto(&err, false);
     bvector reqw = proto.create_version_request(0);
@@ -148,7 +149,7 @@ static void test_request_proto3()
 void  test_protocols()
 {
     acutest_verbose_level_ = 3;
-    TEST_MSG("test_protocols...");
+    printf("test_protocols...\n");
     test_request_proto1();
     test_request_proto2();
     test_request_proto3();
@@ -160,7 +161,7 @@ extern uint32_t xibridge_parse_uri_dev12(const char *uri,
 void test_xibridge_uri_parse()
 {
     xibridge_parsed_uri parsed;
-    TEST_MSG("Starting test_xibridge_uri_parse...");
+    printf("Starting test_xibridge_uri_parse...\n");
     TEST_CHECK(xibridge_parse_uri_dev12("xi-net://abcd/1", &parsed) == 0);
     TEST_CHECK(parsed.uri_device_id.id == 1);
     TEST_CHECK(parsed.uri_device_id.VID == 0 && parsed.uri_device_id.PID == 0 && parsed.uri_device_id.reserve == 0);
@@ -177,6 +178,7 @@ void test_xibridge_uri_parse()
 
 void test_server_ximc()
 {
+    printf("Testing client via protocol 1...\n");
     xibridge_set_base_protocol_version({ 1, 0, 0 });
     char _DEV_IP[64];
     const char *s_ip = "127.0.0.1";
@@ -187,13 +189,13 @@ void test_server_ximc()
 
     uint32_t err = xibridge_enumerate_adapter_devices(s_ip, "", &pdata, &count);
     TEST_CHECK(err == 0);
-    TEST_MSG("Count of enumerated devices: %u", count);
+    printf("Count of enumerated devices: %u\n", count);
     if (count)
     {
         const char *p = pdata;
         for (int i = 0; i < (int)count; i++)
         {
-            TEST_MSG("Enumerated device #%d: URI: %s", i + 1, p);
+            printf("Enumerated device #%d: URI: %s\n", i + 1, p);
             p = strchr(p, 0) + 1;
         }
     }
@@ -220,10 +222,15 @@ void test_server_ximc()
 
     err = xibridge_close_device_connection(&conn);
     TEST_CHECK(err == 0);
+
+    sprintf(_DEV_IP, "xi-net://%s/%x", s_ip, 2); // the device "not exists"
+    err = xibridge_open_device_connection(_DEV_IP, &conn);
+    TEST_CHECK(err == ERR_DEVICE_OPEN);
 }
 
 void test_server_urpc()
 {
+    printf("Testing client via protocol 2...\n");
     xibridge_set_base_protocol_version({ 2, 0, 0 });
     char _DEV_IP[64];
     const char *s_ip = "127.0.0.1";
@@ -244,7 +251,7 @@ void test_server_urpc()
     
     uint32_t urpc_res = (uint32_t)*resp;
 
-    TEST_MSG("Urpc return code: %d\n", (int)(urpc_res >> 24));
+    printf("Urpc return code: %d\n", (int)(urpc_res >> 24));
       
     err = xibridge_device_request_response(&conn, (const unsigned char *)"gets", 4, resp, 48 + 4);
     
@@ -253,10 +260,15 @@ void test_server_urpc()
     err = xibridge_close_device_connection(&conn);
 
     TEST_CHECK(err == 0);
+
+    sprintf(_DEV_IP, "xi-net://%s/%x", s_ip, 8); // the device "not exists"
+    err = xibridge_open_device_connection(_DEV_IP, &conn);
+    TEST_CHECK(err == ERR_DEVICE_OPEN);
 }
 
 void test_server_xibridge()
 {
+    printf("Testing client via protocol 3...\n");
     xibridge_set_base_protocol_version({ 3, 0, 0 });
     char _DEV_IP[64];
     const char *s_ip = "127.0.0.1";
@@ -267,13 +279,13 @@ void test_server_xibridge()
 
     uint32_t err = xibridge_enumerate_adapter_devices(s_ip, "", &pdata, &count);
     TEST_CHECK(err == 0);
-    TEST_MSG("Count of enumerated devices: %u", count);
+    printf("Count of enumerated devices: %u\n", count);
     if (count)
     {
         const char *p = pdata;
         for (int i = 0; i < (int)count; i++)
         {
-            TEST_MSG("Enumerated device #%d: URI: %s", i + 1, p);
+            printf("Enumerated device #%d: URI: %s\n", i + 1, p);
             p = strchr(p, 0) + 1;
         }
     }
@@ -293,25 +305,29 @@ void test_server_xibridge()
 
 
     if (err) return;
-    /*
+    /* 
     re_geng settings;
     err = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
     TEST_CHECK(err == 0);
     */
     err = xibridge_close_device_connection(&conn);
     TEST_CHECK(err == 0);
+
+    sprintf(_DEV_IP, "xi-net://%s/%x", s_ip, 13); // the device "not exists"
+    err = xibridge_open_device_connection(_DEV_IP, &conn);
+    TEST_CHECK(err == ERR_DEVICE_OPEN);
 }
 
 void test_main()
 {
-    TEST_MSG("Starting test_main...");
+    printf("Starting test_main...\n");
     test_protocols();
     test_xibridge_uri_parse();
-    TEST_MSG("Then, starting server-simulator...");
-    // server_simu should be already started
-    // test_server_ximc();
-    // test_server_urpc();
-    // test_server_xibridge();
+    printf("Then, the next testes require the server_simu to be started!\n");
+    // server_simu should be already started to use the following; if it had been successully started, decomment the following and have more tests
+    //test_server_ximc();
+    //test_server_urpc();
+    //test_server_xibridge();
 }
 
 TEST_LIST = {

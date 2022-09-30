@@ -5,44 +5,50 @@
  *staic data init
 */
 
+/*
+   structure to connect packet type and command schema
+   command schema ia a string like this "v_p_0_d_0_0_x"
+   v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
+   l - 32-bit length + byte array of this length, b - 0 or 1 32-bit, u -any 32-bit number
+ */
 cmd_schema Protocol1::_cmd_shemas[9]=
 {
-{ pkt1_raw, "v_p_0_d_0_0_x" },
-{ pkt1_open_req, "v_p_0_d_0_0" },
-{ pkt1_open_resp, "v_p_0_d_0_0_b" },
-{ pkt1_close_req, "v_p_0_d_0_0" },
-{ pkt1_close_resp, "v_p_0_d_0_0_b" },
-{ pkt1_enum_req, "v_p_0_0_0_0_0"},
-{ pkt1_enum_resp, "v_p_0_u_x" },
-{ pkt1_error_ntf , "v_p_0_d_0_0"},
-{ pkt1_raw, nullptr}
+    { pkt1_raw, "v_p_0_d_0_0_x" },
+    { pkt1_open_req, "v_p_0_d_0_0" },
+    { pkt1_open_resp, "v_p_0_d_0_0_b" },
+    { pkt1_close_req, "v_p_0_d_0_0" },
+    { pkt1_close_resp, "v_p_0_d_0_0_b" },
+    { pkt1_enum_req, "v_p_0_0_0_0_0" },
+    { pkt1_enum_resp, "v_p_0_u_x" },
+    { pkt1_error_ntf, "v_p_0_d_0_0" },
+    { pkt1_raw, nullptr }
 };
 
 cmd_schema  Protocol2 ::_cmd_shemas[7] =
 {
-{ pkt2_cmd_req, "v_p_0_d_0_0_x" },
-{ pkt2_cmd_resp, "v_p_0_d_0_0_x" },
-{ pkt2_open_req, "v_p_0_d_0_0" },
-{ pkt2_open_resp, "v_p_0_d_0_0_b" },
-{ pkt2_close_req, "v_p_0_d_0_0" },
-{ pkt2_close_resp, "v_p_0_d_0_0_b" },
-{ pkt2_cmd_req, nullptr }
+    { pkt2_cmd_req, "v_p_0_d_0_0_x" },
+    { pkt2_cmd_resp, "v_p_0_d_0_0_x" },
+    { pkt2_open_req, "v_p_0_d_0_0" },
+    { pkt2_open_resp, "v_p_0_d_0_0_b" },
+    { pkt2_close_req, "v_p_0_d_0_0" },
+    { pkt2_close_resp, "v_p_0_d_0_0_b" },
+    { pkt2_cmd_req, nullptr }
 };
 
 cmd_schema Protocol3::_cmd_shemas[12] =
 {
-{ pkt3_ver_req, "v_p_0_0_0_0_0_0" },
-{ pkt3_ver_resp, "v_p_0_0_0_0_0_0_u" },
-{ pkt3_cmd_req, "v_p_0_I_0_0_l_u" },
-{ pkt3_cmd_resp, "v_p_0_I_0_0_l" },
-{ pkt3_open_req, "v_p_0_I_0_0" },
-{ pkt3_open_resp, "v_p_0_I_0_0_b" },
-{ pkt3_close_req, "v_p_0_I_0_0" },
-{ pkt3_close_resp, "v_p_0_I_0_0_b" },
-{ pkt3_enum_req, "v_p_0_0_0_0_0_0" },
-{ pkt3_enum_resp, "v_p_0_0_0_0_0_0_x" },
-{ pkt3_error_resp, "v_p_0_I_0_0_u" },
-{ pkt3_error_resp, nullptr }
+    { pkt3_ver_req, "v_p_0_0_0_0_0_0" },
+    { pkt3_ver_resp, "v_p_0_0_0_0_0_0_u" },
+    { pkt3_cmd_req, "v_p_0_I_0_0_l_u" },
+    { pkt3_cmd_resp, "v_p_0_I_0_0_l" },
+    { pkt3_open_req, "v_p_0_I_0_0" },
+    { pkt3_open_resp, "v_p_0_I_0_0_b" },
+    { pkt3_close_req, "v_p_0_I_0_0" },
+    { pkt3_close_resp, "v_p_0_I_0_0_b" },
+    { pkt3_enum_req, "v_p_0_0_0_0_0_0" },
+    { pkt3_enum_resp, "v_p_0_0_0_0_0_0_x" },
+    { pkt3_error_resp, "v_p_0_I_0_0_u" },
+    { pkt3_error_resp, nullptr }
 };
 
 const int Protocol2::URPC_CID_SIZE = 4;
@@ -57,7 +63,6 @@ const cmd_schema &cmd_schema::get_schema(uint32_t pckt,
     }
     return _ss[i];
 }
-
 
 int cmd_schema::get_plain_command_length() const
 {
@@ -128,10 +133,6 @@ bvector cmd_schema::gen_plain_command(uint32_t proto,
     return mbuf.to_vector();
 }
 
-// structure to connect packet type and command schema
-// command schema ia a string like this "v_p_0_d_0_0_x"
-// v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
-// l - 32-bit length + byte array of this length, b - 0 or 1 32-bit, u -any 32-bit number
 bool cmd_schema::is_match(const uint8_t *data, 
                           int len, 
                           uint32_t proto, 
@@ -269,6 +270,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
     Hex32 count,  r;
     Hex32 devnum(0, true);
     size_t len;
+    _res_err = 0;
     if (_is_server)
     {
         switch (pckt)
@@ -363,6 +365,7 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
     // 16 bytes or 16 bytes + 8 (extended identifier) has already read from mbuf
     size_t len;
     Hex32 r;
+    _res_err = 0;
     if (_is_server)
     {
         switch (pckt)
@@ -377,7 +380,6 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
                 *_perror = ERR_PCKT_FMT;
                 return false;
             }
-            _res_err = 0;
             data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
             return true;
         case pkt2_open_req:
@@ -402,7 +404,6 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
                 *_perror = ERR_PCKT_FMT;
                 return false;
             }
-            _res_err = 0;
             data = mbuf.to_vector(true);
             return true;
         case pkt2_open_resp:
@@ -433,6 +434,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
     Hex32 size, r;
     HexIDev3 dev;
     size_t len;
+    _res_err = 0;
     if (_is_server)
     {
         switch (pckt)
@@ -566,15 +568,13 @@ bvector Protocol3::create_client_request(uint32_t pckt,
 bool Protocol1::translate_response(uint32_t /*pckt*/, 
                                    const bvector& res_data)
 {
-    if (res_data.size() > 0) return res_data[0] != 0;
-    return  true;
+     return  _res_err == 1;
 }
 
 bool Protocol2::translate_response(uint32_t pckt, 
                                    const bvector& res_data)
 {
-    if (res_data.size() > 3 && pckt == pkt2_open_resp) return res_data[3] != 0;
-    return  true;
+    return  _res_err == 1;
 }
 
 bool Protocol3::translate_response(uint32_t pckt, 
@@ -586,8 +586,7 @@ bool Protocol3::translate_response(uint32_t pckt,
         // to do error codes !!!
         return false;
     }
-    if (res_data.size() > 0 && pckt == pkt3_open_resp) return true;
-    return  false;
+    return _res_err == 1;
 }
 
 AProtocol *create_appropriate_protocol(uint32_t version_number, 

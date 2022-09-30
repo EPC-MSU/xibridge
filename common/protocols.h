@@ -4,7 +4,6 @@
 #include "../xibridge.h"
 #include "utils.h"
 
-
 /*
     * class to keep device identifiers with implicit constructors
 */
@@ -27,15 +26,6 @@ public:
         _dev_id.VID = vid;
         _dev_id.reserve = reserve;
     }
-
-    /*
-    DevId(uint32_t just_id = 0)
-    {
-        _dev_id.id = just_id;
-        _dev_id.PID = _dev_id.VID = 0;
-        _dev_id.reserve = 0;
-    }
-    */
 
     bool operator == (const DevId& devid)
     {
@@ -73,8 +63,7 @@ private:
     xibridge_device_t _dev_id;
 };
 
-  
-/* 
+ /* 
     * structure to connect packet type and command schema
     * command schema is a string like this "v_p_0_d_0_0_x"
     * v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
@@ -147,7 +136,8 @@ public:
 
     static uint32_t get_pckt_of_cmd(const bvector& cmd);
     
-    virtual bvector create_client_request(uint32_t pckt, 
+    virtual bvector create_client_request(
+                uint32_t pckt, 
                 const DevId &devid, 
                 uint32_t tmout, 
                 const bvector *data = nullptr
@@ -190,7 +180,10 @@ public:
     uint32_t get_result_error() const 
     { return _res_err; }
 protected:
-    AProtocol(uint32_t *perror, bool is_server): 
+    AProtocol(
+        uint32_t *perror, 
+        bool is_server
+    ): 
     _is_server(is_server), _perror(perror) {};
     virtual bool get_spec_data(
                 MBuf&  mbuf,
@@ -219,8 +212,11 @@ protected:
 class Protocol1 : public AProtocol
 {
 public:
-    Protocol1(uint32_t * perror, bool isserver):
-        AProtocol(perror, isserver) {};
+    Protocol1(
+        uint32_t * perror, 
+        bool isserver
+    ):
+    AProtocol(perror, isserver) {};
     virtual bool is_device_id_extended() 
     {
         return false;
@@ -317,10 +313,12 @@ private:
 class Protocol2 : public AProtocol
 {
 public:
-    Protocol2(uint32_t * perror, bool isserver):
-        AProtocol(perror, isserver) {};
-    virtual bool 
-    is_device_id_extended() 
+    Protocol2(
+        uint32_t * perror, 
+        bool isserver
+    ):
+    AProtocol(perror, isserver) {};
+    virtual bool is_device_id_extended() 
     {
         return false;
     };
@@ -413,8 +411,11 @@ private:
 class Protocol3 : public AProtocol
 {
 public:
-    Protocol3(uint32_t * perror, bool isserver):
-        AProtocol(perror, isserver) {};
+    Protocol3(
+        uint32_t * perror, 
+        bool isserver
+    ):
+    AProtocol(perror, isserver) {};
     virtual bool is_device_id_extended() 
     {
         return true;
