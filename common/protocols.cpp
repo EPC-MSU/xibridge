@@ -11,7 +11,7 @@
    v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
    l - 32-bit length + byte array of this length, b - 0 or 1 32-bit, u -any 32-bit number
  */
-cmd_schema Protocol1::_cmd_shemas[9]=
+cmd_schema_t Protocol1::_cmd_schemas[9]=
 {
     { pkt1_raw, "v_p_0_d_0_0_x" },
     { pkt1_open_req, "v_p_0_d_0_0" },
@@ -24,7 +24,7 @@ cmd_schema Protocol1::_cmd_shemas[9]=
     { pkt1_raw, nullptr }
 };
 
-cmd_schema  Protocol2 ::_cmd_shemas[7] =
+cmd_schema_t  Protocol2 ::_cmd_schemas[7] =
 {
     { pkt2_cmd_req, "v_p_0_d_0_0_x" },
     { pkt2_cmd_resp, "v_p_0_d_0_0_x" },
@@ -35,7 +35,7 @@ cmd_schema  Protocol2 ::_cmd_shemas[7] =
     { pkt2_cmd_req, nullptr }
 };
 
-cmd_schema Protocol3::_cmd_shemas[12] =
+cmd_schema_t Protocol3::_cmd_schemas[12] =
 {
     { pkt3_ver_req, "v_p_0_0_0_0_0_0" },
     { pkt3_ver_resp, "v_p_0_0_0_0_0_0_u" },
@@ -53,8 +53,8 @@ cmd_schema Protocol3::_cmd_shemas[12] =
 
 const int Protocol2::URPC_CID_SIZE = 4;
 
-const cmd_schema &cmd_schema::get_schema(uint32_t pckt, 
-                                         const cmd_schema *_ss)
+const cmd_schema_t &cmd_schema_t::get_schema(uint32_t pckt, 
+                                         const cmd_schema_t *_ss)
 {
     int i;
     for (i = 0; _ss[i].schema != nullptr; i++)
@@ -64,7 +64,7 @@ const cmd_schema &cmd_schema::get_schema(uint32_t pckt,
     return _ss[i];
 }
 
-int cmd_schema::get_plain_command_length() const
+int cmd_schema_t::get_plain_command_length() const
 {
     std::string sc(schema);
     int l = 0;
@@ -93,7 +93,7 @@ int cmd_schema::get_plain_command_length() const
     return l;
 }
 
-bvector cmd_schema::gen_plain_command(uint32_t proto, 
+bvector cmd_schema_t::gen_plain_command(uint32_t proto, 
                                       const DevId &dev, 
                                       uint32_t zero_one, 
                                       uint32_t some) const
@@ -133,7 +133,7 @@ bvector cmd_schema::gen_plain_command(uint32_t proto,
     return mbuf.to_vector();
 }
 
-bool cmd_schema::is_match(const uint8_t *data, 
+bool cmd_schema_t::is_match(const uint8_t *data, 
                           int len, 
                           uint32_t proto, 
                           const DevId & dev_num) const

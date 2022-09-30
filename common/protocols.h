@@ -69,7 +69,7 @@ private:
     * v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
     * l - 32-bit length + byte array of thislength, b - 0 or 1 32-bit, u -any 32-bit number, I - extended device identifier
 */
-typedef struct _sm
+typedef struct _sm_t
 {
     uint32_t pkt_type;
     const char * schema;
@@ -97,12 +97,12 @@ typedef struct _sm
         uint32_t some
     ) const;
 
-    static const struct _sm &get_schema(
+    static const struct _sm_t &get_schema(
                             uint32_t pckt, 
-                            const struct _sm * _ss
+                            const struct _sm_t * _ss
                         );
 
-} cmd_schema;
+} cmd_schema_t;
 
 
 /*
@@ -176,7 +176,7 @@ public:
     * v - version, p - packet type, 0 - 32 - bit zero, d - 32 - bit non - zero, x - array bytes of any length,
     *l - 32 - bit length + byte array of thislength, b - 0 or 1 32 - bit, u - any 32 - bit number, I - extended device identifier
     */
-    virtual const cmd_schema *get_cmd_shema() = 0;  // pure virtual
+    virtual const cmd_schema_t *get_cmd_schema() = 0;  // pure virtual
     uint32_t get_result_error() const 
     { return _res_err; }
 protected:
@@ -259,8 +259,8 @@ public:
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
     );
-    virtual const cmd_schema *get_cmd_shema() 
-    { return _cmd_shemas; }
+    virtual const cmd_schema_t *get_cmd_schema() 
+    { return _cmd_schemas; }
     virtual bool translate_response(
                 uint32_t pckt, 
                 const bvector& res_data
@@ -291,7 +291,7 @@ private:
         pkt1_error_ntf = 0x4
     };
 
-    static cmd_schema _cmd_shemas[9];
+    static cmd_schema_t _cmd_schemas[9];
     bvector create_client_request(
         uint32_t pckt, 
         uint32_t serial, 
@@ -348,8 +348,8 @@ public:
         return create_client_request(pkt2_close_req, devid, 0);
     };
     
-    virtual const cmd_schema *get_cmd_shema() 
-    { return _cmd_shemas; }
+    virtual const cmd_schema_t *get_cmd_schema() 
+    { return _cmd_schemas; }
 
     virtual bool translate_response(
                 uint32_t pckt, 
@@ -388,7 +388,7 @@ private:
 
     };
 
-    static cmd_schema _cmd_shemas[7];
+    static cmd_schema_t _cmd_schemas[7];
     static const int URPC_CID_SIZE; //  = 4 
     virtual bvector create_client_request(
                 uint32_t pckt, 
@@ -453,8 +453,8 @@ public:
         return create_client_request(pkt3_enum_req, DevId(), 0);
     };
 
-    virtual const cmd_schema *get_cmd_shema() 
-    { return _cmd_shemas; }
+    virtual const cmd_schema_t *get_cmd_schema() 
+    { return _cmd_schemas; }
 
     virtual bool translate_response(
                 uint32_t pckt, 
@@ -497,7 +497,7 @@ private:
         pkt3_error_resp = 0xFA
     };
    
-    static cmd_schema _cmd_shemas[12];
+    static cmd_schema_t _cmd_schemas[12];
 };
 
 /*
