@@ -566,19 +566,19 @@ bvector Protocol3::create_client_request(uint32_t pckt,
 }
 
 bool Protocol1::translate_response(uint32_t /*pckt*/, 
-                                   const bvector& res_data)
+                                   const bvector& /*res_data*/)
 {
      return  _res_err == 1;
 }
 
-bool Protocol2::translate_response(uint32_t pckt, 
-                                   const bvector& res_data)
+bool Protocol2::translate_response(uint32_t /*pckt*/, 
+                                   const bvector& /*res_data*/)
 {
     return  _res_err == 1;
 }
 
 bool Protocol3::translate_response(uint32_t pckt, 
-                                   const bvector& res_data)
+                                   const bvector& /*res_data*/)
 {
     if (pckt == pkt3_error_resp)
     {
