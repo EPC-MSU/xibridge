@@ -52,5 +52,4 @@ private:
     static Bindy_helper _bhelper;
 };
 
-
 #endif

@@ -2,15 +2,15 @@
 #include "../client/xibridge_client.h"
 
 /*
- *staic data init
+    * staic data init
 */
 
 /*
-   structure to connect packet type and command schema
-   command schema ia a string like this "v_p_0_d_0_0_x"
-   v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
-   l - 32-bit length + byte array of this length, b - 0 or 1 32-bit, u -any 32-bit number
- */
+    * structure to connect packet type and command schema
+    * command schema ia a string like this "v_p_0_d_0_0_x"
+    * v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
+    *  l - 32-bit length + byte array of this length, b - 0 or 1 32-bit, u -any 32-bit number
+*/
 cmd_schema_t Protocol1::_cmd_schemas[9]=
 {
     { pkt1_raw, "v_p_0_d_0_0_x" },
@@ -54,7 +54,7 @@ cmd_schema_t Protocol3::_cmd_schemas[12] =
 const int Protocol2::URPC_CID_SIZE = 4;
 
 const cmd_schema_t &cmd_schema_t::get_schema(uint32_t pckt, 
-                                         const cmd_schema_t *_ss)
+                                             const cmd_schema_t *_ss)
 {
     int i;
     for (i = 0; _ss[i].schema != nullptr; i++)
@@ -94,9 +94,9 @@ int cmd_schema_t::get_plain_command_length() const
 }
 
 bvector cmd_schema_t::gen_plain_command(uint32_t proto, 
-                                      const DevId &dev, 
-                                      uint32_t zero_one, 
-                                      uint32_t some) const
+                                        const DevId &dev, 
+                                        uint32_t zero_one, 
+                                        uint32_t some) const
 {
     int length = get_plain_command_length();
     if (length == -1) return bvector();
@@ -134,9 +134,9 @@ bvector cmd_schema_t::gen_plain_command(uint32_t proto,
 }
 
 bool cmd_schema_t::is_match(const uint8_t *data, 
-                          int len, 
-                          uint32_t proto, 
-                          const DevId & dev_num) const
+                            int len, 
+                            uint32_t proto, 
+                            const DevId & dev_num) const
 {
     MBuf mbuf(data, len);
     Hex32 hex32; HexIDev3 hdev3;

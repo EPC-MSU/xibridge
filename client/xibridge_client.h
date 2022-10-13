@@ -6,7 +6,6 @@
 #include "bindy_helper.h"
 #include "version.h"
 
-
 /*
 * Defines client errors (errors to take place at the client side)
 */
@@ -48,12 +47,12 @@
 #define ERR_PCKT_INV 13
 
 /*
-   *\english
-   * Defines default version number of the protocol
-   * \endenglish
-   *\russian
-   * Определяет номер версии протокола по умолчанию  
-   * \endrussian
+    *\english
+    * Defines default version number of the protocol
+    * \endenglish
+    *\russian
+    * Определяет номер версии протокола по умолчанию  
+    * \endrussian
 */
 #define DEFAULT_PROTO_VERSION 3
 
@@ -69,8 +68,8 @@ class Xibridge_client
 {
     friend class Bindy_helper;
 public:
- /**
-   * \english
+/*
+    * \english
     * Function to get library version 
     * @return xibridge library version
     * \endenglish
@@ -85,13 +84,13 @@ public:
     };
 
 /*
-   * \english
-   * Function to get last protocol version
-   * @return last supported protocol version
-   * \endenglish
-   * Функция определения последней версии протокола, поддерживаемого библиотекой
-   * @return последняя поддерживаемая версия протокола
-   * \endrussian
+    * \english
+    * Function to get last protocol version
+    * @return last supported protocol version
+    * \endenglish
+    * Функция определения последней версии протокола, поддерживаемого библиотекой
+    * @return последняя поддерживаемая версия протокола
+    * \endrussian
 */
     static xibridge_version_t xbc_get_last_protocol_version()
     {
@@ -99,55 +98,55 @@ public:
     }
      
 /*
-   * \english
-   * Debug function to set protocol version to dial with the server
-   * @return error code - faulted, 0 - success
-   * \endenglish
-   * \russian
-   * Отладочная функция установки версии протокола для взаимодействия с сервером
-   * @param ver[in] версия протокола для взаимодействия с сервером (1, 2, 3) 
-   * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
-   * \endrussian
+    * \english
+    * Debug function to set protocol version to dial with the server
+    * @return error code - faulted, 0 - success
+    * \endenglish
+    * \russian
+    * Отладочная функция установки версии протокола для взаимодействия с сервером
+    * @param ver[in] версия протокола для взаимодействия с сервером (1, 2, 3) 
+    * @return код ошибки, если установка завершилась неудачно, 0 - если удачно
+    * \endrussian
 */
     static uint32_t xbc_set_base_protocol_version(xibridge_version_t ver);
 
 /*
-   * \english
-   * Function to get the current protocol version to deal with the server via the specified connection
-   * @param[in] pconn connection identifier pointer
-   * @return current protocol version to deal with the server
-   * \endenglish
-   * \russian
-   * Функция запроса версии протокола для взаимодействия с сервером по данному подключению
-   * @param[in] pconn указатель на указатель на идентификатор подключения
-   * @return версия протокола для взаимодействия с сервером 
-   * \endrussian
+    * \english
+    * Function to get the current protocol version to deal with the server via the specified connection
+    * @param[in] pconn connection identifier pointer
+    * @return current protocol version to deal with the server
+    * \endenglish
+    * \russian
+    * Функция запроса версии протокола для взаимодействия с сервером по данному подключению
+    * @param[in] pconn указатель на указатель на идентификатор подключения
+    * @return версия протокола для взаимодействия с сервером 
+    * \endrussian
 */
     static xibridge_version_t xbc_get_connection_protocol_version(const xibridge_conn_t *pconn);
 
 /*
-   * \english
-   * Function closes a device connection
-   * @param[out] pconn pointer to the connection data
-   * @return error code if fault, 0 if success  
-   * \endenglish
-   * \russian
-   * Функция закрытия подключения к устройству 
-   * @param[out] pconn указатель на данные подключения
-   * @return код ошибки в случае неудачной оперции закрытия, 0 - в случае успеха  
-   * \endrussian
+    * \english
+    * Function closes a device connection
+    * @param[out] pconn pointer to the connection data
+    * @return error code if fault, 0 if success  
+    * \endenglish
+    * \russian
+    * Функция закрытия подключения к устройству 
+    * @param[out] pconn указатель на данные подключения
+    * @return код ошибки в случае неудачной оперции закрытия, 0 - в случае успеха  
+    * \endrussian
 */
     static uint32_t xbc_close_connection_device(const xibridge_conn_t *pconn);
         
 /*
-   * \russian
-   * Функция чтения данных ("как есть", без парсинга по протоколу) из устройства с помощью данного подключения
-   * @param[in] pconn указатель на данные подключения
-   * @param[in] buf буфер-приемник для получения данных 
-   * @param[in] size длина буфера-приемника 
-   * @param[out] preal_read указатель на переменную, куда будет записана длина в байтах реально полученных данных 
-   * @return код ошибки - если операция завершилась неудачно< 0 - если успех
-   * \endrussian
+    * \russian
+    * Функция чтения данных ("как есть", без парсинга по протоколу) из устройства с помощью данного подключения
+    * @param[in] pconn указатель на данные подключения
+    * @param[in] buf буфер-приемник для получения данных 
+    * @param[in] size длина буфера-приемника 
+    * @param[out] preal_read указатель на переменную, куда будет записана длина в байтах реально полученных данных 
+    * @return код ошибки - если операция завершилась неудачно< 0 - если успех
+    * \endrussian
 */
     static uint32_t xbc_read_connection_buffer(
         const xibridge_conn_t *pconn, 
@@ -171,34 +170,34 @@ public:
         uint32_t size
     );
 /*
-   * \russian
-   * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
-   * @param[in] xi_net_uri строка с uri устройства, начинающаяся "xi-net://..." илт строка с адресом (даже пустым) - только для сетевого для подключения 
-   * @param[in] send_timeout таймаут отправки запроса на подключение к серверу
-   * @param[in] recv_timeout таймаут ответа сервера
-   * \endrussian
+    * \russian
+    * Конструктор класса: создает  подключение по сети к устройству через сервер (urpc-xinet, ximc-xinet, xibridge)
+    * @param[in] xi_net_uri строка с uri устройства, начинающаяся "xi-net://..." или строка с адресом (даже пустым) - только для сетевого для подключения 
+    * @param[in] send_timeout таймаут отправки запроса на подключение к серверу
+    * @param[in] recv_timeout таймаут ответа сервера
+    * \endrussian
 */
     Xibridge_client(const char *xi_net_uri, const char *adapter = NULL);
 
 /*
-   * \english
-   * Function executes request-response operation, accounts a protocol kind applied at this device connection
-   * @param[in] pconn pointer to the connection data 
-   * @param[in] req request data
-   * @param[in] req_len request data length
-   * @param[out] resp buffer to accept response data
-   * @param[in] resp_len the length of data to be recorded
-   * @return error code if fault, 0 if success
-   * \endenglish
-   * \russian
-   * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
-   * @param[in] pconn указатель на данные подключения
-   * @param[in] req данные запроса 
-   * @param[in] req_len длина данных запроса
-   * @param[out] resp буфер-приемник данных
-   * @param[in] resp_len длина записанных данных ответа
-   * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
-   * \endrussian
+    * \english
+    * Function executes request-response operation, accounts a protocol kind applied at this device connection
+    * @param[in] pconn pointer to the connection data 
+    * @param[in] req request data
+    * @param[in] req_len request data length
+    * @param[out] resp buffer to accept response data
+    * @param[in] resp_len the length of data to be recorded
+    * @return error code if fault, 0 if success
+    * \endenglish
+    * \russian
+    * Функция выполнения операции запрос-ответ с учетом протокола, применяемого в данном подключении
+    * @param[in] pconn указатель на данные подключения
+    * @param[in] req данные запроса 
+    * @param[in] req_len длина данных запроса
+    * @param[out] resp буфер-приемник данных
+    * @param[in] resp_len длина записанных данных ответа
+    * @return код ошибки в случае неудачной операции, 0 - если операция завершилась неудачно
+    * \endrussian
 */
     static uint32_t xbc_request_response(
         const xibridge_conn_t *pconn, 
@@ -209,29 +208,29 @@ public:
     );
 
 /*
-   * \english
-   * Function retunts error explanation text 
-   * @param[in] err_no error code
-   * @return char string containing error explanation text or nullptr in case of unknown error code
-   * \endenglish
-   * \russian
-   * Функция возвращает текст ошибки по ее коду
-   * @param[in] err_no код ошибки
-   * @return строка с ошибкой или NULL, если код ошибки неизвестен
-   * \endrussian
+    * \english
+    * Function retunts error explanation text 
+    * @param[in] err_no error code
+    * @return char string containing error explanation text or nullptr in case of unknown error code
+    * \endenglish
+    * \russian
+    * Функция возвращает текст ошибки по ее коду
+    * @param[in] err_no код ошибки
+    * @return строка с ошибкой или NULL, если код ошибки неизвестен
+    * \endrussian
 */
     static const char *xbc_get_err_expl(unsigned int err_no);
 
 /*
-   * \english
-   * Function releases memory allocated by xibridge_enumerate_adapter_devices function call,
-   * must be called after ibridge_enumerate_adapter_devices calling
-   * \endenglish
-   * \russian
-   * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
-   * вызываться после xibridge_enumerate_adapter_devices
-   * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
-   * \endrussian
+    * \english
+    * Function releases memory allocated by xibridge_enumerate_adapter_devices function call,
+    * must be called after ibridge_enumerate_adapter_devices calling
+    * \endenglish
+    * \russian
+    * Функция освобождения ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
+    * вызываться после xibridge_enumerate_adapter_devices
+    * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
+    * \endrussian
 */
     static void xbc_free_enumerate_devices(char *presult)
     {
@@ -281,12 +280,12 @@ public:
 private:
 
 /*
-  * \english
-  * Returns pointer to a client by connection id
-  * \endenglish
-   * \russian
-   * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
-   * \endrussian
+    * \english
+    * Returns pointer to a client by connection id
+    * \endenglish
+    * \russian
+    * Возвращает клиента, считаем, что обращение с отдельно взятым клиентом - в одном потоке
+    * \endrussian
 */
     static Xibridge_client * _get_client_as_free(conn_id_t conn_id);
     static uint32_t _server_base_protocol_version;
@@ -323,7 +322,7 @@ private:
     * Variables to deal with the client thread in the bindy 
     * \endenglish
     * \russian
-    * Переменные для взаимодействия  с потоком данного клиента в bindy
+    * Переменные для взаимодействия с потоком данного клиента в bindy
     * \endrussian
 */  
     std::condition_variable _is_recv; 

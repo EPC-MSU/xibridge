@@ -32,19 +32,15 @@ static err_def_t _err_strings[] =
  }; 
 
 // to make log level controlled
-#if defined(BUILD_SHARED_LIBS_XI)
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
-#endif
 
 //to set final log level
 void _log_level()
 {
-#if defined(BUILD_SHARED_LIBS_XI)
 #ifdef _DEBUG
     zf_log_set_output_level(ZF_LOG_DEBUG);
 #else
     zf_log_set_output_level(ZF_LOG_WARN);
-#endif
 #endif
   
 }
@@ -103,7 +99,8 @@ xibridge_version_t Xibridge_client::xbc_get_connection_protocol_version(const xi
     return {cl == nullptr ? (uint8_t)_server_base_protocol_version : (uint8_t)cl->_server_protocol_version, 0, 0};
 }
 
-bool Xibridge_client::exec_enumerate(char **result, uint32_t *pcount)
+bool Xibridge_client::exec_enumerate(char **result, 
+                                     uint32_t *pcount)
 {
     clr_errors();
     uint32_t answer_proto_version = _server_protocol_version;
@@ -157,33 +154,33 @@ bool Xibridge_client::exec_enumerate(char **result, uint32_t *pcount)
 }
 
 Xibridge_client::Xibridge_client(const char *xi_net_uri, 
-                                 const char *adapter) :
+                                 const char *adapter):
 _server_protocol_version(_server_base_protocol_version),
 _conn_id(conn_id_invalid),
 _send_tmout((uint32_t)TIMEOUT),
 _recv_tmout((uint32_t)TIMEOUT)
 {
-   memset(_host, 0, XI_URI_HOST_LEN + 1);
-   memset(_adapter, 0, XI_URI_HOST_LEN + 1);
-   
-   if (adapter == NULL)
-   {
+    memset(_host, 0, XI_URI_HOST_LEN + 1);
+    memset(_adapter, 0, XI_URI_HOST_LEN + 1);
+    
+    if (adapter == NULL)
+    {
 
-       xibridge_parsed_uri parsed;
+        xibridge_parsed_uri parsed;
 
-       if (xibridge_parse_uri_dev12(xi_net_uri, &parsed) == 0)
-       {
-           memcpy(_host, parsed.uri_server_host, XI_URI_HOST_LEN);
-           _dev_id = parsed.uri_device_id;
-       }
-   }
-   else
-   {
-       // just connection needed to make some enumerate
-       memcpy(_host, xi_net_uri, strlen(xi_net_uri));
-       memcpy(_adapter, adapter, strlen(adapter));
-   }
-   clr_errors();
+        if (xibridge_parse_uri_dev12(xi_net_uri, &parsed) == 0)
+        {
+             memcpy(_host, parsed.uri_server_host, XI_URI_HOST_LEN);
+             _dev_id = parsed.uri_device_id;
+        }
+    }
+    else
+    {
+        // just connection needed to make some enumerate
+        memcpy(_host, xi_net_uri, strlen(xi_net_uri));
+        memcpy(_adapter, adapter, strlen(adapter));
+    }
+    clr_errors();
 }
 
 void Xibridge_client::_set_last_error(uint32_t err, 
@@ -209,16 +206,18 @@ uint32_t Xibridge_client::xbc_read_connection_buffer(const xibridge_conn_t *pcon
     }
 
     Xibridge_client *pcl = _get_client_as_free(pconn -> conn_id);
-    if (pcl == nullptr) return ERR_NO_CONNECTION;
-
+    if (pcl == nullptr)
+    {   
+        return ERR_NO_CONNECTION;
+    }
     pcl -> clr_errors();
     pcl -> _mutex_recv.lock();
     uint32_t real_size = (uint32_t)pcl->_recv_message.size();
     bool clear = false;
     if (real_size <= size)
     {
-        size = real_size;
-        clear = true;
+         size = real_size;
+         clear = true;
     }
     memcpy(buf, pcl->_recv_message.data(), size);
     if (clear) pcl->_recv_message.clear();
@@ -281,16 +280,16 @@ bool Xibridge_client::_send_and_receive(bvector &req)
 
 bool Xibridge_client::is_connected()
 {
-    return  _conn_id != conn_id_invalid && 
-             Bindy_helper::instance()->is_connected(_conn_id);
+    return _conn_id != conn_id_invalid && 
+           Bindy_helper::instance()->is_connected(_conn_id);
 }
 
 bool Xibridge_client::decrement_server_protocol_version()
 {
     if (_server_protocol_version > 1)
     {
-       _server_protocol_version--;
-     }
+        _server_protocol_version--;
+    }
     else
     {
         _server_protocol_version = xibridge_get_last_protocol_version().major;
@@ -304,7 +303,7 @@ bool Xibridge_client::open_connection()
     _conn_id = Bindy_helper::instance() -> connect(this);
     if (_conn_id == conn_id_invalid)
     {
-       return false;
+        return false;
     }
     return true;
 }

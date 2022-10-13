@@ -6,7 +6,7 @@
 #include <bindy/bindy-static.h>
 
 /*
-* Commnads ids - needed for testing
+    * Commands ids - needed for testing
 */
 #define PROTO_1_OPEN  1
 #define PROTO_1_CLOSE 2 
@@ -173,7 +173,7 @@ void test_xibridge_uri_parse()
 }
 
 /*
- * server simulator must be started to do this test
+    * server simulator must be started to do this test
 */
 
 void test_server_ximc()

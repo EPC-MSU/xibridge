@@ -60,7 +60,6 @@ conn_id_t  Bindy_helper::connect(Xibridge_client *pcl)
     }
     catch (std::exception &ex)
     {
-        
         pcl->_set_last_error(ERR_SET_CONNECTION);
         //pcl->_set_add_err_text(ex.what());
         ZF_LOGE("Catch exception at bindy connect, addr: %s, text: %s", pcl->_host, ex.what());

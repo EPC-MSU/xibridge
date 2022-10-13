@@ -63,7 +63,7 @@ private:
     xibridge_device_t _dev_id;
 };
 
- /* 
+/* 
     * structure to connect packet type and command schema
     * command schema is a string like this "v_p_0_d_0_0_x"
     * v - version, p - packet type, 0 - 32-bit zero, d - 32-bit non-zero, x - array bytes of any length,
@@ -82,9 +82,9 @@ typedef struct _sm_t
         uint32_t proto, 
         const DevId& devid
     ) const;
- /*
+/*
     * Gets command data length according to the schema when command needs no data
- */
+*/
     int get_plain_command_length() const;
 
 /*
@@ -113,14 +113,14 @@ class AProtocol
 {
 public:
     virtual bool is_device_id_extended() = 0;
-/**
-     * Prepares protocol formatted data FROM Bindy callback into some separated arrays and fields
-     * Gets protocol results data (green in Wiki) and device  data (light blue in Wiki), packet type and serial of the device (at server)
-     * In case of enumeration response data will contain array of DevId-s
-     * @param [out] res_data - data could be interpritited by any of the protocols
-     * @param [out] data - data direct from a device
-     * @param [out] pckt_type - packet type in terms of the protocol
-     * @param [out] devid - device identifier of the device at server side
+/*
+    * Prepares protocol formatted data FROM Bindy callback into some separated arrays and fields
+    * Gets protocol results data (green in Wiki) and device  data (light blue in Wiki), packet type and serial of the device (at server)
+    * In case of enumeration response data will contain array of DevId-s
+    * @param [out] res_data - data could be interpritited by any of the protocols
+    * @param [out] data - data direct from a device
+    * @param [out] pckt_type - packet type in terms of the protocol
+    * @param [out] devid - device identifier of the device at server side
 */
     bool get_data_from_bindy_callback(
         MBuf &cmd,
@@ -171,11 +171,11 @@ public:
 
     virtual uint32_t version() = 0;
 
-    /*
+/*
     *command schema is a string like this "v_p_0_d_0_0_x"
     * v - version, p - packet type, 0 - 32 - bit zero, d - 32 - bit non - zero, x - array bytes of any length,
     *l - 32 - bit length + byte array of thislength, b - 0 or 1 32 - bit, u - any 32 - bit number, I - extended device identifier
-    */
+*/
     virtual const cmd_schema_t *get_cmd_schema() = 0;  // pure virtual
     uint32_t get_result_error() const 
     { return _res_err; }
@@ -200,10 +200,10 @@ protected:
 };
 
 /*
-    *\english
+    * \english
     * Class Protocol1 
     * Operates data according to version 1 protocol (ximc-xinet-server) 
-    *\endenglish
+    * \endenglish
     * \russian
     * Класс Protocol1
     * Для создания-обработки сообщений по протоколу версии 1(ximc-сервер)
@@ -276,9 +276,9 @@ protected:
             );
 
 private:
-    /**
+/*
     * Ver.1 protocol packets type
-    */
+*/
     enum Pkt_types1
     {
         pkt1_raw = 0x0,             // пакеты протокола 1
@@ -301,10 +301,10 @@ private:
 };
 
 /*
-    *\english
+    * \english
     * Class Protocol1 
     * Operates data according to version 2 protocol (urpc-xinet-server) 
-    *\endenglish
+    * \endenglish
     * \russian
     * Класс Protocol2
     * Для создания-обработки сообщений по протоколу версии 2(urpc-сервер)
@@ -374,9 +374,9 @@ protected:
             );
     
 private:
-    /**
+/*
     * Ver.2 protocol packets type
-    */
+*/
     enum Pkt_types2
     {
         pkt2_cmd_req = 0x3,
@@ -399,10 +399,10 @@ private:
 };
 
 /*
-    *\english
+    * \english
     * Class Protocol3 
     * Operates data according to version 1 protocol (xibridge-xinet-server) 
-    *\endenglish
+    * \endenglish
     * \russian
     * Класс Protocol3
     * Для создания-обработки сообщений по протоколу версии 3(xibridge-сервер)
@@ -479,9 +479,9 @@ protected:
             );
         
 private:
-    /**
+/*
     * Ver.3 protocol packets type
-    */
+*/
     enum Pkt_types3
     {
         pkt3_ver_req = 0x5,
@@ -501,7 +501,7 @@ private:
 };
 
 /*
-* Virtual protocol constructor
+    * Virtual protocol constructor
 */
 extern AProtocol *create_appropriate_protocol(
            uint32_t version_number, 
@@ -509,6 +509,3 @@ extern AProtocol *create_appropriate_protocol(
        );
 
 #endif
-
-
-
