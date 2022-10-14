@@ -34,6 +34,8 @@ IF (NOT MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 ENDIF()  
 
+set(CMAKE_RUNTIME_INC_DIRECTORY ${CMAKE_SOURCE_DIR}/inc)
+
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_SYSTEM_VERSION} EQUAL 6.1)
     # HACK: Make cryptopp replace missing (till Windows 8) GetOverlappedResultEx() on Windows7 with somehting compatible
     ADD_DEFINITIONS(-D_WIN32_WINNT=0x0601)
@@ -43,8 +45,8 @@ IF(${CMAKE_SYSTEM_NAME} STREQUAL FreeBSD OR ${CMAKE_SYSTEM_NAME} STREQUAL Darwin
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 ENDIF()
 
-CONFIGURE_FILE(client/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/client/version.h)
-CONFIGURE_FILE(client/version_config.rc.in ${CMAKE_CURRENT_BINARY_DIR}/client/version.rc)
+CONFIGURE_FILE(client/version.h.in ${CMAKE_RUNTIME_INC_DIRECTORY}/client/version.h)
+CONFIGURE_FILE(client/version_config.rc.in ${CMAKE_RUNTIME_INC_DIRECTORY}/client/version.rc)
   
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -86,7 +88,7 @@ SET(SOURCES
 		${COMMON_SOURCES}
     )
 
-ADD_LIBRARY(xibridge SHARED ${SOURCES} client/version.rc)
+ADD_LIBRARY(xibridge SHARED ${SOURCES} inc/client/version.rc)
 
 if(MSVC)
   target_compile_options(xibridge PRIVATE /W3 /WX)

@@ -4,7 +4,7 @@
 #include "../xibridge.h"
 #include "../common/protocols.h"
 #include "bindy_helper.h"
-#include "version.h"
+#include "../inc/client/version.h"
 
 /*
 * Defines client errors (errors to take place at the client side)
