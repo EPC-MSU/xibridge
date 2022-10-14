@@ -21,7 +21,7 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 * cкачать и установить cmake (https://cmake.org) и MS Visual Studio (13 и выше);
 * запустить cmake-gui;
-* указать путь до каталога xibridge (с CMakeLists.txt) и такой же путь (до каталога xibridge) в поле для выходной сборочной директории;
+* указать путь до каталога xibridge (с CMakeLists.txt) и путь <до каталога xibridge>/build в поле для выходной сборочной директории;
 * Configure > Visual Studio 12 2013, x64;
 * если нужен пример использования, поставить галочку BUILD_XIBRIDGE_EXAMPLE; 
 * Generate;
@@ -31,7 +31,9 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 Библиотеку, тесты и пример собрать, как и все наши проекты на CMake\make:
 
-* `cmake CMakeLists.txt`
+* `mkdir build`
+* `cd build`
+* `cmake ..`
 * если нужен пример использования, указать дополнительный параметр при запуске cmake: -DBUILD_XIBRIDGE_EXAMPLE=On;
 * `make`
 
