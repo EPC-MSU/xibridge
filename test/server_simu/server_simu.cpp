@@ -310,8 +310,53 @@ int initialization()
     return 0;
 }
 
+#ifndef _WIN32
+#include <sys/types.h>
+#include <unistd.h>
+#include <sstream>
+
+bool is_already_started()
+{
+    // get this process pid
+    pid_t pid = getpid();
+    // compose a bash command that:
+    // check if another process with the same name 
+    // but with different pid is running
+    std::stringstream command;
+    command << "ps -eo pid,comm | grep urpc_xinet_serv | grep -v ' " << pid << " '";
+    int isRuning = system(command.str().c_str());
+    if (isRuning == 0) {
+        std::cout << "Another process (urpc_xinet_server) already running. Exit." << std::endl;
+        return true;
+    }
+    return false;
+}
+#else
+static HANDLE _h_already_started;
+bool is_already_started()
+{
+    const char szUniqueNamedMutex[] = "urpc_xinet_server_m";
+    _h_already_started = CreateMutex(NULL, TRUE, szUniqueNamedMutex);
+    if (ERROR_ALREADY_EXISTS == GetLastError())
+    {
+        std::cout << "Another process (server_simu or urpc_xinet_server) already running. Press a key to exit!" << std::endl;
+        std::cin.get(); // To avoid console closing
+        return true;
+    }
+    return false;
+}
+
+void release_already_started_mutex()
+{
+    ReleaseMutex(_h_already_started); // Explicitly release mutex
+    CloseHandle(_h_already_started); // close handle before terminating
+}
+#endif
+
 void start_server()
 {
+    if (is_already_started())
+        return;
     std::cout << "=== Welcome to xibridge server-simulator! ===" << std::endl;
     std::cout << "It uses real sockets on your local computer, so you must specify the server address as 127.0.0.1 in your testing soft." << std::endl;
     std::cout << "Non real devices used. So, available serial numbers for fake devices are ";
@@ -338,7 +383,9 @@ void start_server()
     {
         ZF_LOGE("Exception while server simulator initializing! Details: %s", e.what());
     }
-    
+#ifdef _WIN32
+    release_already_started_mutex();
+#endif
 }
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
