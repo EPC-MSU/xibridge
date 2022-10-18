@@ -4,6 +4,7 @@
 #include <../common/protocols.h>
 #include "../vendor/acutest/include/acutest.h"
 #include <bindy/bindy-static.h>
+#include <string.h>
 
 /*
     * Commands ids - needed for testing
@@ -266,6 +267,7 @@ void test_server_urpc()
     TEST_CHECK(err == ERR_DEVICE_OPEN);
 }
 
+
 void test_server_xibridge()
 {
     printf("Testing client via protocol 3...\n");
@@ -303,7 +305,6 @@ void test_server_xibridge()
         return;
     }
 
-
     if (err) return;
     /* 
     re_geng settings;
@@ -318,6 +319,49 @@ void test_server_xibridge()
     TEST_CHECK(err == ERR_DEVICE_OPEN);
 }
 
+bool start_server_simu()
+{
+#ifdef _WIN32
+    char path[MAX_PATH];
+    GetModuleFileName(NULL, path, MAX_PATH);
+    char *p = strrchr(path, '\\');
+    if (p == NULL) p = strrchr(path, '/');
+    if (p == NULL) p = (char *)path;
+    else p++;
+    strcpy(p, "server_simu.exe");
+
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+
+    // Start the child process. 
+    if (!CreateProcess(NULL,   // No module name (use command line)
+        path,        // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        0,              // No creation flags
+        NULL,           // Use parent's environment block
+        NULL,           // Use parent's starting directory 
+        &si,            // Pointer to STARTUPINFO structure
+        &pi)           // Pointer to PROCESS_INFORMATION structure
+        )
+    {
+        printf("Cannot start server_simu to continue testing... Error {%d}\n", GetLastError());
+        return false;
+    }
+
+#else
+
+#endif
+
+    return true;
+}
+
 void test_main()
 {
     printf("Starting test_main...\n");
@@ -325,9 +369,18 @@ void test_main()
     test_xibridge_uri_parse();
     printf("Then, the next testes require the server_simu to be started!\n");
     // server_simu should be already started to use the following; if it had been successully started, decomment the following and have more tests
-    //test_server_ximc();
-    //test_server_urpc();
-    //test_server_xibridge();
+    /*
+    bool server_ok = start_server_simu();
+    
+    TEST_CHECK(server_ok == true);
+    if (server_ok)
+    {
+
+        test_server_ximc();
+        test_server_urpc();
+        test_server_xibridge();
+    }
+    */
 }
 
 TEST_LIST = {
