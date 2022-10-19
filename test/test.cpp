@@ -353,7 +353,7 @@ bool start_server_simu()
 
 
     // Start the child process. 
-    if (!(pss = CreateProcess(NULL,   // No module name (use command line)
+    if (!CreateProcess(NULL,   // No module name (use command line)
         path,        // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
@@ -363,12 +363,12 @@ bool start_server_simu()
         NULL,           // Use parent's starting directory 
         &si,            // Pointer to STARTUPINFO structure
         &pi)           // Pointer to PROCESS_INFORMATION structure
-        ))
+       )
     {
         printf("Cannot start server_simu to continue testing... Error {%d}\n", GetLastError());
         return false;
-    }
-
+     }
+    pss = pi.hProcess;
 #else
     char s[64];
     char name[256]; 
