@@ -5,6 +5,12 @@
 #include "../vendor/acutest/include/acutest.h"
 #include <bindy/bindy-static.h>
 #include <string.h>
+#include <stdio.h>
+#ifndef _WIN32
+    #include <sys/types.h>
+    #include <unistd.h>
+    #include <stdlib.h>
+#endif
 
 /*
     * Commands ids - needed for testing
@@ -319,6 +325,14 @@ void test_server_xibridge()
     TEST_CHECK(err == ERR_DEVICE_OPEN);
 }
 
+#ifdef _WIN32
+static HANDLE pss = NULL;
+#else
+//static FILE * pss = NULL;
+pid_t pid = -1;
+#endif
+
+
 bool start_server_simu()
 {
 #ifdef _WIN32
@@ -339,7 +353,7 @@ bool start_server_simu()
 
 
     // Start the child process. 
-    if (!CreateProcess(NULL,   // No module name (use command line)
+    if (!(pss = CreateProcess(NULL,   // No module name (use command line)
         path,        // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
@@ -349,17 +363,62 @@ bool start_server_simu()
         NULL,           // Use parent's starting directory 
         &si,            // Pointer to STARTUPINFO structure
         &pi)           // Pointer to PROCESS_INFORMATION structure
-        )
+        ))
     {
         printf("Cannot start server_simu to continue testing... Error {%d}\n", GetLastError());
         return false;
     }
 
 #else
+    char s[64];
+    char name[256]; 
+    sprintf (s, "readlink -f /proc/%d/exe", getpid());
+    readlink(s, name, 255);
+    char *p = strrchr(name, '/');
+    if (p == NULL) p = (char *)name;
+    else p++;
+    strcpy(p, "server_simu");
+    /*
+    if ((pss = popen(name, "r") ) == NULL)
+    {
+        return false;
+    }
+    */
+    pid_t pid = fork();
 
+    if (pid == -1) 
+    {
+        return false;
+    } 
+    else if (pid > 0) 
+    {
+        //parent
+        sleep(1);
+        return true;
+    }   
+    else 
+    {
+        //child            
+        if (execl(name, "") == -1) 
+            return false;    
+    }
 #endif
 
     return true;
+}
+
+void stop_server_simu()
+{
+#ifdef _WIN32
+   if (pss != NULL) 
+   {
+       TerminateProcess(pss, 0);
+       CloseHandle(pss);
+   }    
+#else
+   //if (pss != NULL) pclose(pss);
+   if (pid != -1) kill (pid, SIGTERM);
+#endif
 }
 
 void test_main()
@@ -367,20 +426,22 @@ void test_main()
     printf("Starting test_main...\n");
     test_protocols();
     test_xibridge_uri_parse();
-    printf("Then, the next testes require the server_simu to be started!\n");
+    printf("Then, the next tests require the server_simu to be started!\n");
     // server_simu should be already started to use the following; if it had been successully started, decomment the following and have more tests
-    /*
+#ifdef _WIN32    
     bool server_ok = start_server_simu();
-    
+   
     TEST_CHECK(server_ok == true);
+    
     if (server_ok)
     {
 
         test_server_ximc();
         test_server_urpc();
         test_server_xibridge();
+        stop_server_simu();
     }
-    */
+#endif
 }
 
 TEST_LIST = {
