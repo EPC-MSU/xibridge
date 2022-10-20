@@ -120,6 +120,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             {
                                  resp << Hex32(dev, true); resp.mseek(180 - sizeof(uint32_t));
                             }
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, resp.to_vector());
                             ZF_LOGD("Answered with 3 devices (enum resp protocol 1) to client conn_id: %u", conn_id);
                             break;
@@ -130,6 +131,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             mbuf >> z >> ddev;
                             const cmd_schema_t cmd_schema_simple = { PROTO_1_RAW_RESP, "v_p_0_d_0_0_0" };
                             bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("Answered 0 to client conn_id: %u (protocol1)", conn_id);
                             break;
@@ -141,6 +143,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_1_OPEN_RESP, p1.get_cmd_schema());
                             uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD(one_zero ? "New connection added conn_id=%u + ... (protocol 1)" : "Sent No to conn_id=%u!", conn_id);
                             break;
@@ -151,6 +154,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             mbuf >> z >> ddev;
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_1_CLOSE_RESP, p1.get_cmd_schema());
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("To connection %u close device response packet sent (protocol 1).", conn_id);
                             break;
@@ -175,6 +179,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             mbuf >> z >> ddev;
                             const cmd_schema_t cmd_schema_simple = { PROTO_2_CMD_RESP, "v_p_0_d_0_0_0" };
                             bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("Answered 0 to client conn_id: %u (protocol 2)", conn_id);
                             break;
@@ -186,6 +191,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_2_OPEN_RESP, p2.get_cmd_schema());
                             uint32_t one_zero = server_simu::is_serial_ok((uint32_t)ddev) ? 1 : 0;
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD(one_zero ? "New connection added conn_id = %u + ...(protocol 2)" : "Sent No to conn_id = %u!", conn_id);
                             break;
@@ -196,6 +202,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             mbuf >> z >> ddev;
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_2_CLOSE_RESP, p2.get_cmd_schema());
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("To connection %u close device response packet sent (protocol 2).", conn_id);
                             break;
@@ -233,6 +240,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                                 resp << HexIDev3(&d);
                             }
                             resp << Hex32((uint32_t)0x0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, resp.to_vector());
                             ZF_LOGD("Answered with 3 devices (enum resp protocol 3) to client conn_id: %u", conn_id);
                             break;
@@ -243,6 +251,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             mbuf >> z >> edev;
                             const cmd_schema_t cmd_schema_simple = { PROTO_3_CMD_RESP, "v_p_0_I_0_0_u_0" };
                             bvector answer = cmd_schema_simple.gen_plain_command(protocol_ver, DevId(ddev), 0, 1);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("Answered just with no data to client conn_id: %u (protocol 3)", conn_id);
                             break;
@@ -255,6 +264,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_OPEN_RESP, p3.get_cmd_schema());
                             uint32_t one_zero = server_simu::is_serial_ok(edev.toDevId().id()) ? 1 : 0;
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), one_zero, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD(one_zero ? "New connection added conn_id = %u + ...(protocol 3)" : "Sent No to conn_id = %u!", conn_id);
                             break;
@@ -265,6 +275,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             mbuf >> z >> edev;
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_CLOSE_RESP, p3.get_cmd_schema());
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 1, 0);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("To connection %u close device response packet sent (protocol 3).", conn_id);
                             break;
@@ -275,6 +286,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data)
                             ZF_LOGD("From %u received Protocol3 server version request packet.", conn_id);
                             const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_VER_RESP, p3.get_cmd_schema());
                             bvector answer = cm1.gen_plain_command(protocol_ver, DevId(ddev), 0, 3);
+                            bindy::sleep_ms(20);
                             pb->send_data(conn_id, answer);
                             ZF_LOGD("To connection %u server version response packet sent (protocol 3).", conn_id);
                             break;
@@ -392,7 +404,7 @@ ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
 int main()
 {
-    zf_log_set_output_level(ZF_LOG_DEBUG);
+    zf_log_set_output_level(ZF_LOG_WARN);
     start_server();
     return 0;
 }

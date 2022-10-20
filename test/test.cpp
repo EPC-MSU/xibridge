@@ -422,10 +422,9 @@ void test_main()
     test_protocols();
     test_xibridge_uri_parse();
     printf("Then, the next tests require the server_simu to be started!\n");
-    // server_simu should be already started to use the following; if it had been successully started, decomment the following and have more tests
-//#ifdef _WIN32    
-    bool server_ok = start_server_simu();
-   
+    // server_simu should be started
+    bool server_ok =  start_server_simu();
+    
     TEST_CHECK(server_ok == true);
     
     if (server_ok)
@@ -436,7 +435,6 @@ void test_main()
         test_server_xibridge();
         stop_server_simu();
     }
-//#endif
 }
 
 TEST_LIST = {
