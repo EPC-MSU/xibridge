@@ -329,7 +329,7 @@ void test_server_xibridge()
 static HANDLE pss = NULL;
 #else
 //static FILE * pss = NULL;
-pid_t pid = -1;
+pid_t pid = 0;
 #endif
 
 
@@ -375,31 +375,25 @@ bool start_server_simu()
     sprintf (s, "readlink -f /proc/%d/exe", getpid());
     readlink(s, name, 255);
     char *p = strrchr(name, '/');
-    if (p == NULL) p = (char *)name;
-    else p++;
-    strcpy(p, "server_simu");
-    /*
-    if ((pss = popen(name, "r") ) == NULL)
-    {
-        return false;
-    }
-    */
-    pid_t pid = fork();
+    if (p == NULL) strcpy(name, "./server_simu");
+    else strcpy(p+1, "server_simu");
+    pid_t _pid = fork();
 
-    if (pid == -1) 
+    if (_pid == -1) 
     {
         return false;
     } 
-    else if (pid > 0) 
+    else if (_pid > 0) 
     {
         //parent
+        pid = _pid; // to kill
         sleep(1);
         return true;
     }   
     else 
     {
         //child            
-        if (execl(name, "") == -1) 
+        if (execl(name, "", "", (char *)0) == -1) 
             return false;    
     }
 #endif
@@ -416,8 +410,9 @@ void stop_server_simu()
        CloseHandle(pss);
    }    
 #else
-   //if (pss != NULL) pclose(pss);
-   if (pid != -1) kill (pid, SIGTERM);
+   sleep(1);
+   if (pid > 0) 
+       kill (pid, SIGTERM);
 #endif
 }
 
@@ -428,7 +423,7 @@ void test_main()
     test_xibridge_uri_parse();
     printf("Then, the next tests require the server_simu to be started!\n");
     // server_simu should be already started to use the following; if it had been successully started, decomment the following and have more tests
-#ifdef _WIN32    
+//#ifdef _WIN32    
     bool server_ok = start_server_simu();
    
     TEST_CHECK(server_ok == true);
@@ -441,7 +436,7 @@ void test_main()
         test_server_xibridge();
         stop_server_simu();
     }
-#endif
+//#endif
 }
 
 TEST_LIST = {
