@@ -1,0 +1,4 @@
+PROJECT_NAME=xibridge
+OUTPUT_LANGUAGE=English
+INPUT=include/
+
