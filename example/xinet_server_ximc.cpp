@@ -1,6 +1,6 @@
 ﻿#include <zf_log.h>
 #include <../common/protocols.h>
-#include <../xibridge.h>
+#include <../include/xibridge.h>
 #include "ximc-min/ximc_min.h"
 #include "../common/utils.h"
 
