@@ -10,6 +10,9 @@
     #include <sys/types.h>
     #include <unistd.h>
     #include <stdlib.h>
+    #include <string.h>
+    #include <stdio.h>
+    #include <errno.h>
 #endif
 
 /*
@@ -371,9 +374,17 @@ bool start_server_simu()
     pss = pi.hProcess;
 #else
     char s[64];
-    char name[256]; 
-    sprintf (s, "readlink -f /proc/%d/exe", getpid());
-    readlink(s, name, 255);
+    char name[256 + 64]; 
+    ssize_t rsize;
+    name[0] = 0;
+    sprintf (s, "/proc/%d/exe", getpid());
+    rsize = readlink(s, name, 256);
+    if (rsize == -1) 
+    {
+        printf("readlink error!\n");
+        return false;
+    }
+    name[rsize] = 0;
     char *p = strrchr(name, '/');
     if (p == NULL) strcpy(name, "./server_simu");
     else strcpy(p+1, "server_simu");
@@ -383,6 +394,7 @@ bool start_server_simu()
     {
         return false;
     } 
+
     else if (_pid > 0) 
     {
         //parent
@@ -392,9 +404,14 @@ bool start_server_simu()
     }   
     else 
     {
-        //child            
+        //child  
+        int errn = 0;
         if (execl(name, "", "", (char *)0) == -1) 
-            return false;    
+        {
+            errn = errno;
+            printf ("%s %s\n", "execl failed - ", strerror(errn));
+            return false;
+        }     
     }
 #endif
 
@@ -423,11 +440,10 @@ void test_main()
     test_xibridge_uri_parse();
     printf("Then, the next tests require the server_simu to be started!\n");
     // server_simu should be started
-    bool server_ok =  start_server_simu();
-    
+    bool server_ok = start_server_simu();
+    if (pid == 0) return; // child was successfully started
     TEST_CHECK(server_ok == true);
-    
-    if (server_ok)
+    if (server_ok) 
     {
 
         test_server_ximc();
