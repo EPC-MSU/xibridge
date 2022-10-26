@@ -441,7 +441,6 @@ void test_main()
     printf("Then, the next tests require the server_simu to be started!\n");
     // server_simu should be started
     bool server_ok = start_server_simu();
-    if (pid == 0) return; // child was successfully started
     TEST_CHECK(server_ok == true);
     if (server_ok) 
     {
