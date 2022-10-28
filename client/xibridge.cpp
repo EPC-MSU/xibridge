@@ -1,5 +1,5 @@
 ﻿#include "../common/defs.h"
-#include "../include/xibridge.h"
+#include "../xibridge.h"
 #include "../common/defs.h"
 #include "xibridge_client.h"
 

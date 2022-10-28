@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 #include "../common/defs.h"
-#include "../include/xibridge.h"
+#include "../xibridge.h"
 #include <zf_log.h>
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;

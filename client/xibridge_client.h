@@ -1,7 +1,7 @@
 #ifndef _XIBRIDGE_CLIENT_H
 #define  _XIBRIDGE_CLIENT_H
 #include "../common/defs.h"
-#include "../include/xibridge.h"
+#include "../xibridge.h"
 #include "../common/protocols.h"
 #include "bindy_helper.h"
 #include "../inc/client/version.h"

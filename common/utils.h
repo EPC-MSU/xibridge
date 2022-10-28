@@ -2,7 +2,7 @@
 #define  _UTILS_H
 #include "defs.h"
 #include "protocols.h"
-#include "../include/xibridge.h"
+#include "../xibridge.h"
 
 
 #ifdef _MSC_VER
