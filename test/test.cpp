@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include "../common/defs.h"
 #include "../client/xibridge_client.h"
 #include <../common/protocols.h>
@@ -6,13 +6,15 @@
 #include <bindy/bindy-static.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 #ifndef _WIN32
     #include <sys/types.h>
     #include <unistd.h>
     #include <stdlib.h>
-    #include <string.h>
-    #include <stdio.h>
     #include <errno.h>
+#endif
+#ifdef __APPLE__
+    #include <mach-o/dyld.h>
 #endif
 
 /*
@@ -331,8 +333,7 @@ void test_server_xibridge()
 #ifdef _WIN32
 static HANDLE pss = NULL;
 #else
-//static FILE * pss = NULL;
-pid_t pid = 0;
+static pid_t pid = 0;
 #endif
 
 
@@ -372,19 +373,32 @@ bool start_server_simu()
         return false;
      }
     pss = pi.hProcess;
+
+#else
+    char name[PATH_MAX + 64];
+    int errn;
+#ifdef __APPLE__
+    uint32_t buf_size;
+    if (_NSGetExecutablePath(name, &buf_size) == -1) 
+    {
+        printf("_NSGetExecutablePath error error!\n");
+        return false;
+    }
 #else
     char s[64];
-    char name[256 + 64]; 
     ssize_t rsize;
     name[0] = 0;
     sprintf (s, "/proc/%d/exe", getpid());
+    printf ("%s\n", s);
     rsize = readlink(s, name, 256);
     if (rsize == -1) 
     {
-        printf("readlink error!\n");
+        errn = errno;
+        printf("readlink error: %s!\n", strerror(errn));
         return false;
     }
     name[rsize] = 0;
+#endif    
     char *p = strrchr(name, '/');
     if (p == NULL) strcpy(name, "./server_simu");
     else strcpy(p+1, "server_simu");
@@ -405,7 +419,6 @@ bool start_server_simu()
     else 
     {
         //child  
-        int errn = 0;
         if (execl(name, "", "", (char *)0) == -1) 
         {
             errn = errno;
