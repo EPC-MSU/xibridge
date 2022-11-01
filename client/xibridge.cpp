@@ -106,9 +106,9 @@ uint32_t xibridge_enumerate_adapter_devices(const char *addr,
                                             uint32_t *pcount)
 {
     uint32_t res_err;
+    if (ppresult != nullptr) *ppresult = nullptr;
+    if (pcount != nullptr) *pcount = 0;
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
-    *pcount = 0;
-    *ppresult = nullptr;
     Xibridge_client * cl = new Xibridge_client(addr, adapter == nullptr ? "" : adapter);
    
     // making opening logic more complex

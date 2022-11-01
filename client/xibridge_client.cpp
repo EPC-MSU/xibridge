@@ -103,11 +103,21 @@ bool Xibridge_client::exec_enumerate(char **result,
                                      uint32_t *pcount)
 {
     clr_errors();
-    uint32_t answer_proto_version = _server_protocol_version;
-    AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
+
+    if (result != nullptr) *result = nullptr;
+    if (pcount != nullptr) *pcount = 0;
     if (result == nullptr || pcount == nullptr)
     {
         _last_error = ERR_NULLPTR_PARAM;
+        return false;
+    }
+   
+    uint32_t answer_proto_version = _server_protocol_version;
+
+    AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
+    if (proto == nullptr)
+    {
+        _last_error = ERR_NO_PROTOCOL;
         return false;
     }
     bvector req = proto -> create_enum_request(_recv_tmout);
