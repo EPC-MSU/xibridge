@@ -1,5 +1,4 @@
-﻿#include <zf_log.h>
-#include <../common/protocols.h>
+﻿#include <../common/protocols.h>
 #include <../xibridge.h>
 #include "ximc-min/ximc_min.h"
 #include "../common/utils.h"
@@ -49,7 +48,7 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
     uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {
-        ZF_LOGE("Cannot open device: %s, error: %s", _DEV_IP, xibridge_get_err_expl(err));
+        printf("Cannot open device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
         xibridge_close_device_connection(&conn);
         return false;
     }
@@ -58,13 +57,21 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
     uint32_t err_op = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 4, (uint8_t *)&status, sizeof(re_gets));
     if (err_op)
     {
-        ZF_LOGE("Cannot execute gets: %s", xibridge_get_err_expl(err));
+        printf("Cannot execute gets: %s\n", xibridge_get_err_expl(err_op));
+        xibridge_close_device_connection(&conn);
         return false;
     }
 
     printf("Speed: %d\n", status.status.CurSpeed);
+    
     re_geng settings;
     err_op = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
+    if (err_op)
+    {
+        printf("Cannot execute geng: %s\n", xibridge_get_err_expl(err_op));
+        xibridge_close_device_connection(&conn);
+        return false;
+    }
     printf("Nom voltage: %u\n", settings.settings.NomVoltage);
     xibridge_close_device_connection(&conn);
     return true;

@@ -1,9 +1,6 @@
 ﻿#include <iostream>
 #include "../common/defs.h"
 #include "../xibridge.h"
-#include <zf_log.h>
-
-ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
 extern bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num);
 extern bool xinet_urpc_usage_example(const char *ip, uint32_t dev_num);
@@ -12,7 +9,6 @@ extern void xinet_urpc_threads();
 
 int main(int /*argc*/, char ** /*argv[]*/)
 {
-    zf_log_set_output_level(ZF_LOG_WARN);
     bool ret = true;
     std::cout << "Starting..." << std::endl;
 
