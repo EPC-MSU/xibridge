@@ -30,7 +30,12 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
     char  *pdata; uint32_t count;
 
-    xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
+    uint32_t err = xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
+    if (err)
+    {
+        printf("Cannot enumerare device: %s, error: %s\n", _DEV_IP,      xibridge_get_err_expl(err));
+          return false;
+    }     
     printf("Count of enumerated devices: %u\n", count);
     if (count)
     {
@@ -45,10 +50,10 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
 
     xibridge_conn_t conn;
 
-    uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
+    err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {
-        printf("Cannot open device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        printf("Cannot open device: %s, error: %s\n", _DEV_IP,                  xibridge_get_err_expl(err));
         xibridge_close_device_connection(&conn);
         return false;
     }
