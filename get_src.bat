@@ -1,6 +1,6 @@
 @set URL="https://github.com/EPC-MSU/xibridge.git"
 @set DISTARCH="."
-@set XIBRIDGEVER=v.1.0.3
+@set XIBRIDGEVER=v1.0.5
 
 call :SRC
 
