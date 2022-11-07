@@ -14,6 +14,8 @@
 git clone https://github.com/EPC-MSU/xibridge --recurse-submodules  
 ```
 
+или скачать исходники (Windows) c помощью скрипта get_src.bat, запускать лучше всего в отдельном (новом) каталоге. 
+
 ## Windows
 
 Библиотеку, тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
@@ -27,7 +29,7 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 * Generate;
 * собрать сгенерированное решение в Visual Studio
 
-## Linux
+## Linux, Mac OS
 
 Библиотеку, тесты и пример собрать, как и все наши проекты на CMake\make:
 
@@ -59,12 +61,11 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 
 * убедиться, что на windows и Linux все собирается и работает;
 * поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
+* поменять версию в скрипте get_src.bat (на vX.X.X);
 * повесить тег vX.X.X на коммит, сделать push;
-* скачать архив с кодом с github https://github.com/epc-msu/uiobgige в разделе "Релизы";
-* содержимое архива добавить в релиз в папку src/;
 * собрать библиотеку под всеми архитектурами: win32, win64, debian linux, бинарные результаты сборки добавить в архив в 
-  соответствующие папки;
-* назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом v.X.X.X, 
+соответствующие папки;
+* назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X, 
 а также на сетевой диск.
 
 ## Генерация документации

@@ -15,7 +15,7 @@ typedef struct
 
 static err_def_t _err_strings[] =
 { 
-    { ERR_NO_PROTOCOL, "Protocol is undefined: supported versions (major) are 1, 2, 3." },
+    { ERR_NO_PROTOCOL, "Protocol is either undefined or current operation is not available." },
     { ERR_NO_CONNECTION, "Connection is not created or broken." },
     { ERR_SEND_TIMEOUT, "Send data timeout." },
     { ERR_NO_BINDY, "Network component (xibridge-bindy) has not been initialized properly." },

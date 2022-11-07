@@ -8,7 +8,7 @@ OPTION(BUILD_XIBRIDGE_EXAMPLE "Build xibridge example@ project" OFF)
 #set the right version here !
 SET (XIBRIDGE_VERSION_MAJOR 1)
 SET (XIBRIDGE_VERSION_MINOR 0)
-SET (XIBRIDGE_VERSION_PATCH 4) 
+SET (XIBRIDGE_VERSION_PATCH 5) 
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     # It is required to build a rpath framework
