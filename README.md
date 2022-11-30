@@ -59,7 +59,7 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 
 Выпуск релиза:
 
-* убедиться, что на windows и Linux все собирается и работает;
+* убедиться, что на windows, Linux и MacOS все собирается и работает;
 * поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
 * повесить тег vX.X.X на коммит, сделать push;
 * написать changelog xibridge-x.x.x-changelog.txt;
