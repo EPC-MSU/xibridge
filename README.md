@@ -61,12 +61,12 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 
 * убедиться, что на windows и Linux все собирается и работает;
 * поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
-* поменять версию в скрипте get_src.bat (на vX.X.X);
 * повесить тег vX.X.X на коммит, сделать push;
-* собрать библиотеку под всеми архитектурами: win32, win64, debian linux, бинарные результаты сборки добавить в архив в 
+* написать changelog xibridge-x.x.x-changelog.txt;
+* собрать библиотеку под всеми архитектурами: win32, win64, debian linux, macos, бинарные результаты сборки добавить в архив в 
 соответствующие папки;
-* назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X, 
-а также на сетевой диск.
+* назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X;
+* выложить xibridge-x.x.x-changelog.txt, xibridge-x.x.x.zip на сетевой диск .
 
 ## Генерация документации
 
