@@ -1,7 +1,7 @@
 #ifndef URPC_DEVSERIAL_DEVSERIAL_H
 #define URPC_DEVSERIAL_DEVSERIAL_H
 
-#include "../urpc.h"
+#include "urpc.h"
 
 
 struct urpc_device_serial_t;

@@ -135,27 +135,26 @@ IF(BUILD_XIBRIDGE_EXAMPLE)
     endif()  
 ENDIF()
 
-FUNCTION(ADD_SUBDIRECTORY_URPC_SERIAL)
-I   ADD_SUBDIRECTORY(server/urpc_serial)
-ENDIF() 
-ENDFUNCTION()
-ADD_SUBDIRECTORY_URPC_SERIAL()
-
-include_directories(server)
-
 set(SRV_SOURCES 
     server/common.cpp
     server/server.cpp
     server/mapserialurpc.cpp)
 if (ENABLE_SUPERVISOR)
-    set(SRV_SOURCES ${SOURCES} server/supervisor.cpp)
+    set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
 endif()
 if (WIN32)
-    set(SRV_SOURCES ${SOURCES} server/platform-win32.cpp)
+    set(SRV_SOURCES ${SRV_SOURCES} server/platform-win32.cpp)
 else()
-    set(SRV_SOURCES ${SOURCES} server/platform-posix.cpp)
+    set(SRV_SOURCES ${SRV_SOURCES} server/platform-posix.cpp)
 endif()
 ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
+
+FUNCTION(ADD_SUBDIRECTORY_URPC_SERIAL)
+ADD_SUBDIRECTORY(server/urpc-serial)
+ENDFUNCTION()
+ADD_SUBDIRECTORY_URPC_SERIAL()
+
+include_directories(server)
 
 TARGET_LINK_LIBRARIES(xibridge_server zf_log urpc-serial bindy)
 

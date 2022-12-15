@@ -27,7 +27,7 @@
 
 #include <zf_log.h>
 
-#include "../urpc.h"
+#include "urpc-serial/urpc.h"
 #include "bindy/bindy.h"
 #include "bindy/tinythread.h"
 #include "common.hpp"

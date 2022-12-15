@@ -3,7 +3,7 @@
 
 #include <map>
 #include <mutex>
-#include "../urpc.h"
+#include "urpc-serial/urpc.h"
 #include "common.hpp"
 #include "platform.h"
 #include "rw_lock.h"
