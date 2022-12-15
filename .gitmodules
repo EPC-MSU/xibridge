@@ -7,3 +7,7 @@
 [submodule "vendor/acutest"]
 	path = vendor/acutest
 	url = https://github.com/mity/acutest
+[submodule "server/devurpcserial/vendor/tinycthread"]
+	path = server/devurpcserial/vendor/tinycthread
+	url = https://github.com/tinycthread/tinycthread.git
+	

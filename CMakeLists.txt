@@ -135,4 +135,36 @@ IF(BUILD_XIBRIDGE_EXAMPLE)
     endif()  
 ENDIF()
 
+FUNCTION(ADD_SUBDIRECTORY_URPC_SERIAL)
+I   ADD_SUBDIRECTORY(server/urpc_serial)
+ENDIF() 
+ENDFUNCTION()
+ADD_SUBDIRECTORY_URPC_SERIAL()
+
+include_directories(server)
+
+set(SRV_SOURCES 
+    server/common.cpp
+    server/server.cpp
+    server/mapserialurpc.cpp)
+if (ENABLE_SUPERVISOR)
+    set(SRV_SOURCES ${SOURCES} server/supervisor.cpp)
+endif()
+if (WIN32)
+    set(SRV_SOURCES ${SOURCES} server/platform-win32.cpp)
+else()
+    set(SRV_SOURCES ${SOURCES} server/platform-posix.cpp)
+endif()
+ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
+
+TARGET_LINK_LIBRARIES(xibridge_server zf_log urpc-serial bindy)
+
+IF (MSVC)
+    add_custom_command(TARGET  xibridge_server POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                       "${LIBSERIALPORT_PATH}/libserialport.dll"
+                       $<TARGET_FILE_DIR:xibridge_server>)
+ENDIF()
+  
+
 
