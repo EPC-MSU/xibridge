@@ -8,3 +8,6 @@
 	path = vendor/acutest
 	url = https://github.com/mity/acutest
 
+[submodule "server/urpc-serial/vendor/tinycthread"]
+	path = server/urpc-serial/vendor/tinycthread
+	url = https://github.com/tinycthread/tinycthread.git
