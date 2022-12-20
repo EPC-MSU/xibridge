@@ -345,12 +345,14 @@ int main(int argc, char *argv[])
 #ifndef _WIN32
     signal(SIGSEGV, handler);   // install our handler  
 #endif
-    std::cout << "=== uRPC XiNet Server "
-              << URPC_XINET_VERSION_MAJOR << "."
-              << URPC_XINET_VERSION_MINOR << "."
-              << URPC_XINET_VERSION_BUGFIX << " "
+    std::cout << "=== Xibridge Server "
+              << 1 << "."
+              << 0 << "."
+              << 0 << " "
               << "===" << std::endl;
 
+    std::cout << "=== Protocol v.2 supported ===" << std::endl;
+ 
     bool exit = false;
     if (argc > 1)
     {
