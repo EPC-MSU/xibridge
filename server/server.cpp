@@ -267,6 +267,15 @@ void handler(int sig) {
     exit(1);
 }
 
+#ifdef __APPLE__
+
+bool is_already_started()
+{
+    return false;
+}
+
+#else
+
 #define SOCKET_NAME "SOCKET_TO_BE_USED_AS_NAMED_MUTEX"
 #ifndef UNIX_PATH_MAX                                                           
   #define UNIX_PATH_MAX (108)                                                   
@@ -297,6 +306,7 @@ bool is_already_started()
     }
     return false;
 }
+#endif
 #else
 static HANDLE _h_already_started;
 bool is_already_started()

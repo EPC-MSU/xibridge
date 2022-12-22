@@ -18,25 +18,36 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 ## Windows
 
-Библиотеку, тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
+Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Архив попложить рядом 
+с xibridge.
+
+Библиотеку, сервер. тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
 проектов:
 
 * cкачать и установить cmake (https://cmake.org) и MS Visual Studio (13 и выше);
 * запустить cmake-gui;
 * указать путь до каталога xibridge (с CMakeLists.txt) и путь <до каталога xibridge>/build в поле для выходной сборочной директории;
 * Configure > Visual Studio 12 2013, x64;
-* если нужен пример использования, поставить галочку BUILD_XIBRIDGE_EXAMPLE; 
+* если нужен пример использования, поставить галочку BUILD_XIBRIDGE_EXAMPLE;
+* если нужен xibridge_server, поставить галочку BUILD_XIBRIDGE_SERVER;
 * Generate;
 * собрать сгенерированное решение в Visual Studio
 
 ## Linux, Mac OS
 
+Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Архив попложить рядом 
+с xibridge.
+
+Для Linux установить пакет из папки с соответствующим именем (deb64 или deb_mips).
+
+Нужно взять архив libserialport_release.
 Библиотеку, тесты и пример собрать, как и все наши проекты на CMake\make:
 
 * `mkdir build`
 * `cd build`
 * `cmake ..`
 * если нужен пример использования, указать дополнительный параметр при запуске cmake: -DBUILD_XIBRIDGE_EXAMPLE=On;
+* если нужен xibridge_server, указать дополнительный параметр при запуске cmake: -DBUILD_XIBRIDGE_SERVER=On;
 * `make`
 
 ### Запуск тестов
