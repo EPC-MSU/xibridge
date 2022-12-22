@@ -4,6 +4,7 @@ PROJECT(xibridge)
 
 OPTION(BUILD_TEST "Build xibridge test project" ON)
 OPTION(BUILD_XIBRIDGE_EXAMPLE "Build xibridge example@ project" OFF)
+OPTION(BUILD_XIBRIDGE_SERVER "Build xibridge server" OFF)
 
 #set the right version here !
 SET (XIBRIDGE_VERSION_MAJOR 1)
@@ -135,35 +136,36 @@ IF(BUILD_XIBRIDGE_EXAMPLE)
     endif()  
 ENDIF()
 
-set(SRV_SOURCES 
-    server/common.cpp
-    server/server.cpp
-    server/mapserialurpc.cpp)
-if (ENABLE_SUPERVISOR)
-    set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
-endif()
-if (WIN32)
-    set(SRV_SOURCES ${SRV_SOURCES} server/platform-win32.cpp)
-else()
-    set(SRV_SOURCES ${SRV_SOURCES} server/platform-posix.cpp)
-endif()
-ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
+IF(BUILD_XIBRIDGE_SERVER)
+   set(SRV_SOURCES 
+        server/common.cpp
+        server/server.cpp
+        server/mapserialurpc.cpp)
+   if (ENABLE_SUPERVISOR)
+        set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
+   endif()
+   if (WIN32)
+        set(SRV_SOURCES ${SRV_SOURCES} server/platform-win32.cpp)
+   else()
+        set(SRV_SOURCES ${SRV_SOURCES} server/platform-posix.cpp)
+   endif()
+   ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
 
-FUNCTION(ADD_SUBDIRECTORY_URPC_SERIAL)
-ADD_SUBDIRECTORY(server/urpc-serial)
-ENDFUNCTION()
-ADD_SUBDIRECTORY_URPC_SERIAL()
+   FUNCTION(ADD_SUBDIRECTORY_URPC_SERIAL)
+   ADD_SUBDIRECTORY(server/urpc-serial)
+   ENDFUNCTION()
+   ADD_SUBDIRECTORY_URPC_SERIAL()
 
-include_directories(server)
+   include_directories(server)
 
-TARGET_LINK_LIBRARIES(xibridge_server zf_log urpc-serial bindy)
+   TARGET_LINK_LIBRARIES(xibridge_server zf_log urpc-serial bindy)
 
-IF (MSVC)
-    add_custom_command(TARGET  xibridge_server POST_BUILD
+   IF (MSVC)
+        add_custom_command(TARGET  xibridge_server POST_BUILD
                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
                        "${LIBSERIALPORT_PATH}/libserialport.dll"
                        $<TARGET_FILE_DIR:xibridge_server>)
-ENDIF()
-  
+   ENDIF()
+ENDIF()  
 
 

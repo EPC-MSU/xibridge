@@ -42,7 +42,7 @@ void UrpcDevicePHandle::destroy_urpc_h()
 {
     if (_uhandle != nullptr)
     {
-        ZF_LOGD("Urpc device handle %u.", _uhandle);
+        ZF_LOGD("Urpc device handle %lu.", (unsigned long int)_uhandle);
         urpc_device_destroy(&_uhandle);
         _uhandle = nullptr;
     }
@@ -67,7 +67,7 @@ void MapSerialUrpc::log()
     ZF_LOGD("MapSerialUrpc:");
     for (auto &m : *this)
     {
-        ZF_LOGD("serial_%u -> (urpc ptr %u\n", m.first, m.second.uhandle());
+        ZF_LOGD("serial_%u -> (urpc ptr %lu\n", m.first, (unsigned long int)m.second.uhandle());
     }
 
     ZF_LOGD("MapSerialUrpc connections pairs:");
