@@ -10,6 +10,7 @@
 
 #define conn_id_invalid 0
 #define URPC_XINET_PROTOCOL_VERSION 0x00000002
+#define XIBRIDGE_XINET_PROTOCOL_VERSION 0x00000003
 
 typedef uint32_t conn_id_t;
 
@@ -21,6 +22,18 @@ enum urpc_packet_type_t {
     URPC_COMMAND_REQUEST_PACKET_TYPE = 0x00000003,
     URPC_COMMAND_RESPONSE_PACKET_TYPE = 0x000000FD,
     URPC_ERROR_PACKET_TYPE = 0x00000004,
+};
+
+enum xibridge_packet_type_t {
+    XIBRIDGE_OPEN_DEVICE_REQUEST_PACKET_TYPE = 0x00000001,
+    XIBRIDGE_OPEN_DEVICE_RESPONSE_PACKET_TYPE = 0x000000FF,
+    XIBRIDGE_CLOSE_DEVICE_REQUEST_PACKET_TYPE = 0x00000002,
+    XIBRIDGE_CLOSE_DEVICE_RESPONSE_PACKET_TYPE = 0x000000FE,
+    XIBRIDGE_COMMAND_REQUEST_PACKET_TYPE = 0x00000003,
+    XIBRIDGE_COMMAND_RESPONSE_PACKET_TYPE = 0x000000FD,
+    XIBRIDGE_ERROR_PACKET_TYPE = 0x00000004,
+    XIBRIDGE_VERSION_REQUEST_PACKET_TYPE = 0x00000005,
+    XIBRIDGE_VERSION_RESPONSE_PACKET_TYPE = 0x0000000FB
 };
 
 #ifdef _MSC_VER
@@ -36,6 +49,15 @@ struct urpc_xinet_common_header_t {
 	uint32_t reserved3;
 	uint32_t serial;
 	uint32_t reserved4 [2];
+});
+
+PACK(
+struct xibridge_xinet_common_header_t {
+    uint32_t protocol_version;
+    uint32_t packet_type;
+    uint32_t reserved3;
+    uint32_t serial[4];
+    uint32_t reserved4[2];
 });
 
 size_t adaptive_wait_send(bindy::Bindy* bindy, conn_id_t conn_id, std::vector<uint8_t> data, size_t timeout_ms);
