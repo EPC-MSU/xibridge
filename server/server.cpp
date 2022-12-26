@@ -8,6 +8,7 @@
 #include <functional>
 #include <ctype.h>
 #include "../common/utils.h"
+#include "../common/protocols.h"
 
 #ifndef _WIN32 
   #include <execinfo.h>
@@ -127,7 +128,7 @@ public:
 template <>
 class DataPacket <XIBRIDGE_OPEN_DEVICE_RESPONSE_PACKET_TYPE> : public CommonDataPacket{
 public:
-    DataPacket(conn_id_t conn_id, uint32_t serial, bool opened_ok) {
+    DataPacket(conn_id_t conn_id, const DevId &device, bool opened_ok) {
         this->conn_id = conn_id;
 
         int len = sizeof(xibridge_xinet_common_header_t)+sizeof(uint32_t);

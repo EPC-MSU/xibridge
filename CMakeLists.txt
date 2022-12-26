@@ -80,13 +80,13 @@ ADD_SUBDIRECTORY_ZF_LOG()
 SET (COMMON_SOURCES 
         common/protocols.cpp
         common/utils.cpp
-    ) 	
+    )
 
 SET(SOURCES
         client/xibridge_client.cpp
         client/bindy_helper.cpp
         client/xibridge.cpp
-		${COMMON_SOURCES}
+        ${COMMON_SOURCES}
     )
 
 ADD_LIBRARY(xibridge SHARED ${SOURCES} inc/client/version.rc)
@@ -140,7 +140,8 @@ IF(BUILD_XIBRIDGE_SERVER)
    set(SRV_SOURCES 
         server/common.cpp
         server/server.cpp
-        server/mapserialurpc.cpp)
+        server/mapserialurpc.cpp
+        ${COMMON_SOURCES})
    if (ENABLE_SUPERVISOR)
         set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
    endif()
@@ -168,4 +169,4 @@ IF(BUILD_XIBRIDGE_SERVER)
    ENDIF()
 ENDIF()  
 
-
+Доделала cmake-файл
