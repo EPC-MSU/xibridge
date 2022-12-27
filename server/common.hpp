@@ -8,11 +8,13 @@
 
 #include "bindy/bindy-static.h"
 
-#define conn_id_invalid 0
+#ifndef conn_id_invalid
+  #define conn_id_invalid 0
+  typedef uint32_t conn_id_t;
+#endif
+
 #define URPC_XINET_PROTOCOL_VERSION 0x00000002
 #define XIBRIDGE_XINET_PROTOCOL_VERSION 0x00000003
-
-typedef uint32_t conn_id_t;
 
 enum urpc_packet_type_t {
     URPC_OPEN_DEVICE_REQUEST_PACKET_TYPE = 0x00000001,

@@ -467,6 +467,19 @@ public:
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
             );
+
+    bool get_data_from_request(MBuf &cmd,
+        bvector &req_data,
+        DevId &dev_id,
+        uint32_t &resp_len);
+
+    bvector create_server_response(
+        uint32_t pckt,
+        uint32_t bool_val = 0,
+        const DevId *pdevid = nullptr,
+        const bvector* pdata = nullptr
+        );
+
  
 protected:
     virtual uint32_t version() 

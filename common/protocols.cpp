@@ -565,6 +565,67 @@ bvector Protocol3::create_client_request(uint32_t pckt,
     return mbuf.to_vector();
 }
 
+bool Protocol3::get_data_from_request(MBuf &cmd,
+                                         bvector &req_data,
+                                         DevId &dev_id,
+                                         uint32_t &resp_len)
+{
+    req_data.clear();
+     _res_err = 0;
+    resp_len = 0;
+
+    Hex32 skip_prt, skip_tout, sr, pckt, serial; HexIDev3 hdev;
+    cmd >> skip_prt >> pckt >> skip_tout >> hdev;
+    
+    dev_id = hdev.toDevId();
+
+    bvector z;
+
+    if (!get_spec_data(cmd, z, req_data, (uint32_t)pckt))
+        return false;
+    cmd >> skip_prt;
+    resp_len = (uint32_t)skip_prt;
+    if (cmd.wasBroken())
+    {
+        *_perror = ERR_PCKT_FMT;
+        return false;
+    }
+
+    return true;
+}
+
+bvector Protocol3::create_server_response(uint32_t pckt,
+                                          uint32_t bool_val,
+                                          const DevId *pdevid,
+                                          const bvector* pdata
+                                         )
+{
+    MBuf mbuf(64 + (pdata == nullptr ? 0 : (int)pdata->size()));
+    mbuf << Hex32(version()) << Hex32(pckt) << Hex32(uint32_t(0)) << HexIDev3(pdevid) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00);
+
+    switch (pckt)
+    {
+    case pkt3_close_resp:
+    case pkt3_open_resp:
+        mbuf << Hex32(bool_val);
+        break;
+    case pkt3_cmd_resp:
+        mbuf << Hex32(pdata == nullptr ? (uint32_t)0x0 : (uint32_t)pdata->size());
+        if (pdata != nullptr) mbuf.memwrite(pdata->data(), (int)pdata->size());
+        break;
+    case pkt3_enum_resp:
+        mbuf << Hex32(pdata == nullptr ? (uint32_t)0x0 : pdata->size() / sizeof (DevId));
+        if (pdata != nullptr)  mbuf.memwrite(pdata->data(), (int)pdata->size());
+        mbuf << Hex32((uint32_t)0x0);
+        break;
+    case pkt3_ver_resp:
+        mbuf << Hex32(version());
+        break;
+    }
+     
+    return mbuf.to_vector();
+}
+
 bool Protocol1::translate_response(uint32_t /*pckt*/, 
                                    const bvector& /*res_data*/)
 {

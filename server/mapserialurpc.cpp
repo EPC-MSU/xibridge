@@ -38,6 +38,18 @@ urpc_result_t UrpcDevicePHandle::urpc_send_request(const char cid[URPC_CID_SIZE]
     return urpc_result_nodevice;
 }
 
+urpc_result_t UrpcDevicePHandle::urpc_send_request_base(const uint8_t *request,
+    uint8_t request_len,
+    uint8_t *response,
+    uint8_t response_len)
+{
+    if (_uhandle != nullptr)
+    {
+        return urpc_device_send_request_base(_uhandle, request, request_len, response, response_len);
+    }
+    return urpc_result_nodevice;
+}
+
 void UrpcDevicePHandle::destroy_urpc_h()
 {
     if (_uhandle != nullptr)

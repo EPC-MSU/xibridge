@@ -168,5 +168,3 @@ IF(BUILD_XIBRIDGE_SERVER)
                        $<TARGET_FILE_DIR:xibridge_server>)
    ENDIF()
 ENDIF()  
-
-Доделала cmake-файл

@@ -55,6 +55,15 @@ urpc_device_send_request(
 );
 
 urpc_result_t
+urpc_device_send_request_base(
+urpc_device_handle_t device,
+const uint8_t *request,
+uint8_t request_len,
+uint8_t *response,
+uint8_t response_len
+);
+
+urpc_result_t
 urpc_device_destroy(
     urpc_device_handle_t *device_ptr
 );

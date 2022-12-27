@@ -143,6 +143,48 @@ urpc_result_t urpc_device_send_request(
     return result;
 }
 
+    // can be called from any thread;
+    // calling this function after urpc_device_destroy is undefined behaviour (where 'after' is defined by languages' memory model)
+    urpc_result_t urpc_device_send_request_base(
+    struct urpc_device_t *device,
+        const uint8_t *request,
+        uint8_t request_len,
+        uint8_t *response,
+        uint8_t response_len
+        )
+    {
+        if (device == NULL)
+        {
+            return urpc_result_nodevice;
+        }
+
+        urpc_result_t result;
+
+        if (urpc_synchronizer_acquire(device->sync) != 0)
+        {
+            ZF_LOGE("can't acquire device lock");
+            return urpc_result_nodevice;
+        }
+
+        switch (device->type)
+        {
+        case URPC_DEVICE_TYPE_SERIAL:
+            result = urpc_device_serial_send_request_base(device->impl.serial, request, request_len, response, response_len);
+            break;
+        default:
+            result = urpc_result_error;
+            break;
+        }
+
+        if (urpc_synchronizer_release(device->sync) != 0)
+        {
+            ZF_LOGE("can't release device lock");
+            return urpc_result_error;
+        }
+
+        return result;
+    }
+
 // can be called from any thread; will return only after all in-flight requests has been completed;
 // calling this function more then once per device is undefined behaviour
 urpc_result_t urpc_device_destroy(

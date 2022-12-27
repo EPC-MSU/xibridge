@@ -29,6 +29,14 @@ public:
         uint8_t *response,
         uint8_t response_len);
 
+    /*
+    * Executes urpc request base operation.
+    */
+    urpc_result_t urpc_send_request_base( const uint8_t *request,
+        uint8_t request_len,
+        uint8_t *response,
+        uint8_t response_len);
+
     urpc_device_handle_t uhandle() const { return _uhandle; }
 
     /*
@@ -82,6 +90,16 @@ public:
      */
     urpc_result_t operation_urpc_send_request(uint32_t serial,
         const char cid[URPC_CID_SIZE],
+        const uint8_t *request,
+        uint8_t request_len,
+        uint8_t *response,
+        uint8_t response_len);
+
+
+    /*
+    * Executes urpc request operation.
+    */
+    urpc_result_t operation_urpc_send_request_base(uint32_t serial,
         const uint8_t *request,
         uint8_t request_len,
         uint8_t *response,

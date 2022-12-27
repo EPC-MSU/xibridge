@@ -21,6 +21,14 @@ urpc_device_serial_send_request(
     uint8_t response_len
 );
 
+    urpc_device_serial_send_request_base(
+    struct urpc_device_serial_t *device,
+        const uint8_t *request,
+        uint8_t request_len,
+        uint8_t *response,
+        uint8_t response_len
+        );
+
 urpc_result_t
 urpc_device_serial_destroy(
     struct urpc_device_serial_t **device_ptr

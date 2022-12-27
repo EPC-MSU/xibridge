@@ -350,6 +350,73 @@ urpc_result_t urpc_device_serial_send_request(
     return urpc_result_ok;
 }
 
+urpc_result_t urpc_device_serial_send_request_base(
+struct urpc_device_serial_t *device,
+    const uint8_t *request,
+    uint8_t request_len,
+    uint8_t *response,
+    uint8_t response_len
+    )
+{
+    assert(device != NULL);
+
+    struct sp_port * handle_port = device->handle_port;
+    if (request_len != 0 && !request)
+    {
+        ZF_LOGE("can't read from an empty buffer");
+    }
+
+    if (response_len != 0 && !response)
+    {
+        ZF_LOGE("can't write to empty buffer");
+    }
+
+    {
+        urpc_result_t result;
+
+
+        // send command
+        if (request_len != 0)
+        {
+            result = command_port_send(handle_port, request, request_len);
+            if (result != urpc_result_ok)
+            {
+                return result;
+            }
+            uint16_t request_crc = get_crc(request, request_len);
+            result = command_port_send(handle_port, (const uint8_t *)&request_crc, URPC_CRC_SIZE);
+            if (result != urpc_result_ok)
+            {
+                return result;
+            }
+        }
+    }
+
+    {
+        urpc_result_t result;
+        uint16_t response_crc = 0;
+     
+        if (response_len != 0)
+        {
+            // receive remaining uint8_ts
+            if ((result = receive(handle_port, response, response_len)) != urpc_result_ok)
+            {
+                return result;
+            }
+
+            if ((result = receive(handle_port, (uint8_t *)&response_crc, URPC_CRC_SIZE)) != urpc_result_ok)
+            {
+                return result;
+            }
+            if (response_crc != get_crc(response, URPC_CRC_SIZE))
+            {
+                return result;
+            }
+        }
+    }
+
+    return urpc_result_ok;
+}
 urpc_result_t urpc_device_serial_destroy(
     struct urpc_device_serial_t **device_ptr
 )
