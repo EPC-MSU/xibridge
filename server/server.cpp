@@ -263,9 +263,9 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                            urpc_result_t result = msu.operation_urpc_send_request_base(
                                                                serial,
                                                                req_data.data(),
-                                                               req_data.size(),
+                                                               (uint8_t)req_data.size(),
                                                                resp_data.data(),
-                                                               (uint32_t)resp_len
+                                                               (uint8_t)resp_len
                                                                );
 
                                                            bvector answer = p3.create_server_response(XIBRIDGE_COMMAND_RESPONSE_PACKET_TYPE, 0, &dev_id, &resp_data);

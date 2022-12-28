@@ -614,7 +614,7 @@ bvector Protocol3::create_server_response(uint32_t pckt,
         if (pdata != nullptr) mbuf.memwrite(pdata->data(), (int)pdata->size());
         break;
     case pkt3_enum_resp:
-        mbuf << Hex32(pdata == nullptr ? (uint32_t)0x0 : pdata->size() / sizeof (DevId));
+        mbuf << Hex32(pdata == nullptr ? (uint32_t)0x0 : (uint32_t)((pdata->size() / sizeof (DevId))));
         if (pdata != nullptr)  mbuf.memwrite(pdata->data(), (int)pdata->size());
         mbuf << Hex32((uint32_t)0x0);
         break;

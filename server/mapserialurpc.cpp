@@ -312,3 +312,30 @@ urpc_result_t MapSerialUrpc::operation_urpc_send_request(uint32_t serial,
     }
     return res;
 }
+
+urpc_result_t MapSerialUrpc::operation_urpc_send_request_base(uint32_t serial,
+    const uint8_t *request,
+    uint8_t request_len,
+    uint8_t *response,
+    uint8_t response_len)
+{
+    urpc_result_t res = urpc_result_nodevice;
+    _rwlock.read_lock();
+    if (find(serial) != cend())
+    {
+        _rwlock.read_unlock();
+        lock_create_device_mutex(serial);
+        res = (*this)[serial].urpc_send_request_base(request, request_len, response, response_len);
+        unlock_device_mutex(serial);
+        if (res == urpc_result_nodevice)
+        {
+            remove_conn_or_remove_urpc_device(UINT32_MAX, serial, true);
+            ZF_LOGE("The urpc device with  serial %u returned urpc_result_nodevice and was closed", serial);
+        }
+    }
+    else
+    {
+        _rwlock.read_unlock();
+    }
+    return res;
+}
