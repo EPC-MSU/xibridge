@@ -595,7 +595,7 @@ bool Protocol3::get_data_from_request(MBuf &cmd,
 }
 
 bvector Protocol3::create_server_response(uint32_t pckt,
-                                          uint32_t bool_val,
+                                          uint32_t val,
                                           const DevId *pdevid,
                                           const bvector* pdata
                                          )
@@ -607,7 +607,7 @@ bvector Protocol3::create_server_response(uint32_t pckt,
     {
     case pkt3_close_resp:
     case pkt3_open_resp:
-        mbuf << Hex32(bool_val);
+        mbuf << Hex32(val);
         break;
     case pkt3_cmd_resp:
         mbuf << Hex32(pdata == nullptr ? (uint32_t)0x0 : (uint32_t)pdata->size());
@@ -621,8 +621,11 @@ bvector Protocol3::create_server_response(uint32_t pckt,
     case pkt3_ver_resp:
         mbuf << Hex32(version());
         break;
+    case pkt3_error_resp:
+        mbuf << Hex32(val);
+        break;
     }
-     
+    
     return mbuf.to_vector();
 }
 

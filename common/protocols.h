@@ -502,6 +502,11 @@ public:
     {
         return create_server_response(pkt3_close_resp, bool_val, &devid);
     }
+
+    bvector create_error_response(uint32_t val)
+    {
+        return create_server_response(pkt3_error_resp, val);
+    }
  
 protected:
     virtual uint32_t version() 

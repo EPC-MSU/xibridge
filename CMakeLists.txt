@@ -5,6 +5,11 @@ PROJECT(xibridge)
 OPTION(BUILD_TEST "Build xibridge test project" ON)
 OPTION(BUILD_XIBRIDGE_EXAMPLE "Build xibridge example@ project" OFF)
 OPTION(BUILD_XIBRIDGE_SERVER "Build xibridge server" OFF)
+OPTION(XIBRIDGE_SERVER_ENABLE_SUPERVISOR "Enable supervisor when build xibridge server" OFF)
+
+if (WIN32)
+  set(XIBRIDGE_SERVER_ENABLE_SUPERVISOR  OFF CACHE INTERNAL "")
+endif()
 
 #set the right version here !
 SET (XIBRIDGE_VERSION_MAJOR 1)
@@ -139,10 +144,10 @@ ENDIF()
 IF(BUILD_XIBRIDGE_SERVER)
    set(SRV_SOURCES 
         server/common.cpp
-        server/server.cpp
+        server/xibridge_server.cpp
         server/mapserialurpc.cpp
         ${COMMON_SOURCES})
-   if (ENABLE_SUPERVISOR)
+   if (XIBRIDGE_SERVER_ENABLE_SUPERVISOR )
         set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
    endif()
    if (WIN32)

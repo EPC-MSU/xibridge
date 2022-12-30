@@ -17,9 +17,19 @@ bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
     xibridge_conn_t conn;
 
-    xibridge_set_base_protocol_version({ 3, 0, 0 });
+    xibridge_version_t real_server_version;
 
-    uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);
+    uint32_t err = xibridge_get_server_last_protocol_version(_DEV_IP, &real_server_version);
+
+    if (err)
+    {
+        printf("Cannot get xibridge vesrion (execute version request) %s: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        return false;
+    }
+
+    xibridge_set_base_protocol_version(real_server_version);
+
+    err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {
         printf ("Cannot open %s: %s\n", _DEV_IP, xibridge_get_err_expl(err));

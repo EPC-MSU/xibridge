@@ -165,7 +165,7 @@ uint32_t xibridge_get_server_last_protocol_version(const char *addr,
 {
     uint32_t res_err = 0;
     if (pversion == nullptr) return ERR_NULLPTR_PARAM;
-    Xibridge_client * cl = new Xibridge_client(addr, "");
+    Xibridge_client * cl = new Xibridge_client(addr);
     if (!cl->open_connection())
     {
         res_err = cl->get_last_error();
