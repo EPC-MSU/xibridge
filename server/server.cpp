@@ -244,6 +244,10 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         switch (command_code)
         {
 
+            command_code = AProtocol::get_pckt_of_cmd(data);
+            p3.get_data_from_request(mbuf, req_data, dev_id, resp_len);
+            serial = get_serial_from_DevId(dev_id);
+
 #ifdef ENABLE_SUPERVISOR
             /*
             * Capture and release (in destructor) serial number
@@ -251,11 +255,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
             */
             SupervisorLock _s = SupervisorLock(&supervisor, std::to_string(serial));
 #endif
-            command_code = AProtocol::get_pckt_of_cmd(data);
-            p3.get_data_from_request(mbuf, req_data, dev_id, resp_len);
-            serial = get_serial_from_DevId(dev_id);
-
-            switch (command_code) {
+         
             case XIBRIDGE_COMMAND_REQUEST_PACKET_TYPE: {
                                                            ZF_LOGD("From %u received Protocol3 command request packet.", conn_id);
                                                            // !!! to do - error processing

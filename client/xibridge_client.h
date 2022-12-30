@@ -242,6 +242,12 @@ public:
     
     bool open_device();
 
+    /*
+        * Executes version request whish is supported starting v.3 protocol
+        * in spite of the base server protocol vesrion set
+    */
+    bool exec_version_request(xibridge_version_t *pversion);
+
     bool exec_enumerate( char **result, uint32_t *pcount);
 
     bool open_connection();

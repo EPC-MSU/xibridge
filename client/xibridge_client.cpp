@@ -82,7 +82,7 @@ Xibridge_client * Xibridge_client::_get_client_as_free(conn_id_t conn_id)
     return Bindy_helper::_map.at((conn_id_t)conn_id);
 }
 
-uint32_t  Xibridge_client::xbc_set_base_protocol_version(xibridge_version_t ver)
+uint32_t Xibridge_client::xbc_set_base_protocol_version(xibridge_version_t ver)
 {
     if (!is_protocol_supported_version(ver)) return ERR_NO_PROTOCOL;
     _server_base_protocol_version = (uint32_t)ver.major;
@@ -97,6 +97,54 @@ xibridge_version_t Xibridge_client::xbc_get_connection_protocol_version(const xi
     };
     Xibridge_client * cl = _get_client_as_free(pconn->conn_id);
     return {cl == nullptr ? (uint8_t)_server_base_protocol_version : (uint8_t)cl->_server_protocol_version, 0, 0};
+}
+
+bool Xibridge_client::exec_version_request(xibridge_version_t *pversion)
+{
+    clr_errors();
+    if (pversion == nullptr)
+    {
+        _last_error = ERR_NULLPTR_PARAM;
+        return false;
+    }
+
+    _server_protocol_version = xbc_get_last_protocol_version().major;
+    AProtocol *proto = create_appropriate_protocol(_server_protocol_version, &_last_error);
+    if (proto == nullptr)
+    {
+        _last_error = ERR_NO_PROTOCOL;
+        return false;
+    }
+    bvector req = proto->create_version_request(_recv_tmout);
+
+    if (req.size() == 0)
+    {
+        _last_error = ERR_NO_PROTOCOL;
+        return false;
+    }
+    if (_send_and_receive(req))
+    {
+        bvector res_data, data;
+        uint32_t pckt;
+        _mutex_recv.lock();
+        MBuf buf(_recv_message.data(), (int)_recv_message.size());
+        _mutex_recv.unlock();
+
+        if (proto->get_data_from_bindy_callback(buf, res_data, data, pckt) == false)
+        {
+            _last_error = ERR_NO_PROTOCOL;
+            return false;
+        }
+      
+        pversion->major = proto->get_result_error();
+        pversion->minor = 0;
+        pversion->bagfix = 0;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool Xibridge_client::exec_enumerate(char **result, 

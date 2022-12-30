@@ -246,13 +246,35 @@ XI_EXPORT uint32_t xibridge_enumerate_adapter_devices(
     * \~english
     * Releases memory allocated by xibridge_enumerate_adapter_devices function call,
     * must be called after ibridge_enumerate_adapter_devices calling
+    * @param[in] presult pointer to memory to be deallocated 
     * \~russian
-    * Выполняет свобождение ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
+    * Выполняет освобождение ресурсов, распределенных в результате вызова xibridge_enumerate_adapter_devices, должна 
     * вызываться после xibridge_enumerate_adapter_devices
     * @param[in] presult указатель на распределенные данные, полученные в результате вызова* xibridge_enumerate_adapter_devices 
 */
 XI_EXPORT void xibridge_free_enumerate_devices(char *presult);
 
+
+/**
+    * \~english
+    * Requests server about last protol version supported by a server,
+    * Neither all servers nor all protocols support such a request (only starting from xibridge - server whish suports Protocol v.3  and only
+    * the protocol v.3 has the appropriate commmand)
+    * @param[in] addr ip-address of a server (or its domain name), for example: "192.168.0.16" or "server.com"
+    * @param[out] pversion last supported protocol version on the server
+    * @return error code if fault or the version request is not supported
+
+    * \~russian
+    * Запрашивает сервер о последней версии, которую он поддержмвает
+    * Не все сервера и не все протоколы поддерживают запросы версии (начина с сервера xibridge, и протокол версии 3)
+    * @param[in] addr ip-адрес сервера (либо доменное имя), например: "192.168.0.16" или "server.com"
+    * @param[out] pversion указатель на переменную-приемник номера версии сервера
+    * @return код ошибки, если запрос неудачен или данный запрос не поддерживается
+*/
+XI_EXPORT uint32_t xibridge_get_server_last_protocol_version(
+              const char *addr,           
+              xibridge_version_t *pversion
+          );
 #if defined(__cplusplus)
 };
 #endif

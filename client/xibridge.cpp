@@ -159,3 +159,26 @@ void xibridge_free_enumerate_devices(char *presult)
 {
     Xibridge_client::xbc_free_enumerate_devices(presult);
 }
+
+uint32_t xibridge_get_server_last_protocol_version(const char *addr,
+    xibridge_version_t *pversion)
+{
+    uint32_t res_err = 0;
+    if (pversion == nullptr) return ERR_NULLPTR_PARAM;
+    Xibridge_client * cl = new Xibridge_client(addr, "");
+    if (!cl->open_connection())
+    {
+        res_err = cl->get_last_error();
+        delete cl;
+        return res_err;
+    }
+    if (cl->exec_version_request(pversion))
+    {
+        
+    }
+    else
+    {
+        res_err = cl->get_last_error();
+    }
+    return res_err;
+}
