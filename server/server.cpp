@@ -268,7 +268,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                                (uint8_t)resp_len
                                                                );
 
-                                                           bvector answer = p3.create_server_response(XIBRIDGE_COMMAND_RESPONSE_PACKET_TYPE, 0, &dev_id, &resp_data);
+                                                           bvector answer = p3.create_cmd_response(dev_id, &resp_data);
                                                            pb->send_data(conn_id, answer);
                                                            ZF_LOGD("Answered just with no data to client conn_id: %u (protocol 3)", conn_id);
                                                            break;
@@ -279,7 +279,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
 
                                                                added = msu.open_if_not(conn_id, serial);
 
-                                                               bvector answer = p3.create_server_response(XIBRIDGE_OPEN_DEVICE_RESPONSE_PACKET_TYPE, added, &dev_id);
+                                                               bvector answer = p3.create_open_response(dev_id, added);
                                                                pb->send_data(conn_id, answer);
 
                                                                if (added)
@@ -294,7 +294,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                                 msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
                                                                 ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                                 msu.log();
-                                                                bvector answer = p3.create_server_response(XIBRIDGE_CLOSE_DEVICE_RESPONSE_PACKET_TYPE, 1, &dev_id);
+                                                                bvector answer = p3.create_close_response(dev_id, 1);
                                                                 pb->send_data(conn_id, answer);
                                                                 ZF_LOGD("To connection %u close device response packet sent.", conn_id);
                                                                 break;
@@ -302,7 +302,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
 
             case XIBRIDGE_VERSION_REQUEST_PACKET_TYPE: {
                                                            ZF_LOGD("From %u received version request packet.", conn_id);
-                                                           bvector answer = p3.create_server_response(XIBRIDGE_VERSION_RESPONSE_PACKET_TYPE);
+                                                           bvector answer = p3.create_version_response();
                                                            pb->send_data(conn_id, answer);
                                                            ZF_LOGD("To connection %u version response packet sent.", conn_id);
                                                            break;

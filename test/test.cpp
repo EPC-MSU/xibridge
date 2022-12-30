@@ -34,6 +34,12 @@
 #define PROTO_3_CMD   3
 #define PROTO_3_VER   5
 #define PROTO_3_ENUM  4
+#define PROTO_3_OPEN_R  0xFF
+#define PROTO_3_CLOSE_R 0xFE
+#define PROTO_3_CMD_R   0xFD
+#define PROTO_3_VER_R   0xFB
+#define PROTO_3_ENUM_R  0xFA
+
 
 // from ximc.h
 typedef struct
@@ -134,29 +140,37 @@ static void test_request_proto3()
 {
     printf("?test_request_proto3?\n");
     uint32_t err;
-    Protocol3 proto(&err, false);
-    bvector reqw = proto.create_version_request(0);
-    const cmd_schema_t & cm0 = cmd_schema_t::get_schema(PROTO_3_VER, proto.get_cmd_schema());
-    TEST_CHECK(cm0.is_match(reqw.data(), (int)reqw.size(), 3, 0));
+    Protocol3 proto(&err, true);
+    bvector resp = proto.create_version_response();
+    const cmd_schema_t & cm0 = cmd_schema_t::get_schema(PROTO_3_VER_R, proto.get_cmd_schema());
+    TEST_CHECK(cm0.is_match(resp.data(), (int)resp.size(), 3, 0));
     
-    reqw = proto.create_open_request(DevId(1), 1000);
-    const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_OPEN, proto.get_cmd_schema());
-    TEST_CHECK(cm1.is_match(reqw.data(), (int)reqw.size(), 3, 1));
+    resp = proto.create_open_response(DevId(1), 1);
+    const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_OPEN_R, proto.get_cmd_schema());
+    TEST_CHECK(cm1.is_match(resp.data(), (int)resp.size(), 3, 1));
     
-    reqw = proto.create_close_request(DevId(2), 2000);
-    const cmd_schema_t & cm2 = cmd_schema_t::get_schema(PROTO_3_CLOSE, proto.get_cmd_schema());
-    TEST_CHECK(cm2.is_match(reqw.data(), (int)reqw.size(), 3, 2));
+    resp = proto.create_close_response(DevId(2), 0);
+    const cmd_schema_t & cm2 = cmd_schema_t::get_schema(PROTO_3_CLOSE_R, proto.get_cmd_schema());
+    TEST_CHECK(cm2.is_match(resp.data(), (int)resp.size(), 3, 2));
   
     bvector data = { 'h', 'a', 'h', 'a', 'h', 'a', '3' };
 
-    reqw = proto.create_cmd_request(DevId(3), 3000, &data);
-    const cmd_schema_t & cm3 = cmd_schema_t::get_schema(PROTO_3_CMD, proto.get_cmd_schema());
-    TEST_CHECK(cm3.is_match(reqw.data(), (int)reqw.size(), 3, 3));
-   
-    reqw = proto.create_enum_request(4000);
+    resp = proto.create_cmd_response(DevId(3), &data);
+    const cmd_schema_t & cm3 = cmd_schema_t::get_schema(PROTO_3_CMD_R, proto.get_cmd_schema());
+    TEST_CHECK(cm3.is_match(resp.data(), (int)resp.size(), 3, 3));
+    
+    /*
+    resp = proto.create_enum_response(4000);
     const cmd_schema_t & cm4 = cmd_schema_t::get_schema(PROTO_3_ENUM, proto.get_cmd_schema());
-    TEST_CHECK(cm4.is_match(reqw.data(), (int)reqw.size(), 3, 0));
+    TEST_CHECK(cm4.is_match(resp.data(), (int)resp.size(), 3, 0));
+    */
  }
+
+static void test_response_proto3()
+{
+    
+
+}
 
 void  test_protocols()
 {
@@ -165,6 +179,7 @@ void  test_protocols()
     test_request_proto1();
     test_request_proto2();
     test_request_proto3();
+    test_response_proto3();
 }
 
 extern uint32_t xibridge_parse_uri_dev12(const char *uri, 

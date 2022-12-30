@@ -473,13 +473,35 @@ public:
         DevId &dev_id,
         uint32_t &resp_len);
 
-    bvector create_server_response(
-        uint32_t pckt,
-        uint32_t bool_val = 0,
-        const DevId *pdevid = nullptr,
-        const bvector* pdata = nullptr
-        );
+   
+    bvector create_cmd_response(
+        const DevId &devid,
+        const bvector *data
+        )
+    {
+        return create_server_response(pkt3_cmd_resp, 0, &devid, data);
+    }
 
+    bvector create_open_response(
+        const DevId &devid,
+        uint32_t bool_val
+        )
+    {
+        return create_server_response(pkt3_open_resp, bool_val, &devid);
+    }
+
+    bvector create_version_response()
+    {
+        return create_server_response(pkt3_ver_resp);
+    }
+
+    bvector create_close_response(
+        const DevId &devid,
+        uint32_t bool_val
+        )
+    {
+        return create_server_response(pkt3_close_resp, bool_val, &devid);
+    }
  
 protected:
     virtual uint32_t version() 
@@ -511,6 +533,13 @@ private:
     };
    
     static cmd_schema_t _cmd_schemas[12];
+
+    bvector create_server_response(
+        uint32_t pckt,
+        uint32_t bool_val = 0,
+        const DevId *pdevid = nullptr,
+        const bvector* pdata = nullptr
+        );
 };
 
 /*
