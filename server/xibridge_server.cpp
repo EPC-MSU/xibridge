@@ -51,6 +51,10 @@ bindy::Bindy * pb = NULL;
 
 MapSerialUrpc msu;
 
+// xibridge-server protocol3 support object - to map DevId to some serial number
+
+std::map <DevId, uint32_t> _server3_devid_serial;
+ 
 class CommonDataPacket {
 public:
     bool send_data() {

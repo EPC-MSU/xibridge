@@ -53,15 +53,6 @@ struct urpc_xinet_common_header_t {
 	uint32_t reserved4 [2];
 });
 
-PACK(
-struct xibridge_xinet_common_header_t {
-    uint32_t protocol_version;
-    uint32_t packet_type;
-    uint32_t reserved3;
-    uint32_t serial[4];
-    uint32_t reserved4[2];
-});
-
 size_t adaptive_wait_send(bindy::Bindy* bindy, conn_id_t conn_id, std::vector<uint8_t> data, size_t timeout_ms);
 inline void read_uint32(uint32_t * value, uint8_t * p) {
     *value = ((uint32_t)(p[0]<<24)) | ((uint32_t)(p[1]<<16)) | ((uint32_t)(p[2]<<8)) | ((uint32_t)(p[3]<<0));

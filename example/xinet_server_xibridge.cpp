@@ -27,6 +27,7 @@ bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
         return false;
     }
 
+    printf("Server last protocol version is %u.%u.%u\n", (unsigned int)real_server_version.major, (unsigned int)real_server_version.minor, (unsigned int)real_server_version.bagfix);
     xibridge_set_base_protocol_version(real_server_version);
 
     err = xibridge_open_device_connection(_DEV_IP, &conn);

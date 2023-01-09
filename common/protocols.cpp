@@ -443,12 +443,13 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
             mbuf.mseek(8);
             mbuf >> size;
             len = mbuf.restOfSize(-1);
-            if (mbuf.wasBroken() || len != (size_t)size)
+            if (mbuf.wasBroken() || len != ((size_t)size + sizeof(uint32_t))) // data + length of response!
             {
                 *_perror = ERR_PCKT_FMT;
                 return false;
             }
-            data = mbuf.to_vector(true);
+            data.assign(mbuf.cur_data(), mbuf.cur_data() + (int)(uint32_t)size);
+            mbuf.mseek((int)(uint32_t)size);
             return true;
         case pkt3_open_req:
         case pkt3_close_req:
