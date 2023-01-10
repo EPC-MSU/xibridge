@@ -23,7 +23,7 @@ bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
 
     if (err)
     {
-        printf("Cannot get xibridge vesrion (execute version request) %s: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        printf("Cannot get xibridge version (execute version request) %s: %s\n", _DEV_IP, xibridge_get_err_expl(err));
         return false;
     }
 

@@ -322,7 +322,8 @@ public:
     {
         return false;
     };
-    virtual bvector create_client_request(
+
+     virtual bvector create_client_request(
                 uint32_t pckt, 
                 const DevId &devid, 
                 uint32_t tmout, 
@@ -362,6 +363,36 @@ public:
                 const bvector *data = nullptr, 
                 uint32_t resp_length = 0
             );
+    
+    bool get_data_from_request(MBuf &cmd,
+        bvector &req_data,
+        DevId &dev_id,
+        uint32_t &resp_len);
+
+
+    bvector create_cmd_response(
+        const DevId &devid,
+        const bvector *data
+        )
+    {
+        return create_server_response(pkt2_cmd_resp, 0, &devid, data);
+    }
+
+    bvector create_open_response(
+        const DevId &devid,
+        uint32_t bool_val
+        )
+    {
+        return create_server_response(pkt2_open_resp, bool_val, &devid);
+    }
+
+    bvector create_close_response(
+        const DevId &devid,
+        uint32_t bool_val
+        )
+    {
+        return create_server_response(pkt2_close_resp, bool_val, &devid);
+    }
 protected:
     
     virtual uint32_t version() 
@@ -390,12 +421,20 @@ private:
 
     static cmd_schema_t _cmd_schemas[7];
     static const int URPC_CID_SIZE; //  = 4 
-    virtual bvector create_client_request(
-                uint32_t pckt, 
-                uint32_t serial, 
-                uint32_t tmout, 
-                const bvector *data
-            );
+   
+    bvector create_client_request(
+        uint32_t pckt,
+        uint32_t serial,
+        uint32_t tmout,
+        const bvector *data
+        );
+
+    bvector create_server_response(
+        uint32_t pckt,
+        uint32_t bool_val = 0,
+        const DevId *pdevid = nullptr,
+        const bvector* pdata = nullptr
+        );
 };
 
 /*

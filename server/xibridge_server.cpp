@@ -83,59 +83,6 @@ static uint32_t get_serial_from_DevId(const DevId &devid)
     return devid.id();
 }
 
-template <int PacketId>
-class DataPacket : public CommonDataPacket { }; // Still allows us to instantiate common packet, which is wrong
-
-template <>
-class DataPacket <URPC_OPEN_DEVICE_RESPONSE_PACKET_TYPE> : public CommonDataPacket{
-public:
-    DataPacket(conn_id_t conn_id, uint32_t serial, bool opened_ok) {
-        this->conn_id = conn_id;
-
-        int len = sizeof(urpc_xinet_common_header_t)+sizeof(uint32_t);
-        reply.resize(len);
-        std::fill(reply.begin(), reply.end(), 0x00);
-
-        write_uint32(&reply.at(0), URPC_XINET_PROTOCOL_VERSION);
-        write_uint32(&reply.at(4), URPC_OPEN_DEVICE_RESPONSE_PACKET_TYPE);
-        write_uint32(&reply.at(12), serial);
-        write_bool(&reply.at(len - 1), opened_ok);
-    }
-};
-
-template <>
-class DataPacket <URPC_CLOSE_DEVICE_RESPONSE_PACKET_TYPE> : public CommonDataPacket{
-public:
-    DataPacket(conn_id_t conn_id, uint32_t serial) {
-        this->conn_id = conn_id;
-
-        int len = sizeof(urpc_xinet_common_header_t)+sizeof(uint32_t);
-        reply.resize(len);
-        std::fill(reply.begin(), reply.end(), 0x00);
-
-        write_uint32(&reply.at(0), URPC_XINET_PROTOCOL_VERSION);
-        write_uint32(&reply.at(4), URPC_CLOSE_DEVICE_RESPONSE_PACKET_TYPE);
-        write_uint32(&reply.at(12), serial);
-    }
-};
-
-template <>
-class DataPacket <URPC_COMMAND_RESPONSE_PACKET_TYPE> : public CommonDataPacket{
-public:
-    DataPacket(conn_id_t conn_id, uint32_t serial, urpc_result_t result, uint8_t *ptr, uint32_t size) {
-        this->conn_id = conn_id;
-
-        int len = sizeof(urpc_xinet_common_header_t)+sizeof(result)+size;
-        reply.resize(len);
-        std::fill(reply.begin(), reply.end(), 0x00);
-
-        write_uint32(&reply.at(0), URPC_XINET_PROTOCOL_VERSION);
-        write_uint32(&reply.at(4), URPC_COMMAND_RESPONSE_PACKET_TYPE);
-        write_uint32(&reply.at(12), serial);
-        write_uint32(&reply.at(sizeof(urpc_xinet_common_header_t)), (uint32_t)result);
-        write_bytes(reply.data() + sizeof(urpc_xinet_common_header_t)+sizeof(result), ptr, size);
-    }
-};
 
 // ========================================================
 void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
@@ -147,18 +94,21 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     }
 
     bool added;
-    uint32_t protocol_ver;
-    uint32_t command_code;
-    uint32_t serial;
-    uint32_t err_p;
+    MBuf mbuf(data.data(), data.size());
+    Hex32 proto;
+    mbuf >> proto;
+    uint32_t protocol_ver = (uint32_t)proto;
+    uint32_t command_code = AProtocol::get_pckt_of_cmd(data);
+    uint32_t err_p, serial;
+    bvector req_data, resp_data;
+    uint32_t resp_len;
+    DevId dev_id;
 
-    read_uint32(&protocol_ver, &data[0]);
     if (protocol_ver == URPC_XINET_PROTOCOL_VERSION)
     {
-
-        read_uint32(&command_code, &data[4]);
-        read_uint32(&serial, &data[12]); // strictly speaking it might read junk in case of enumerate_reply or something else which does not have the serial... if someone sends us such packet
-
+        Protocol2 p2(&err_p, true);
+        p2.get_data_from_request(mbuf, req_data, dev_id, resp_len);
+        serial = get_serial_from_DevId(dev_id);
 #ifdef ENABLE_SUPERVISOR
         /*
         * Capture and release (in destructor) serial number
@@ -169,47 +119,30 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
 
         switch (command_code) {
         case URPC_COMMAND_REQUEST_PACKET_TYPE: {
-                                                   ZF_LOGD("From %u received command request packet.", conn_id);
-
-                                                   char cid[URPC_CID_SIZE];
-                                                   std::memcpy(cid, &data[sizeof(urpc_xinet_common_header_t)], sizeof(cid));
-
-                                                   uint32_t response_len;
-                                                   read_uint32(&response_len, &data[sizeof(urpc_xinet_common_header_t)+sizeof(cid)]);
-
-                                                   size_t request_len;
-                                                   request_len = data.size() - sizeof(urpc_xinet_common_header_t)-sizeof(cid)-sizeof(response_len);
-                                                   std::vector<uint8_t> response(response_len);
-
-                                                   urpc_result_t result = msu.operation_urpc_send_request(
+                                                   ZF_LOGD("From %u received command Protocol2 request packet.", conn_id);
+                                                   resp_data.resize(resp_len);
+                                                   urpc_result_t result = msu.operation_urpc_send_request_base(
                                                        serial,
-                                                       cid,
-                                                       request_len ? &data[sizeof(urpc_xinet_common_header_t)+sizeof(cid)+sizeof(response_len)] : NULL,
-                                                       (uint8_t)request_len,
-                                                       response.data(),
-                                                       (uint8_t)response_len
+                                                       req_data.data(),
+                                                       (uint8_t)req_data.size(),
+                                                       resp_data.data(),
+                                                       (uint8_t)resp_len
                                                        );
 
-                                                   DataPacket<URPC_COMMAND_RESPONSE_PACKET_TYPE>
-                                                       response_packet(conn_id, serial, result, response.data(), response_len);
-                                                   if (result == urpc_result_nodevice)
+                                                    bvector answer = p2.create_cmd_response(dev_id, &resp_data);
+                                                    pb->send_data(conn_id, answer);
+                                                 
+                                                    if (result == urpc_result_nodevice)
                                                        ZF_LOGE("The operation_urpc_send_reqest returned urpc_result_nodevic (conn_id = %u).", conn_id);
-                                                   if (!response_packet.send_data())
-                                                       ZF_LOGD("To %u command response packet send failed.", conn_id);
-                                                   break;
+                                                    break;
         }
 
         case URPC_OPEN_DEVICE_REQUEST_PACKET_TYPE: {
-                                                       ZF_LOGD("From %u received open device request packet.", conn_id);
+                                                       ZF_LOGD("From %u received open device request packet Protocol 2.", conn_id);
                                                        added = msu.open_if_not(conn_id, serial);
-                                                       DataPacket<URPC_OPEN_DEVICE_RESPONSE_PACKET_TYPE> response_packet(conn_id, serial, added);
 
-                                                       if (!response_packet.send_data()) {
-                                                           ZF_LOGE("To %u open device response packet sending error.", conn_id);
-                                                       }
-                                                       else {
-                                                           ZF_LOGD("To %u open device response packet sent.", conn_id);
-                                                       }
+                                                       bvector answer = p2.create_open_response(dev_id, added);
+                                                       pb->send_data(conn_id, answer);
 
                                                        if (added)
                                                        {
@@ -219,13 +152,12 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        break;
         }
         case URPC_CLOSE_DEVICE_REQUEST_PACKET_TYPE: {
-                                                        ZF_LOGD("From %u received close device request packet.", conn_id);
+                                                        ZF_LOGD("From %u received close device request packet Protocol 2.", conn_id);
                                                         msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
                                                         ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                         msu.log();
-                                                        DataPacket<URPC_CLOSE_DEVICE_RESPONSE_PACKET_TYPE>
-                                                            response_packet(conn_id, serial);
-                                                        response_packet.send_data();
+                                                        bvector answer = p2.create_close_response(dev_id, 1);
+                                                        pb->send_data(conn_id, answer);
                                                         ZF_LOGD("To connection %u close device response packet sent.", conn_id);
                                                         break;
         }
@@ -237,13 +169,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     }
     else if (protocol_ver == XIBRIDGE_XINET_PROTOCOL_VERSION)
     {
-        MBuf mbuf(data.data(), data.size());
         Protocol3 p3(&err_p, true);
-        bvector req_data, resp_data;
-        uint32_t resp_len;
-        DevId dev_id;
-
-        command_code = AProtocol::get_pckt_of_cmd(data);
         p3.get_data_from_request(mbuf, req_data, dev_id, resp_len);
         serial = get_serial_from_DevId(dev_id);
 
@@ -272,12 +198,12 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
 
                                                        bvector answer = p3.create_cmd_response(dev_id, &resp_data);
                                                        pb->send_data(conn_id, answer);
-                                                       ZF_LOGD("Answered just with no data to client conn_id: %u (protocol 3)", conn_id);
+                                                       ZF_LOGD("Answered just with data to client conn_id: %u (protocol 3)", conn_id);
                                                        break;
         }
 
         case XIBRIDGE_OPEN_DEVICE_REQUEST_PACKET_TYPE: {
-                                                           ZF_LOGD("From %u received open device request packet.", conn_id);
+                                                           ZF_LOGD("From %u received open device request packet Protocol3.", conn_id);
 
                                                            added = msu.open_if_not(conn_id, serial);
 
@@ -292,7 +218,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                            break;
         }
         case XIBRIDGE_CLOSE_DEVICE_REQUEST_PACKET_TYPE: {
-                                                            ZF_LOGD("From %u received close device request packet.", conn_id);
+                                                            ZF_LOGD("From %u received close device request packet Protocol3.", conn_id);
                                                             msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
                                                             ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                             msu.log();

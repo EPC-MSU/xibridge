@@ -380,8 +380,12 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
                 *_perror = ERR_PCKT_FMT;
                 return false;
             }
-            data.assign(mbuf.cur_data(), mbuf.cur_data() + len);
-            return true;
+            data.assign(mbuf.cur_data(), mbuf.cur_data() + URPC_CID_SIZE);
+            mbuf >> r;
+            len = mbuf.restOfSize(-1);
+            if (len > 0)
+               data.insert(data.end(), mbuf.cur_data(), mbuf.cur_data()+len);
+            return !mbuf.wasBroken();
         case pkt2_open_req:
             return true;
         case pkt2_close_req:
@@ -466,6 +470,7 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
         switch (pckt)
         {
         case pkt3_cmd_resp:
+            mbuf.mseek(8);
             mbuf >> size;
             len = mbuf.restOfSize(-1);
             if (mbuf.wasBroken() || len != (size_t)size)
@@ -566,6 +571,35 @@ bvector Protocol3::create_client_request(uint32_t pckt,
     return mbuf.to_vector();
 }
 
+bool Protocol2::get_data_from_request(MBuf &cmd,
+    bvector &req_data,
+    DevId &dev_id,
+    uint32_t &resp_len)
+{
+    req_data.clear();
+    _res_err = 0;
+    resp_len = 0;
+
+    Hex32 skip_prt, skip_tout, sr, pckt, serial;
+    cmd >> skip_prt >> pckt >> skip_tout >> serial;
+
+    dev_id = DevId(serial);
+
+    bvector z;
+
+    if (!get_spec_data(cmd, z, req_data, (uint32_t)pckt))
+        return false;
+    cmd >> skip_prt;
+    resp_len = (uint32_t)skip_prt;
+    if (cmd.wasBroken())
+    {
+        *_perror = ERR_PCKT_FMT;
+        return false;
+    }
+
+    return true;
+}
+
 bool Protocol3::get_data_from_request(MBuf &cmd,
                                          bvector &req_data,
                                          DevId &dev_id,
@@ -575,7 +609,7 @@ bool Protocol3::get_data_from_request(MBuf &cmd,
      _res_err = 0;
     resp_len = 0;
 
-    Hex32 skip_prt, skip_tout, sr, pckt, serial; HexIDev3 hdev;
+    Hex32 skip_prt, skip_tout, sr, pckt; HexIDev3 hdev;
     cmd >> skip_prt >> pckt >> skip_tout >> hdev;
     
     dev_id = hdev.toDevId();
@@ -593,6 +627,29 @@ bool Protocol3::get_data_from_request(MBuf &cmd,
     }
 
     return true;
+}
+
+bvector Protocol2::create_server_response(uint32_t pckt,
+    uint32_t val,
+    const DevId *pdevid,
+    const bvector* pdata
+    )
+{
+    MBuf mbuf(64 + (pdata == nullptr ? 0 : (int)pdata->size()));
+    mbuf << Hex32(version()) << Hex32(pckt) << Hex32(uint32_t(0)) << Hex32(pdevid->id()) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00);
+
+    switch (pckt)
+    {
+    case pkt2_close_resp:
+    case pkt2_open_resp:
+        mbuf << Hex32(val);
+        break;
+    case pkt2_cmd_resp:
+          if (pdata != nullptr) mbuf.memwrite(pdata->data(), (int)pdata->size());
+        break;
+     }
+
+    return mbuf.to_vector();
 }
 
 bvector Protocol3::create_server_response(uint32_t pckt,
