@@ -8,11 +8,7 @@ struct urpc_device_t;
 typedef struct urpc_device_t *urpc_device_handle_t;
 typedef int urpc_result_t;
 
-#define URPC_XINET_VERSION_MAJOR  1
-#define URPC_XINET_VERSION_MINOR  1
-#define URPC_XINET_VERSION_BUGFIX 3
 
-#define URPC_CID_SIZE 4
 #define URPC_CRC_SIZE 2
 
 #define urpc_result_ok 0
@@ -40,22 +36,12 @@ extern "C" {
 *   xi-net://remote.ximc.ru/7890ABCD
  */
 urpc_device_handle_t
-urpc_device_create(
+xib_com_device_create(
     const char *uri
 );
 
 urpc_result_t
-urpc_device_send_request(
-    urpc_device_handle_t device,
-    const char cid[URPC_CID_SIZE],
-    const uint8_t *request,
-    uint8_t request_len,
-    uint8_t *response,
-    uint8_t response_len
-);
-
-urpc_result_t
-urpc_device_send_request_base(
+xib_com_device_send_request_base(
 urpc_device_handle_t device,
 const uint8_t *request,
 uint8_t request_len,
@@ -64,7 +50,7 @@ uint8_t response_len
 );
 
 urpc_result_t
-urpc_device_destroy(
+xib_com_device_destroy(
     urpc_device_handle_t *device_ptr
 );
 

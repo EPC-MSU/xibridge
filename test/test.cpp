@@ -28,6 +28,9 @@
 #define PROTO_2_OPEN  1
 #define PROTO_2_CLOSE 2
 #define PROTO_2_CMD   3
+#define PROTO_2_OPEN_R 0xFF
+#define PROTO_2_CLOSE_R 0xFE
+#define PROTO_2_CMD_R 0xFD
 
 #define PROTO_3_OPEN  1
 #define PROTO_3_CLOSE 2
@@ -136,39 +139,84 @@ static void test_request_proto2()
     TEST_CHECK(proto.create_enum_request(4000).size() == 0);
 }
 
+static void test_response_proto2()
+{
+    printf("?test_response_proto2?\n");
+    uint32_t err;
+    Protocol2 proto(&err, false);
+    
+    bvector reqw = proto.create_open_response(1, 1);
+    const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_2_OPEN_R, proto.get_cmd_schema());
+    TEST_CHECK(cm1.is_match(reqw.data(), (int)reqw.size(), 2, 1));
+    
+    reqw = proto.create_close_response(2, 0);
+    const cmd_schema_t & cm2 = cmd_schema_t::get_schema(PROTO_2_CLOSE_R, proto.get_cmd_schema());
+    TEST_CHECK(cm2.is_match(reqw.data(), (int)reqw.size(), 2, 2));
+
+    bvector data = { 'h', 'a', 'h', 'a', 'h', 'a', '2' };
+
+    reqw = proto.create_cmd_response(0, 3, &data);
+    const cmd_schema_t & cm3 = cmd_schema_t::get_schema(PROTO_2_CMD_R, proto.get_cmd_schema());
+    TEST_CHECK(cm3.is_match(reqw.data(), (int)reqw.size(), 2, 3));
+}
+
 static void test_request_proto3()
 {
     printf("?test_request_proto3?\n");
     uint32_t err;
     Protocol3 proto(&err, true);
+    bvector resp = proto.create_version_request(0);
+    const cmd_schema_t & cm0 = cmd_schema_t::get_schema(PROTO_3_VER, proto.get_cmd_schema());
+    TEST_CHECK(cm0.is_match(resp.data(), (int)resp.size(), 3, 0));
+    
+    resp = proto.create_open_request(DevId(1), 1000);
+    const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_OPEN, proto.get_cmd_schema());
+    TEST_CHECK(cm1.is_match(resp.data(), (int)resp.size(), 3, 1));
+    
+    resp = proto.create_close_request(DevId(2), 2000);
+    const cmd_schema_t & cm2 = cmd_schema_t::get_schema(PROTO_3_CLOSE, proto.get_cmd_schema());
+    TEST_CHECK(cm2.is_match(resp.data(), (int)resp.size(), 3, 2));
+  
+    bvector data = { 'h', 'a', 'h', 'a', 'h', 'a', '3' };
+
+    resp = proto.create_cmd_request(DevId(3), 3000, &data);
+    const cmd_schema_t & cm3 = cmd_schema_t::get_schema(PROTO_3_CMD, proto.get_cmd_schema());
+    TEST_CHECK(cm3.is_match(resp.data(), (int)resp.size(), 3, 3));
+    
+    
+    resp = proto.create_enum_request(4000);
+    const cmd_schema_t & cm4 = cmd_schema_t::get_schema(PROTO_3_ENUM, proto.get_cmd_schema());
+    TEST_CHECK(cm4.is_match(resp.data(), (int)resp.size(), 3, 0));
+}
+
+static void test_response_proto3()
+{
+    printf("?test_response_proto3?\n");
+    uint32_t err;
+    Protocol3 proto(&err, true);
     bvector resp = proto.create_version_response();
     const cmd_schema_t & cm0 = cmd_schema_t::get_schema(PROTO_3_VER_R, proto.get_cmd_schema());
     TEST_CHECK(cm0.is_match(resp.data(), (int)resp.size(), 3, 0));
-    
+
     resp = proto.create_open_response(DevId(1), 1);
     const cmd_schema_t & cm1 = cmd_schema_t::get_schema(PROTO_3_OPEN_R, proto.get_cmd_schema());
     TEST_CHECK(cm1.is_match(resp.data(), (int)resp.size(), 3, 1));
-    
+
     resp = proto.create_close_response(DevId(2), 0);
     const cmd_schema_t & cm2 = cmd_schema_t::get_schema(PROTO_3_CLOSE_R, proto.get_cmd_schema());
     TEST_CHECK(cm2.is_match(resp.data(), (int)resp.size(), 3, 2));
-  
+
     bvector data = { 'h', 'a', 'h', 'a', 'h', 'a', '3' };
 
     resp = proto.create_cmd_response(DevId(3), &data);
     const cmd_schema_t & cm3 = cmd_schema_t::get_schema(PROTO_3_CMD_R, proto.get_cmd_schema());
     TEST_CHECK(cm3.is_match(resp.data(), (int)resp.size(), 3, 3));
-    
+
     /*
     resp = proto.create_enum_response(4000);
-    const cmd_schema_t & cm4 = cmd_schema_t::get_schema(PROTO_3_ENUM, proto.get_cmd_schema());
+    const cmd_schema_t & cm4 = cmd_schema_t::get_schema(PROTO_3_ENUM_R, proto.get_cmd_schema());
     TEST_CHECK(cm4.is_match(resp.data(), (int)resp.size(), 3, 0));
     */
- }
-
-static void test_response_proto3()
-{
-    
 
 }
 
@@ -178,6 +226,7 @@ void  test_protocols()
     printf("test_protocols...\n");
     test_request_proto1();
     test_request_proto2();
+    test_response_proto2();
     test_request_proto3();
     test_response_proto3();
 }

@@ -143,7 +143,6 @@ ENDIF()
 
 IF(BUILD_XIBRIDGE_SERVER)
    set(SRV_SOURCES 
-        server/common.cpp
         server/xibridge_server.cpp
         server/mapserialurpc.cpp
         ${COMMON_SOURCES})
@@ -157,14 +156,14 @@ IF(BUILD_XIBRIDGE_SERVER)
    endif()
    ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
 
-   FUNCTION(ADD_SUBDIRECTORY_URPC_SERIAL)
-   ADD_SUBDIRECTORY(server/urpc-serial)
+   FUNCTION(ADD_SUBDIRECTORY_XIB_SERIAL)
+   ADD_SUBDIRECTORY(server/xib-serial)
    ENDFUNCTION()
-   ADD_SUBDIRECTORY_URPC_SERIAL()
+   ADD_SUBDIRECTORY_XIB_SERIAL()
 
    include_directories(server)
 
-   TARGET_LINK_LIBRARIES(xibridge_server zf_log urpc-serial bindy)
+   TARGET_LINK_LIBRARIES(xibridge_server zf_log xib-serial bindy)
 
    IF (MSVC)
         add_custom_command(TARGET  xibridge_server POST_BUILD

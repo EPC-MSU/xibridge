@@ -11,6 +11,7 @@ static char  _DEV_IP[256];
 bool xinet_urpc_usage_example(const char * ip, uint32_t dev_num)
 {
   
+    xibridge_set_base_protocol_version({2,0,0}); // to test the protocol2 if xibridge is testing!!!
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
     xibridge_conn_t conn;
     uint32_t err = xibridge_open_device_connection(_DEV_IP, &conn);

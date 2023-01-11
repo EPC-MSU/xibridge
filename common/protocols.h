@@ -371,11 +371,12 @@ public:
 
 
     bvector create_cmd_response(
+        uint32_t val,
         const DevId &devid,
         const bvector *data
         )
     {
-        return create_server_response(pkt2_cmd_resp, 0, &devid, data);
+        return create_server_response(pkt2_cmd_resp, val, &devid, data);
     }
 
     bvector create_open_response(

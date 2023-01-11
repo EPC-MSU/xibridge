@@ -42,6 +42,8 @@
 */
 #define ERR_DEVICE_OPEN 0xffbc
 #define ERR_DEVICE_LOST 0xfffb
+#define ERR_DEVICE_ERR 0xfffa
+#define ERR_DEVICE_ERR_VAL 0xfff9
 
 #define ERR_PCKT_FMT 12
 #define ERR_PCKT_INV 13

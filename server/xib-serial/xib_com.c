@@ -1,4 +1,4 @@
-#include "urpc.h"
+#include "xib_com.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -7,7 +7,7 @@
 #include <zf_log.h>
 
 #include "uri.h"
-#include "synchronizer.h"
+//#include "synchronizer.h"
 #include "devserial.h"
 
 #ifdef _MSC_VER
@@ -23,11 +23,11 @@ enum urpc_device_type_t
 
 struct urpc_device_t
 {
-    struct urpc_synchronizer_t *sync;
+    //struct urpc_synchronizer_t *sync;
     enum urpc_device_type_t type;
     union
     {
-        struct urpc_device_serial_t *serial;
+        struct device_serial_t *serial;
     } impl;
 };
 
@@ -42,7 +42,7 @@ static enum urpc_device_type_t get_device_type_from_uri(const struct urpc_uri_t 
 
 // can be called from any thread;
 struct urpc_device_t *
-urpc_device_create(
+xib_com_device_create(
     const char *uri
 )
 {
@@ -61,13 +61,13 @@ urpc_device_create(
         ZF_LOGE("failed to allocate memory for device");
         goto device_malloc_failed;
     }
-
+    /*
     if ((device->sync = urpc_syncronizer_create()) == NULL)
     {
         ZF_LOGE("failed to create synchronizer");
         goto synchronizer_create_failed;
     }
-
+    */
     device->type = get_device_type_from_uri(&parsed_uri);
     switch (device->type)
     {
@@ -77,7 +77,7 @@ urpc_device_create(
 //                ZF_LOGE("Unknown device URI, only path should be specified");
 //                goto device_impl_create_failed;
 //            }
-            if ((device->impl.serial = urpc_device_serial_create(parsed_uri.path)) == NULL)
+            if ((device->impl.serial = device_serial_create(parsed_uri.path)) == NULL)
             {
                 ZF_LOGE("failed to create serial device");
                 goto device_impl_create_failed;
@@ -91,9 +91,9 @@ urpc_device_create(
     return device;
 
 device_impl_create_failed:
-    urpc_synchronizer_destroy(device->sync);
+   // urpc_synchronizer_destroy(device->sync);
 
-synchronizer_create_failed:
+//synchronizer_create_failed:
     free(device);
 
 device_malloc_failed:
@@ -102,50 +102,7 @@ device_malloc_failed:
 
 // can be called from any thread;
 // calling this function after urpc_device_destroy is undefined behaviour (where 'after' is defined by languages' memory model)
-urpc_result_t urpc_device_send_request(
-    struct urpc_device_t *device,
-    const char cid[URPC_CID_SIZE],
-    const uint8_t *request,
-    uint8_t request_len,
-    uint8_t *response,
-    uint8_t response_len
-)
-{
-    if (device == NULL)
-    {
-        return urpc_result_nodevice;
-    }
-
-    urpc_result_t result;
-
-    if (urpc_synchronizer_acquire(device->sync) != 0)
-    {
-        ZF_LOGE("can't acquire device lock");
-        return urpc_result_nodevice;
-    }
-
-    switch (device->type)
-    {
-        case URPC_DEVICE_TYPE_SERIAL:
-            result = urpc_device_serial_send_request(device->impl.serial, cid, request, request_len, response, response_len);
-            break;
-        default:
-            result = urpc_result_error;
-            break;
-    }
-
-    if (urpc_synchronizer_release(device->sync) != 0)
-    {
-        ZF_LOGE("can't release device lock");
-        return urpc_result_error;
-    }
-
-    return result;
-}
-
-    // can be called from any thread;
-    // calling this function after urpc_device_destroy is undefined behaviour (where 'after' is defined by languages' memory model)
-    urpc_result_t urpc_device_send_request_base(
+urpc_result_t xib_com_device_send_request_base(
     struct urpc_device_t *device,
         const uint8_t *request,
         uint8_t request_len,
@@ -159,35 +116,35 @@ urpc_result_t urpc_device_send_request(
         }
 
         urpc_result_t result;
-
+        /*
         if (urpc_synchronizer_acquire(device->sync) != 0)
         {
             ZF_LOGE("can't acquire device lock");
             return urpc_result_nodevice;
         }
-
+        */
         switch (device->type)
         {
         case URPC_DEVICE_TYPE_SERIAL:
-            result = urpc_device_serial_send_request_base(device->impl.serial, request, request_len, response, response_len);
+            result = device_serial_send_request_base(device->impl.serial, request, request_len, response, response_len);
             break;
         default:
             result = urpc_result_error;
             break;
         }
-
+        /*
         if (urpc_synchronizer_release(device->sync) != 0)
         {
             ZF_LOGE("can't release device lock");
             return urpc_result_error;
         }
-
+        */
         return result;
     }
 
 // can be called from any thread; will return only after all in-flight requests has been completed;
 // calling this function more then once per device is undefined behaviour
-urpc_result_t urpc_device_destroy(
+urpc_result_t xib_com_device_destroy(
     struct urpc_device_t **device_ptr
 )
 {
@@ -196,18 +153,18 @@ urpc_result_t urpc_device_destroy(
     {
         return urpc_result_nodevice;
     }
-
+    /*
     if (urpc_synchronizer_destroy(device->sync) != 0)
     {
         ZF_LOGE("can't destroy device lock");
         return urpc_result_error;
     }
-
+    */
     urpc_result_t result;
     switch (device->type)
     {
         case URPC_DEVICE_TYPE_SERIAL:
-            result = urpc_device_serial_destroy(&device->impl.serial);
+            result = device_serial_destroy(&device->impl.serial);
             break;
         default:
             result = urpc_result_error;

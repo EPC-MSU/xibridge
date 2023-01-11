@@ -636,19 +636,11 @@ bvector Protocol2::create_server_response(uint32_t pckt,
     )
 {
     MBuf mbuf(64 + (pdata == nullptr ? 0 : (int)pdata->size()));
-    mbuf << Hex32(version()) << Hex32(pckt) << Hex32(uint32_t(0)) << Hex32(pdevid->id()) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00);
-
-    switch (pckt)
+    mbuf << Hex32(version()) << Hex32(pckt) << Hex32(uint32_t(0)) << Hex32(pdevid->id()) << Hex32((uint32_t)0x00) << Hex32((uint32_t)0x00) << Hex32(val);
+    if (pckt == pkt2_cmd_resp)
     {
-    case pkt2_close_resp:
-    case pkt2_open_resp:
-        mbuf << Hex32(val);
-        break;
-    case pkt2_cmd_resp:
-          if (pdata != nullptr) mbuf.memwrite(pdata->data(), (int)pdata->size());
-        break;
-     }
-
+        if (pdata != nullptr) mbuf.memwrite(pdata->data(), (int)pdata->size());
+    }
     return mbuf.to_vector();
 }
 

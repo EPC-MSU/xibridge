@@ -14,7 +14,7 @@ urpc_device_handle_t UrpcDevicePHandle::create_urpc_h(uint32_t serial)
 {
     const std::string addr = serial_to_address(serial);
     ZF_LOGD("Open device %u.", serial);
-    urpc_device_handle_t handle = urpc_device_create(addr.c_str());
+    urpc_device_handle_t handle = xib_com_device_create(addr.c_str());
     if (handle == nullptr) 
 	{
         ZF_LOGE("Can\'t open device %s.", addr.c_str());
@@ -22,21 +22,6 @@ urpc_device_handle_t UrpcDevicePHandle::create_urpc_h(uint32_t serial)
     return handle;
 }
 
-/*
- * Executes urpc request operation.
- */
-urpc_result_t UrpcDevicePHandle::urpc_send_request(const char cid[URPC_CID_SIZE],
-    const uint8_t *request,
-    uint8_t request_len,
-    uint8_t *response,
-    uint8_t response_len)
-{
-    if (_uhandle != nullptr)
-    {
-        return urpc_device_send_request(_uhandle, cid, request, request_len, response, response_len);
-    }
-    return urpc_result_nodevice;
-}
 
 urpc_result_t UrpcDevicePHandle::urpc_send_request_base(const uint8_t *request,
     uint8_t request_len,
@@ -45,7 +30,7 @@ urpc_result_t UrpcDevicePHandle::urpc_send_request_base(const uint8_t *request,
 {
     if (_uhandle != nullptr)
     {
-        return urpc_device_send_request_base(_uhandle, request, request_len, response, response_len);
+        return xib_com_device_send_request_base(_uhandle, request, request_len, response, response_len);
     }
     return urpc_result_nodevice;
 }
@@ -55,7 +40,7 @@ void UrpcDevicePHandle::destroy_urpc_h()
     if (_uhandle != nullptr)
     {
         ZF_LOGD("Urpc device handle %lu.", (unsigned long int)_uhandle);
-        urpc_device_destroy(&_uhandle);
+        xib_com_device_destroy(&_uhandle);
         _uhandle = nullptr;
     }
 }
@@ -283,34 +268,6 @@ void MapSerialUrpc::remove_conn_or_remove_urpc_device(conn_id_t conn_id, uint32_
     
     _rwlock.write_unlock();
     unlock_device_mutex(serial_known);
-}
-
-urpc_result_t MapSerialUrpc::operation_urpc_send_request(uint32_t serial,
-    const char cid[URPC_CID_SIZE],
-    const uint8_t *request,
-    uint8_t request_len,
-    uint8_t *response,
-    uint8_t response_len)
-{
-    urpc_result_t res = urpc_result_nodevice;
-    _rwlock.read_lock();
-    if (find(serial) != cend())
-    {
-        _rwlock.read_unlock();
-        lock_create_device_mutex(serial);
-        res = (*this)[serial].urpc_send_request(cid, request, request_len, response, response_len);
-        unlock_device_mutex(serial);
-        if (res == urpc_result_nodevice)
-        {
-            remove_conn_or_remove_urpc_device(UINT32_MAX, serial, true);
-            ZF_LOGE("The urpc device with  serial %u returned urpc_result_nodevice and was closed", serial);
-        }
-    }
-    else
-    {
-        _rwlock.read_unlock();
-    }
-    return res;
 }
 
 urpc_result_t MapSerialUrpc::operation_urpc_send_request_base(uint32_t serial,

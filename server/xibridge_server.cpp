@@ -30,7 +30,7 @@
 
 #include <zf_log.h>
 
-#include "urpc-serial/urpc.h"
+#include "xib-serial/xib_com.h"
 #include "bindy/bindy.h"
 #include "bindy/tinythread.h"
 #include "common.hpp"
@@ -55,32 +55,42 @@ MapSerialUrpc msu;
 
 std::map <DevId, uint32_t> _server3_devid_serial;
  
-class CommonDataPacket {
-public:
-    bool send_data() {
-        if (pb == NULL) {
-            return false;
-        }
-        try {
-            adaptive_wait_send(pb, conn_id, reply, SEND_WAIT_TIMEOUT_MS);
-        }
-        catch (const std::exception &) {
-            // Logged in adaptive_wait_send()
-            return false;
-        }
-        return true;
-    }
-
-protected:
-    std::vector<uint8_t> reply;
-    conn_id_t conn_id;
-};
-
 // for xibridge_server  - matching complex DevId and serial port simple id
 static uint32_t get_serial_from_DevId(const DevId &devid)
 {
     // temp. simple trnasformation while enumerate does not exit 
     return devid.id();
+}
+
+void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
+{
+    uint32_t errp;
+    bvector answer = Protocol3(&errp, true).create_error_response(err);
+    pb->send_data(conn_id, answer);
+}
+
+uint32_t urpc_errors_to_xibridge(urpc_result_t res)
+{
+    uint32_t err;
+    switch (res)
+    {
+    case urpc_result_error:
+        err = ERR_DEVICE_ERR;
+        break;
+    case urpc_result_value_error:
+        err = ERR_DEVICE_ERR_VAL;
+        break;
+    case urpc_result_timeout:
+        err = ERR_RECV_TIMEOUT;
+        break;
+    case urpc_result_nodevice:
+        err = ERR_DEVICE_LOST;
+        break;
+    default: 
+        err = 0;
+    }
+
+    return err;
 }
 
 
@@ -97,6 +107,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     MBuf mbuf(data.data(), data.size());
     Hex32 proto;
     mbuf >> proto;
+    mbuf.mseek(-(int)sizeof(uint32_t));
     uint32_t protocol_ver = (uint32_t)proto;
     uint32_t command_code = AProtocol::get_pckt_of_cmd(data);
     uint32_t err_p, serial;
@@ -129,7 +140,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        (uint8_t)resp_len
                                                        );
 
-                                                    bvector answer = p2.create_cmd_response(dev_id, &resp_data);
+                                                    bvector answer = p2.create_cmd_response((uint32_t)result, dev_id, &resp_data);
                                                     pb->send_data(conn_id, answer);
                                                  
                                                     if (result == urpc_result_nodevice)
@@ -156,7 +167,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                         msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
                                                         ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                         msu.log();
-                                                        bvector answer = p2.create_close_response(dev_id, 1);
+                                                        bvector answer = p2.create_close_response(dev_id, 0);
                                                         pb->send_data(conn_id, answer);
                                                         ZF_LOGD("To connection %u close device response packet sent.", conn_id);
                                                         break;
@@ -170,7 +181,13 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     else if (protocol_ver == XIBRIDGE_XINET_PROTOCOL_VERSION)
     {
         Protocol3 p3(&err_p, true);
-        p3.get_data_from_request(mbuf, req_data, dev_id, resp_len);
+        if (!p3.get_data_from_request(mbuf, req_data, dev_id, resp_len))
+        {
+            ZF_LOGE("From %u received bad packet, error: %u. Error protocol3 pckt will be sent to client.", conn_id, err_p);
+            send_error_pckt_proto3(conn_id, err_p);
+            return;
+        }
+
         serial = get_serial_from_DevId(dev_id);
 
         switch (command_code)
@@ -195,10 +212,18 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                            resp_data.data(),
                                                            (uint8_t)resp_len
                                                            );
-
-                                                       bvector answer = p3.create_cmd_response(dev_id, &resp_data);
-                                                       pb->send_data(conn_id, answer);
-                                                       ZF_LOGD("Answered just with data to client conn_id: %u (protocol 3)", conn_id);
+                                                       // according to Protocol 3
+                                                       if (result == urpc_result_ok)
+                                                       {
+                                                           bvector answer = p3.create_cmd_response(dev_id, &resp_data);
+                                                           pb->send_data(conn_id, answer);
+                                                           ZF_LOGD("Answered just with data to client conn_id: %u (protocol 3)", conn_id);
+                                                       }
+                                                       else
+                                                       {
+                                                           uint32_t err = urpc_errors_to_xibridge(result);
+                                                           send_error_pckt_proto3(conn_id, err);
+                                                       }
                                                        break;
         }
 
@@ -222,7 +247,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                             msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
                                                             ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                             msu.log();
-                                                            bvector answer = p3.create_close_response(dev_id, 1);
+                                                            bvector answer = p3.create_close_response(dev_id, 0);
                                                             pb->send_data(conn_id, answer);
                                                             ZF_LOGD("To connection %u close device response packet sent.", conn_id);
                                                             break;
@@ -244,15 +269,14 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     else
     {
         ZF_LOGE("From %u received packet with not supported protocol version: %u.", conn_id, protocol_ver);
-        bvector answer = Protocol3(&err_p, true).create_error_response(ERR_NO_PROTOCOL);
-        pb->send_data(conn_id, answer);
-        ZF_LOGD("To connection %u error response packet sent.", conn_id);
+        send_error_pckt_proto3(conn_id, ERR_NO_PROTOCOL);
+        ZF_LOGD("To connection %u error response packet Protocol 3 sent.", conn_id);
     }
 }
 // ========================================================
 
 void callback_disc(conn_id_t conn_id) {
-    // if there is an ordinary case - no connection to process in server structures (it is all alredy done); if there ia an extra case - the connection will be deleted here  
+    // if there is an ordinary case - no connection to process in server structures (it is all alredy done); if there is an extra case - the connection will be deleted here  
     msu.remove_conn_or_remove_urpc_device(conn_id, UINT32_MAX, false);
 }
 

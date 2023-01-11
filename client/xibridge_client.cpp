@@ -26,6 +26,8 @@ static err_def_t _err_strings[] =
     { ERR_ANOTHER_PROTOCOL, "Another protocol is to be tested [internal flag]." },
     { ERR_DEVICE_LOST, "Server tells that the device connected is lost." },
     { ERR_DEVICE_OPEN, "Server tells that the device cannot be opened." },
+    { ERR_DEVICE_ERR, "Server tells that the device does not understand the command." },
+    { ERR_DEVICE_ERR_VAL, "Server tells that the device does not understand some command parameter(s)." },
     { ERR_PCKT_FMT, "Invalid data format." },
     { ERR_PCKT_INV, "Invalid data packet." },
     { 0, "" }

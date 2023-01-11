@@ -3,7 +3,7 @@
 
 #include <map>
 #include <mutex>
-#include "urpc-serial/urpc.h"
+#include "xib-serial/xib_com.h"
 #include "common.hpp"
 #include "platform.h"
 #include "rw_lock.h"
@@ -19,15 +19,6 @@ public:
      * Creates urpc device handle pointer, calls urpc device creation function
     */
     static urpc_device_handle_t  create_urpc_h(uint32_t serial); // creates urpc device handle
-
-    /*
-    * Executes urpc request operation.
-    */
-    urpc_result_t urpc_send_request(const char cid[URPC_CID_SIZE],
-        const uint8_t *request,
-        uint8_t request_len,
-        uint8_t *response,
-        uint8_t response_len);
 
     /*
     * Executes urpc request base operation.
@@ -84,17 +75,6 @@ public:
      * Opens if has not.
      */
     bool open_if_not(conn_id_t conn_id, uint32_t serial);
-
-    /*
-     * Executes urpc request operation.
-     */
-    urpc_result_t operation_urpc_send_request(uint32_t serial,
-        const char cid[URPC_CID_SIZE],
-        const uint8_t *request,
-        uint8_t request_len,
-        uint8_t *response,
-        uint8_t response_len);
-
 
     /*
     * Executes urpc request operation.
