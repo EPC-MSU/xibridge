@@ -3,7 +3,7 @@
 
 static int parse_uri_after_path(
     const char *ppath,
-    struct urpc_uri_t *result
+    struct xib_uri_t *result
 )
 {
     const char *p = ppath, *pn;
@@ -59,9 +59,9 @@ static int parse_uri_after_path(
  * Returns 0 on success
  */
 
-int urpc_uri_parse(
+int xib_uri_parse(
     const char *uri,
-    struct urpc_uri_t *result
+    struct xib_uri_t *result
 )
 {
     const char *p, *pn, *pm;

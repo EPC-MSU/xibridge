@@ -13,7 +13,7 @@
     #define portable_strcasecmp strcasecmp
 #endif
 
-struct urpc_uri_t
+struct xib_uri_t
 {
     char scheme[1024];
     char host[1024];
@@ -24,9 +24,9 @@ struct urpc_uri_t
 };
 
 int
-urpc_uri_parse(
+xib_uri_parse(
     const char *uri,
-    struct urpc_uri_t *result
+    struct xib_uri_t *result
 );
 
 #endif //URPC_URI_H

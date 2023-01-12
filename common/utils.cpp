@@ -333,7 +333,7 @@ bool MBuf::tot_seek(int offset)
 size_t MBuf::restOfSize(int from_pos) const
 {
     if (from_pos == -1) from_pos = (int)(pdata - origin_data);
-    if (from_pos < 0 || from_pos >= (int)dlen) return SIZE_MAX;
+    if (from_pos < 0 || from_pos > (int)dlen) return SIZE_MAX;
     return (dlen - from_pos);
 }
 

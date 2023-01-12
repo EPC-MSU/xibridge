@@ -18,24 +18,33 @@ public:
     /*
      * Creates urpc device handle pointer, calls urpc device creation function
     */
-    static urpc_device_handle_t  create_urpc_h(uint32_t serial); // creates urpc device handle
+    static xib_device_handle_t  create_urpc_h(uint32_t serial); // creates urpc device handle
 
     /*
-    * Executes urpc request base operation.
+    * Executes urpc request operation.
     */
-    urpc_result_t urpc_send_request_base( const uint8_t *request,
+    xib_result_t urpc_send_request(const char cid[URPC_CID_SIZE],
+        const uint8_t *request,
         uint8_t request_len,
         uint8_t *response,
         uint8_t response_len);
 
-    urpc_device_handle_t uhandle() const { return _uhandle; }
+    /*
+    * Executes common request-response operation.
+    */
+    xib_result_t send_request( const uint8_t *request,
+        uint8_t request_len,
+        uint8_t *response,
+        uint8_t response_len);
+
+    xib_device_handle_t uhandle() const { return _uhandle; }
 
     /*
     * Destroys urpc device
     */
     void destroy_urpc_h();
 
-    void set_urpc_h(urpc_device_handle_t h) { _uhandle = h; }
+    void set_urpc_h(xib_device_handle_t h) { _uhandle = h; }
 
     UrpcDevicePHandle(const UrpcDevicePHandle &uh)
     {
@@ -49,7 +58,7 @@ public:
     }
   
 private:
-    urpc_device_handle_t _uhandle;
+    xib_device_handle_t _uhandle;
 };
 
 /*
@@ -79,7 +88,17 @@ public:
     /*
     * Executes urpc request operation.
     */
-    urpc_result_t operation_urpc_send_request_base(uint32_t serial,
+    xib_result_t urpc_operation_send_request(uint32_t serial,
+        const char cid[URPC_CID_SIZE],
+        const uint8_t *request,
+        uint8_t request_len,
+        uint8_t *response,
+        uint8_t response_len);
+
+    /*
+    * Executes common request-response operation.
+    */
+    xib_result_t operation_send_request(uint32_t serial,
         const uint8_t *request,
         uint8_t request_len,
         uint8_t *response,

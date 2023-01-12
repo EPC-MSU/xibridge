@@ -69,21 +69,21 @@ void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
     pb->send_data(conn_id, answer);
 }
 
-uint32_t urpc_errors_to_xibridge(urpc_result_t res)
+uint32_t urpc_errors_to_xibridge(xib_result_t res)
 {
     uint32_t err;
     switch (res)
     {
-    case urpc_result_error:
+    case xib_result_error:
         err = ERR_DEVICE_ERR;
         break;
-    case urpc_result_value_error:
+    case xib_result_value_error:
         err = ERR_DEVICE_ERR_VAL;
         break;
-    case urpc_result_timeout:
+    case xib_result_timeout:
         err = ERR_RECV_TIMEOUT;
         break;
-    case urpc_result_nodevice:
+    case xib_result_nodevice:
         err = ERR_DEVICE_LOST;
         break;
     default: 
@@ -118,7 +118,8 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     if (protocol_ver == URPC_XINET_PROTOCOL_VERSION)
     {
         Protocol2 p2(&err_p, true);
-        p2.get_data_from_request(mbuf, req_data, dev_id, resp_len);
+        bvector cid;
+        p2.get_data_from_request(mbuf, cid, req_data, dev_id, resp_len);
         serial = get_serial_from_DevId(dev_id);
 #ifdef ENABLE_SUPERVISOR
         /*
@@ -132,8 +133,11 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         case URPC_COMMAND_REQUEST_PACKET_TYPE: {
                                                    ZF_LOGD("From %u received command Protocol2 request packet.", conn_id);
                                                    resp_data.resize(resp_len);
-                                                   urpc_result_t result = msu.operation_urpc_send_request_base(
+                                                   char ccid[URPC_CID_SIZE];
+                                                   memcpy(ccid, cid.data(), URPC_CID_SIZE);
+                                                   xib_result_t result = msu.urpc_operation_send_request(
                                                        serial,
+                                                       ccid,
                                                        req_data.data(),
                                                        (uint8_t)req_data.size(),
                                                        resp_data.data(),
@@ -143,7 +147,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                     bvector answer = p2.create_cmd_response((uint32_t)result, dev_id, &resp_data);
                                                     pb->send_data(conn_id, answer);
                                                  
-                                                    if (result == urpc_result_nodevice)
+                                                    if (result == xib_result_nodevice)
                                                        ZF_LOGE("The operation_urpc_send_reqest returned urpc_result_nodevic (conn_id = %u).", conn_id);
                                                     break;
         }
@@ -205,7 +209,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        ZF_LOGD("From %u received Protocol3 command request packet.", conn_id);
                                                        // !!! to do - error processing
                                                        resp_data.resize(resp_len);
-                                                       urpc_result_t result = msu.operation_urpc_send_request_base(
+                                                       xib_result_t result = msu.operation_send_request(
                                                            serial,
                                                            req_data.data(),
                                                            (uint8_t)req_data.size(),
@@ -213,7 +217,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                            (uint8_t)resp_len
                                                            );
                                                        // according to Protocol 3
-                                                       if (result == urpc_result_ok)
+                                                       if (result == xib_result_ok)
                                                        {
                                                            bvector answer = p3.create_cmd_response(dev_id, &resp_data);
                                                            pb->send_data(conn_id, answer);

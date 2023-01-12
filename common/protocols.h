@@ -365,6 +365,7 @@ public:
             );
     
     bool get_data_from_request(MBuf &cmd,
+        bvector &cid,
         bvector &req_data,
         DevId &dev_id,
         uint32_t &resp_len);

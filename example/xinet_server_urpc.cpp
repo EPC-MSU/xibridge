@@ -31,7 +31,7 @@ bool xinet_urpc_usage_example(const char * ip, uint32_t dev_num)
         return false;
     }
     
-    uint32_t urpc_res = (uint32_t)*resp;
+    uint32_t urpc_res = *((uint32_t *)resp);
     
     printf("Urpc return code: %d\n", (int)(urpc_res >> 24));
     urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + sizeof(uint32_t));

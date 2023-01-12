@@ -358,7 +358,7 @@ bool Protocol1::get_spec_data(MBuf&  mbuf,
 }
 
 bool Protocol2::get_spec_data(MBuf&  mbuf,
-                              bvector &/*res_data*/,
+                              bvector &cid,
                               bvector &data,
                               uint32_t pckt)
 {
@@ -380,11 +380,13 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
                 *_perror = ERR_PCKT_FMT;
                 return false;
             }
-            data.assign(mbuf.cur_data(), mbuf.cur_data() + URPC_CID_SIZE);
+            cid.assign(mbuf.cur_data(), mbuf.cur_data() + URPC_CID_SIZE);
+            mbuf.mseek(URPC_CID_SIZE);
             mbuf >> r;
             len = mbuf.restOfSize(-1);
             if (len > 0)
-               data.insert(data.end(), mbuf.cur_data(), mbuf.cur_data()+len);
+               data.assign(mbuf.cur_data(), mbuf.cur_data()+len);
+            _res_err = r;
             return !mbuf.wasBroken();
         case pkt2_open_req:
             return true;
@@ -572,6 +574,7 @@ bvector Protocol3::create_client_request(uint32_t pckt,
 }
 
 bool Protocol2::get_data_from_request(MBuf &cmd,
+    bvector &cid,
     bvector &req_data,
     DevId &dev_id,
     uint32_t &resp_len)
@@ -585,12 +588,9 @@ bool Protocol2::get_data_from_request(MBuf &cmd,
 
     dev_id = DevId(serial);
 
-    bvector z;
-
-    if (!get_spec_data(cmd, z, req_data, (uint32_t)pckt))
+    if (!get_spec_data(cmd, cid, req_data, (uint32_t)pckt))
         return false;
-    cmd >> skip_prt;
-    resp_len = (uint32_t)skip_prt;
+    resp_len = _res_err;
     if (cmd.wasBroken())
     {
         *_perror = ERR_PCKT_FMT;

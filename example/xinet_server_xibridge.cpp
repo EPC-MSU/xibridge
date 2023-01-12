@@ -9,9 +9,13 @@
 static char  _DEV_IP[256];
 
 /* 
-* In fact it's the same urpc-device server, but via protocol 3 
+* In fact it's the same urpc-device, but via protocol 3 
 
 */
+
+// urpc cid size
+#define CID_SIZE 4
+
 bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
 {
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
@@ -37,27 +41,27 @@ bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
         xibridge_close_device_connection(&conn);
         return false;
     }
-    unsigned char resp[sizeof(urmc_get_identity_information_t) + sizeof(uint32_t)];
+    unsigned char resp[sizeof(urmc_get_identity_information_t) + CID_SIZE];
+    memset(resp, 0, sizeof(urmc_get_identity_information_t) + CID_SIZE);
    
-    uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, sizeof(urmc_get_identity_information_t)+sizeof(uint32_t));
+    uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, sizeof(urmc_get_identity_information_t) + CID_SIZE);
     if (ginf_err)
     {
         printf ("Cannot execute ginf: %s\n", xibridge_get_err_expl(ginf_err));
         xibridge_close_device_connection(&conn);
         return false;
     }
-    
-    uint32_t urpc_res = (uint32_t)*resp;
-    
-    printf("Urpc return code: %d\n", (int)(urpc_res >> 24));
-    urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + sizeof(uint32_t));
+         
+    urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + CID_SIZE);
    
     printf("Manufacture: %s\n", (char *)info.Manufacturer);
     printf("Product name: %s\n", (char *)info.ProductName);
     printf("Controller: %s\n", (char *)info.ControllerName);
 
-    unsigned char resp_st[sizeof(urmc_status_impl_t)+sizeof(uint32_t)];
-    uint32_t gets_err = xibridge_device_request_response(&conn, (const unsigned char *)"gets", 4, resp_st, sizeof(urmc_status_impl_t)+sizeof(uint32_t));
+    unsigned char resp_st[sizeof(urmc_status_impl_t) + CID_SIZE];
+    memset(resp_st, 0, sizeof(urmc_status_impl_t) + CID_SIZE);
+
+    uint32_t gets_err = xibridge_device_request_response(&conn, (const unsigned char *)"gets", 4, resp_st, sizeof(urmc_status_impl_t) + CID_SIZE);
     if (gets_err)
     {
         printf("Cannot execute gets: %s\n", xibridge_get_err_expl(gets_err));
@@ -65,7 +69,7 @@ bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
         return false;
     }
     
-    urmc_status_impl_t &status = *(urmc_status_impl_t *)(resp_st + sizeof(uint32_t));
+    urmc_status_impl_t &status = *(urmc_status_impl_t *)(resp_st + CID_SIZE);
     printf("Current position: %u\n", status.CurPosition);
     printf("Current speed: %u\n", status.CurSpeed);
 
@@ -79,7 +83,7 @@ static void thread_body(int thread_num)
     printf("Thread %u: openning connection... \n", thread_num);
     xibridge_open_device_connection(_DEV_IP, &conn);
     printf("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
-    unsigned char resp[sizeof(urmc_get_identity_information_t)+sizeof(uint32_t)];
+    unsigned char resp[sizeof(urmc_get_identity_information_t) + CID_SIZE];
     printf("Thread %u: sending ginf... \n", thread_num);
     uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, sizeof(urmc_get_identity_information_t)+sizeof(uint32_t));
     
