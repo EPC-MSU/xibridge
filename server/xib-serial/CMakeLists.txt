@@ -3,9 +3,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(xib-serial C)
 
 IF(WIN32)
-    ADD_LIBRARY(xib-serial STATIC xib_com.c uri.c devserial.c)
+    ADD_LIBRARY(xib-serial STATIC xib_com.c uri.c devserial.c platform-win32.c)
 ELSE()
-    ADD_LIBRARY(xib-serial STATIC xib_com.c uri.c devserial.c)
+    ADD_LIBRARY(xib-serial STATIC xib_com.c uri.c devserial.c platform-posix.c)
 ENDIF()
 
 FUNCTION(ADD_SUBDIRECTORY_TINYCTHREAD)

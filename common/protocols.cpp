@@ -51,7 +51,7 @@ cmd_schema_t Protocol3::_cmd_schemas[12] =
     { pkt3_error_resp, nullptr }
 };
 
-const int Protocol2::URPC_CID_SIZE = 4;
+const int Protocol2::_URPC_CID_SIZE = 4;
 
 const cmd_schema_t &cmd_schema_t::get_schema(uint32_t pckt, 
                                              const cmd_schema_t *_ss)
@@ -240,11 +240,11 @@ bvector Protocol2::create_cmd_request(const DevId &devid,
 {
     bvector data_and_length;
     auto data_cbeg = data -> cbegin();
-    if (data != nullptr && data->size() >= (size_t)URPC_CID_SIZE)
+    if (data != nullptr && data->size() >= (size_t)_URPC_CID_SIZE)
     {
-        data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + URPC_CID_SIZE );
+        data_and_length.insert(data_and_length.end(), data_cbeg, data_cbeg + _URPC_CID_SIZE );
         add_uint32_2_bvector(data_and_length, resp_length - (uint32_t)(sizeof(uint32_t))); // minus answer code length according to Protocol2
-        data_and_length.insert(data_and_length.end(), data_cbeg + URPC_CID_SIZE, data->cend());
+        data_and_length.insert(data_and_length.end(), data_cbeg + _URPC_CID_SIZE, data->cend());
     }
     return create_client_request(pkt2_cmd_req, devid, 0,  &data_and_length);
 }
@@ -380,8 +380,8 @@ bool Protocol2::get_spec_data(MBuf&  mbuf,
                 *_perror = ERR_PCKT_FMT;
                 return false;
             }
-            cid.assign(mbuf.cur_data(), mbuf.cur_data() + URPC_CID_SIZE);
-            mbuf.mseek(URPC_CID_SIZE);
+            cid.assign(mbuf.cur_data(), mbuf.cur_data() + _URPC_CID_SIZE);
+            mbuf.mseek(_URPC_CID_SIZE);
             mbuf >> r;
             len = mbuf.restOfSize(-1);
             if (len > 0)
@@ -701,6 +701,20 @@ bool Protocol3::translate_response(uint32_t pckt,
         return false;
     }
     return _res_err == 1;
+}
+
+bvector Protocol3::create_enum_response(const std::vector<DevId>& vdevs)
+{
+    if (vdevs.size() == 0) return bvector();
+    MBuf enumbuf(vdevs.size() * sizeof(xibridge_device_t));
+    
+    for (auto v : vdevs)
+    {
+        HexIDev3 hd(&v);
+        enumbuf << hd;
+    }
+    bvector enumvect = enumbuf.to_vector();
+    return create_server_response(pkt3_enum_resp, 0, nullptr, &enumvect);
 }
 
 AProtocol *create_appropriate_protocol(uint32_t version_number, 

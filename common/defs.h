@@ -6,9 +6,14 @@
 #include <string>
 #include <string.h>
 #include <stdint.h>
-#define conn_id_t bindy::conn_id_t
 
-#define conn_id_invalid  bindy::conn_id_invalid
+#ifndef conn_id_t
+  #define conn_id_t bindy::conn_id_t
+#endif
+
+#ifndef conn_id_invalid
+    #define conn_id_invalid  bindy::conn_id_invalid
+#endif
 
 typedef  std::vector<uint8_t> bvector;
 

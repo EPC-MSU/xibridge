@@ -35,11 +35,19 @@ enum xibridge_packet_type_t {
     XIBRIDGE_COMMAND_RESPONSE_PACKET_TYPE = 0x000000FD,
     XIBRIDGE_ERROR_PACKET_TYPE = 0x00000004,
     XIBRIDGE_VERSION_REQUEST_PACKET_TYPE = 0x00000005,
-    XIBRIDGE_VERSION_RESPONSE_PACKET_TYPE = 0x0000000FB
+    XIBRIDGE_VERSION_RESPONSE_PACKET_TYPE = 0x0000000FB,
+    XIBRIDGE_ENUM_REQUEST_PACKET_TYPE = 0x00000004,
+    XIBRIDGE_ENUM_RESPONSE_PACKET_TYPE = 0x0000000FC
 };
 
 
-size_t adaptive_wait_send(bindy::Bindy* bindy, conn_id_t conn_id, std::vector<uint8_t> data, size_t timeout_ms);
+//size_t adaptive_wait_send(bindy::Bindy* bindy, conn_id_t conn_id, std::vector<uint8_t> data, size_t timeout_ms);
+
+enum device_id_style {
+    dis_urpc,
+    dis_ximc,
+    dis_ext_ximc
+};
 
 
 #endif //URPC_DEVXINET_COMMON_HPP

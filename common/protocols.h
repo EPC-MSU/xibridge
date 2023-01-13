@@ -27,11 +27,28 @@ public:
         _dev_id.reserve = reserve;
     }
 
-    bool operator == (const DevId& devid)
+    bool operator == (const DevId& devid) const
     {
         return _dev_id.id == devid._dev_id.id && _dev_id.PID == devid._dev_id.PID
             && _dev_id.VID == devid._dev_id.VID && _dev_id.reserve == devid._dev_id.reserve;
     }
+
+    DevId & operator = (const DevId& devid)
+    {
+        _dev_id.id = devid.id();
+        _dev_id.PID = devid.PID();
+        _dev_id.VID = devid.VID();
+        _dev_id.reserve = devid.reserve();
+        return *this;
+    }
+
+    bool operator < (const DevId& rv) const
+    {
+        if (_dev_id.VID < rv.VID()) return true;
+        if (_dev_id.PID < rv.PID()) return true;
+        if (_dev_id.id < rv.id()) return true;
+        return false;
+    }    
 
     uint32_t id() const 
     { 
@@ -422,7 +439,7 @@ private:
     };
 
     static cmd_schema_t _cmd_schemas[7];
-    static const int URPC_CID_SIZE; //  = 4 
+    static const int _URPC_CID_SIZE; //  = 4 
    
     bvector create_client_request(
         uint32_t pckt,
@@ -535,6 +552,8 @@ public:
     {
         return create_server_response(pkt3_ver_resp);
     }
+
+    bvector create_enum_response(const std::vector<DevId>& vdevs);
 
     bvector create_close_response(
         const DevId &devid,

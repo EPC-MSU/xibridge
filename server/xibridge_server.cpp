@@ -35,7 +35,7 @@
 #include "bindy/tinythread.h"
 #include "common.hpp"
 #include "platform.h"
-#include "mapserialurpc.h"
+#include "mapdevidphnd.h"
 
 #ifdef ENABLE_SUPERVISOR
 #include "supervisor.hpp"
@@ -49,19 +49,12 @@ bindy::Bindy * pb = NULL;
 
 #define SEND_WAIT_TIMEOUT_MS 5000
 
-MapSerialUrpc msu;
+MapDevIdPHandle msu;
 
 // xibridge-server protocol3 support object - to map DevId to some serial number
 
 std::map <DevId, uint32_t> _server3_devid_serial;
  
-// for xibridge_server  - matching complex DevId and serial port simple id
-static uint32_t get_serial_from_DevId(const DevId &devid)
-{
-    // temp. simple trnasformation while enumerate does not exit 
-    return devid.id();
-}
-
 void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
 {
     uint32_t errp;
@@ -110,7 +103,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     mbuf.mseek(-(int)sizeof(uint32_t));
     uint32_t protocol_ver = (uint32_t)proto;
     uint32_t command_code = AProtocol::get_pckt_of_cmd(data);
-    uint32_t err_p, serial;
+    uint32_t err_p;
     bvector req_data, resp_data;
     uint32_t resp_len;
     DevId dev_id;
@@ -120,13 +113,12 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         Protocol2 p2(&err_p, true);
         bvector cid;
         p2.get_data_from_request(mbuf, cid, req_data, dev_id, resp_len);
-        serial = get_serial_from_DevId(dev_id);
 #ifdef ENABLE_SUPERVISOR
         /*
         * Capture and release (in destructor) serial number
         * if it is captured many times, but never freed, the supervisor will kill this device
         */
-        SupervisorLock _s = SupervisorLock(&supervisor, std::to_string(serial));
+        SupervisorLock _s = SupervisorLock(&supervisor, std::to_string(dev_id.id()));
 #endif
 
         switch (command_code) {
@@ -136,7 +128,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                    char ccid[URPC_CID_SIZE];
                                                    memcpy(ccid, cid.data(), URPC_CID_SIZE);
                                                    xib_result_t result = msu.urpc_operation_send_request(
-                                                       serial,
+                                                       dev_id,
                                                        ccid,
                                                        req_data.data(),
                                                        (uint8_t)req_data.size(),
@@ -154,7 +146,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
 
         case URPC_OPEN_DEVICE_REQUEST_PACKET_TYPE: {
                                                        ZF_LOGD("From %u received open device request packet Protocol 2.", conn_id);
-                                                       added = msu.open_if_not(conn_id, serial);
+                                                       added = msu.open_if_not(conn_id, dev_id);
 
                                                        bvector answer = p2.create_open_response(dev_id, added);
                                                        pb->send_data(conn_id, answer);
@@ -168,7 +160,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         }
         case URPC_CLOSE_DEVICE_REQUEST_PACKET_TYPE: {
                                                         ZF_LOGD("From %u received close device request packet Protocol 2.", conn_id);
-                                                        msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
+                                                        msu.remove_conn_or_remove_device(conn_id, dev_id, false);
                                                         ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                         msu.log();
                                                         bvector answer = p2.create_close_response(dev_id, 0);
@@ -192,8 +184,6 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
             return;
         }
 
-        serial = get_serial_from_DevId(dev_id);
-
         switch (command_code)
         {
 
@@ -210,7 +200,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        // !!! to do - error processing
                                                        resp_data.resize(resp_len);
                                                        xib_result_t result = msu.operation_send_request(
-                                                           serial,
+                                                           dev_id,
                                                            req_data.data(),
                                                            (uint8_t)req_data.size(),
                                                            resp_data.data(),
@@ -234,7 +224,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         case XIBRIDGE_OPEN_DEVICE_REQUEST_PACKET_TYPE: {
                                                            ZF_LOGD("From %u received open device request packet Protocol3.", conn_id);
 
-                                                           added = msu.open_if_not(conn_id, serial);
+                                                           added = msu.open_if_not(conn_id, dev_id);
 
                                                            bvector answer = p3.create_open_response(dev_id, added);
                                                            pb->send_data(conn_id, answer);
@@ -248,7 +238,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         }
         case XIBRIDGE_CLOSE_DEVICE_REQUEST_PACKET_TYPE: {
                                                             ZF_LOGD("From %u received close device request packet Protocol3.", conn_id);
-                                                            msu.remove_conn_or_remove_urpc_device(conn_id, serial, false);
+                                                            msu.remove_conn_or_remove_device(conn_id, dev_id, false);
                                                             ZF_LOGD("Connection or Device removed ordinary with conn_id=%u + ...", conn_id);
                                                             msu.log();
                                                             bvector answer = p3.create_close_response(dev_id, 0);
@@ -263,6 +253,14 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        pb->send_data(conn_id, answer);
                                                        ZF_LOGD("To connection %u version response packet sent.", conn_id);
                                                        break;
+        case XIBRIDGE_ENUM_REQUEST_PACKET_TYPE: {
+                                                       ZF_LOGD("From %u received enum request packet.", conn_id);
+                                                       std::vector<DevId> sv = xibridge_enumerate_dev(MapDevIdPHandle::get_device_id_style());
+                                                       bvector answer = p3.create_enum_response(sv);
+                                                       pb->send_data(conn_id, answer);
+                                                       ZF_LOGD("To connection %u enum response packet sent.", conn_id);
+                                                       break;
+
         }
         default: {
                      ZF_LOGD("Unknown packet code.");
@@ -281,7 +279,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
 
 void callback_disc(conn_id_t conn_id) {
     // if there is an ordinary case - no connection to process in server structures (it is all alredy done); if there is an extra case - the connection will be deleted here  
-    msu.remove_conn_or_remove_urpc_device(conn_id, UINT32_MAX, false);
+    msu.remove_conn_or_remove_device(conn_id, UINT32_MAX, false);
 }
 
 void print_help(char *argv[])
@@ -357,7 +355,7 @@ bool is_already_started()
         AddrLen = sizeof (SockAddr);
         if (bind(Socket, (struct sockaddr *) &SockAddr, AddrLen))
         {
-            std::cout << "Another process (urpc_xinet_server) already running. Exit." << std::endl;
+            std::cout << "Another process (xxx_xinet_server) already running. Exit." << std::endl;
             return true;
         }
     }
@@ -368,11 +366,11 @@ bool is_already_started()
 static HANDLE _h_already_started;
 bool is_already_started()
 {
-    const char szUniqueNamedMutex[] = "urpc_xinet_server_m";
+    const char szUniqueNamedMutex[] = "xinet_server_m";
     _h_already_started = CreateMutex(NULL, TRUE, szUniqueNamedMutex);
     if (ERROR_ALREADY_EXISTS == GetLastError())
     {
-        std::cout << "Another process (urpc_xinet_server) already running. Press a key to exit!" << std::endl;
+        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
         std::cin.get(); // To avoid console closing
         return true;
     }
@@ -497,6 +495,7 @@ int main(int argc, char *argv[])
 #endif
 
         ZF_LOGI("Starting server...");
+        list_sp_ports();
 
         bindy.connect();
         bindy.set_handler(&callback_data);
@@ -510,5 +509,6 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
     release_already_started_mutex();
 #endif
+    free_sp_ports();
     return 0;
 }

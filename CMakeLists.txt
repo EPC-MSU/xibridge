@@ -144,7 +144,7 @@ ENDIF()
 IF(BUILD_XIBRIDGE_SERVER)
    set(SRV_SOURCES 
         server/xibridge_server.cpp
-        server/mapserialurpc.cpp
+        server/mapdevidphnd.cpp
         ${COMMON_SOURCES})
    if (XIBRIDGE_SERVER_ENABLE_SUPERVISOR )
         set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
@@ -157,9 +157,10 @@ IF(BUILD_XIBRIDGE_SERVER)
    ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
 
    FUNCTION(ADD_SUBDIRECTORY_XIB_SERIAL)
-   ADD_SUBDIRECTORY(server/xib-serial)
+       ADD_SUBDIRECTORY(server/xib-serial)
    ENDFUNCTION()
    ADD_SUBDIRECTORY_XIB_SERIAL()
+   include_directories(${LIBSERIALPORT_INCLUDE_DIR})
 
    include_directories(server)
 

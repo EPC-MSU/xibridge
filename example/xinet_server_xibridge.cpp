@@ -107,6 +107,27 @@ bool xinet_xibridge_usage_example(const char * ip, uint32_t dev_num)
     printf("Current speed: %u\n", status.CurSpeed);
 
     xibridge_close_device_connection(&conn);
+    char  *pdata; uint32_t count;
+    err = xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
+    if (err)
+    {
+        printf("Cannot enumerare device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        return false;
+    }
+
+   
+
+    printf("Count of enumerated devices: %u\n", count);
+    if (count)
+    {
+        const char *p = pdata;
+        for (int i = 0; i < (int)count; i++)
+        {
+            printf("Enumerated device #%d: URI: %s\n", i + 1, p);
+            p = strchr(p, 0) + 1;
+        }
+    }
+    xibridge_free_enumerate_devices(pdata);
     return true;
 }
 
