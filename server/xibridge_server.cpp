@@ -35,6 +35,7 @@
 #include "bindy/tinythread.h"
 #include "common.hpp"
 #include "platform.h"
+#include "devid2usb.h"
 #include "mapdevidphnd.h"
 
 #ifdef ENABLE_SUPERVISOR
@@ -51,10 +52,6 @@ bindy::Bindy * pb = NULL;
 
 MapDevIdPHandle msu;
 
-// xibridge-server protocol3 support object - to map DevId to some serial number
-
-std::map <DevId, uint32_t> _server3_devid_serial;
- 
 void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
 {
     uint32_t errp;
@@ -62,7 +59,7 @@ void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
     pb->send_data(conn_id, answer);
 }
 
-uint32_t urpc_errors_to_xibridge(xib_result_t res)
+uint32_t xib_errors_to_xibridge(xib_result_t res)
 {
     uint32_t err;
     switch (res)
@@ -82,7 +79,6 @@ uint32_t urpc_errors_to_xibridge(xib_result_t res)
     default: 
         err = 0;
     }
-
     return err;
 }
 
@@ -215,7 +211,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        }
                                                        else
                                                        {
-                                                           uint32_t err = urpc_errors_to_xibridge(result);
+                                                           uint32_t err = xib_errors_to_xibridge(result);
                                                            send_error_pckt_proto3(conn_id, err);
                                                        }
                                                        break;
@@ -252,10 +248,11 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                        bvector answer = p3.create_version_response();
                                                        pb->send_data(conn_id, answer);
                                                        ZF_LOGD("To connection %u version response packet sent.", conn_id);
-                                                       break;
+                                                       break; 
+        }
         case XIBRIDGE_ENUM_REQUEST_PACKET_TYPE: {
                                                        ZF_LOGD("From %u received enum request packet.", conn_id);
-                                                       std::vector<DevId> sv = xibridge_enumerate_dev(MapDevIdPHandle::get_device_id_style());
+                                                       std::vector<DevId> sv = MapDevIdPHandle::get_devid_2_usb_confor() ->enumerate_dev();
                                                        bvector answer = p3.create_enum_response(sv);
                                                        pb->send_data(conn_id, answer);
                                                        ZF_LOGD("To connection %u enum response packet sent.", conn_id);
@@ -286,14 +283,15 @@ void print_help(char *argv[])
 {
 #if ZF_LOG_LEVEL <= ZF_LOG_DEBUG
     std::cout <<
-        "Usage: " << argv[0] << " [keyfile] [debug]"
+        "Usage: " << argv[0] << " [keyfile] [debug] [urpc|ximc|ximc_ext]"
         << std::endl
         << "Examples: " << std::endl
         << argv[0] << std::endl
-        << argv[0] << " debug" << std::endl
-        << argv[0] << " ~/keyfile.sqlite" << std::endl
-        << argv[0] << " ~/keyfile.sqlite debug" << std::endl
-        << "Debug logging will be disabled by default" << std::endl;
+        << argv[0] << " ximc" << std::endl
+        << argv[0] << " debug urpc" << std::endl
+        << argv[0] << " ~/keyfile.sqlite ximc" << std::endl
+        << argv[0] << " ~/keyfile.sqlite debug urpc" << std::endl
+        << "Debug logging will be disabled by default, urpc-style protocol usb-naming configuration selected by default" << std::endl;
 #else
     std::cout << "Usage: " << argv[0] << " keyfile"
         << std::endl
@@ -416,7 +414,7 @@ int main(int argc, char *argv[])
         << 0 << " "
         << "===" << std::endl;
 
-    std::cout << "=== Protocol v.2 and v.3 supported (except enumeration) ===" << std::endl;
+    std::cout << "=== Protocol v.2 and v.3 supported ===" << std::endl;
 
     bool exit = false;
     if (argc > 1)
@@ -452,6 +450,23 @@ int main(int argc, char *argv[])
     }
 
     zf_log_set_output_level(ZF_LOG_WARN);
+    
+    device_conf_style dcs = dcs_urpc;
+    ADevId2UsbConfor *pdevid_usb_conf;
+    // checking for urpc or ximc or ximc_ext presents in cmd and processing  
+    if (argc > 1)
+    {
+        char * s = argv[argc - 1];
+        if (strcmp(s, "urpc") == 0 || strcmp(s, "ximc") == 0 || strcmp(s, "ximc_ext") == 0)
+        {
+            argc--;
+            pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(s);
+        }
+        else
+            pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator("urpc");
+    }
+
+    MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);
     bool is_keyfile_supplied = false;
     if (argc > 1)
     {
@@ -460,8 +475,8 @@ int main(int argc, char *argv[])
         {
             zf_log_set_output_level(ZF_LOG_DEBUG);
         }
-    }
-
+     }
+    ADevId2UsbConfor::print_sp_ports();
     try
     {
 
@@ -495,8 +510,6 @@ int main(int argc, char *argv[])
 #endif
 
         ZF_LOGI("Starting server...");
-        list_sp_ports();
-
         bindy.connect();
         bindy.set_handler(&callback_data);
         bindy.set_discnotify(&callback_disc);
@@ -509,6 +522,6 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
     release_already_started_mutex();
 #endif
-    free_sp_ports();
+    if (pdevid_usb_conf != nullptr) delete pdevid_usb_conf;
     return 0;
 }

@@ -6,8 +6,10 @@ extern bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num);
 extern bool xinet_urpc_usage_example(const char *ip, uint32_t dev_num);
 extern void xinet_ximc_threads();
 extern void xinet_urpc_threads();
-extern bool xinet_xibridge_usage_example(const char *ip, uint32_t dev_num);
+extern bool xinet_xibridge_usage_example_urpc(const char *ip, uint32_t dev_num);
 extern void xinet_xibridge_threads();
+extern bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num);
+
 
 
 int main(int /*argc*/, char ** /*argv[]*/)
@@ -53,11 +55,18 @@ int main(int /*argc*/, char ** /*argv[]*/)
     {
         std::cout << "Enter device serial number to be used with xibridge-server  (decimal unsigned number):\n";
         std::cin >> dev_num;
-
-        if (!xinet_xibridge_usage_example(ip_s.data(), dev_num))
+        /*
+        if (!xinet_xibridge_usage_example_urpc(ip_s.data(), dev_num))
         {
             ret = false;
         }
+        */
+  
+        if (!xinet_xibridge_usage_example_ximc(ip_s.data(), dev_num))
+        {
+            ret = false;
+        }
+
         if (!ret) return 1;
         //xinet_2_threads();  
     }

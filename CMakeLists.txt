@@ -145,6 +145,7 @@ IF(BUILD_XIBRIDGE_SERVER)
    set(SRV_SOURCES 
         server/xibridge_server.cpp
         server/mapdevidphnd.cpp
+        server/devid2usb.cpp
         ${COMMON_SOURCES})
    if (XIBRIDGE_SERVER_ENABLE_SUPERVISOR )
         set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)

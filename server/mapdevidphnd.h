@@ -8,6 +8,7 @@
 #include "platform.h"
 #include "rw_lock.h"
 #include "../common/utils.h"
+#include "devid2usb.h"
 
 /**
  * XibDevicePHandle - class to contain some xibridge-compatible (request with known response len and response) usb/com device handle pointer.
@@ -77,7 +78,7 @@ class MapDevIdPHandle : public
 
 {
 public:
-    MapDevIdPHandle(){};
+    MapDevIdPHandle() {};
     ~MapDevIdPHandle();
 
     /*
@@ -115,11 +116,10 @@ public:
      */
     void remove_conn_or_remove_device(conn_id_t conn_id, const DevId &devid_known, bool force_remove = false);
     void log();
+    static void set_devid_2_usb_confor(const ADevId2UsbConfor *pdev2usb) { _pdev2_usb_confor = pdev2usb; }
+    static const ADevId2UsbConfor *get_devid_2_usb_confor() { return _pdev2_usb_confor; }
 
-    static device_id_style get_device_id_style() {return _dis; }
-    static void set_device_id_style(device_id_style dis) { _dis = dis; }
-
-private:
+ private:
     ReadWriteLock _rwlock;
      // spy for tcp-connections
     std::list<conn_serial> _conns;
@@ -131,15 +131,12 @@ private:
     static void lock_create_device_mutex(const DevId &devid);
     static void unlock_device_mutex(const DevId &devid);
     static void free_mutex_pool();
-    static device_id_style _dis;
-
+    
     /**
     * Checks if the given connection is actual and can write the serial corresponding to thic connection
     */
     bool _is_actual_connection(conn_id_t conn_id, DevId *devid = nullptr);
+    static const ADevId2UsbConfor *_pdev2_usb_confor;
 };
 
-extern void list_sp_ports();
-extern void free_sp_ports();
-extern std::vector<DevId> xibridge_enumerate_dev(enum device_id_style dis);
 #endif
