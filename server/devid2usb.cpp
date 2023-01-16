@@ -15,7 +15,6 @@ void ADevId2UsbConfor::list_sp_ports()
     }
 }
 
-
 void ADevId2UsbConfor::print_sp_ports()
 {
 #if(ZF_LOG_ENABLED_DEBUG)    
