@@ -62,7 +62,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
         }
         */
   
-        if (!xinet_xibridge_usage_example_ximc(ip_s.data(), dev_num))
+        if (!xinet_xibridge_usage_example_urpc(ip_s.data(), dev_num))
         {
             ret = false;
         }

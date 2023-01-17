@@ -397,14 +397,14 @@ bool xi_net_dev_uris(MBuf& result,
                      const bvector& data_devid, 
                      int count)
 {
-    uint8_t str_dev_id[sizeof(xibridge_device_t) * 2];
+    uint8_t str_dev_id[sizeof(xibridge_device_t) * 2 + 1];
     MBuf read_buf(data_devid.data(),(int) data_devid.size());
     while (count--)
     {
         HexIDev3 devid;
         read_buf >> devid;
         xibridge_device_t dev = devid.toDevId().to_xibridge_device_t();
-        portable_snprintf((char *)str_dev_id, sizeof(xibridge_device_t)* 2, "%X%X%X%X", dev.reserve, dev.VID, dev.PID, dev.id);
+        portable_snprintf((char *)str_dev_id, sizeof(xibridge_device_t)* 2 + 1, "%08X%04X%04X%08X", dev.reserve, (uint32_t)dev.VID, (uint32_t)dev.PID, dev.id);
         result.memwrite((const uint8_t *)_xinet_pre, (int)strlen(_xinet_pre));
         result.memwrite((const uint8_t *)server, (int)strlen(server));
         result << Hex8('/');

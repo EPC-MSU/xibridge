@@ -5,8 +5,8 @@
 
 std::string serial_to_address(uint32_t serial)
 {
-    static const std::string addr_prefix = "com:\\\\.\\COM";
-
+    //static const std::string addr_prefix = "com:\\\\.\\COM";
+    static const std::string addr_prefix = "\\.\\COM";
     char devstr[4]; // large enough to hold a 999
     sprintf_s(devstr, "%i", serial);
 

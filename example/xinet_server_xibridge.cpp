@@ -46,7 +46,7 @@ bool xinet_xibridge_usage_example_urpc(const char * ip, uint32_t dev_num)
 
     xibridge_version_t real_server_version;
 
-    uint32_t err = xibridge_get_server_last_protocol_version(_DEV_IP, &real_server_version);
+    uint32_t err = xibridge_get_server_last_protocol_version(ip, &real_server_version);
 
     if (err)
     {
@@ -191,16 +191,15 @@ typedef struct _geng_re re_geng;
 
 bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
 {
-    sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
     char  *pdata; uint32_t count;
 
     xibridge_version_t real_server_version;
 
-    uint32_t err = xibridge_get_server_last_protocol_version(_DEV_IP, &real_server_version);
+    uint32_t err = xibridge_get_server_last_protocol_version(ip, &real_server_version);
 
     if (err)
     {
-        printf("Cannot get xibridge version (execute version request) %s: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        printf("Cannot get xibridge version (execute version request) %s: %s\n", ip, xibridge_get_err_expl(err));
         return false;
     }
 
@@ -221,7 +220,7 @@ bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
         const char *p = pdata;
         for (int i = 0; i < (int)count; i++)
         {
-            if (i == 0) memcpy(first_name, p, strlen(p));
+            if (i == 0) memcpy(first_name, p, strlen(p)+1);
             printf("Enumerated device #%d: URI: %s\n", i + 1, p);
             p = strchr(p, 0) + 1;
         }
@@ -239,6 +238,7 @@ bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
     }
 
     re_gets status;
+    memset(&status, 0, sizeof(re_gets));
     uint32_t err_op = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 4, (uint8_t *)&status, sizeof(re_gets));
     if (err_op)
     {
@@ -250,6 +250,7 @@ bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
     printf("Speed: %d\n", status.status.CurSpeed);
 
     re_geng settings;
+    memset(&settings, 0, sizeof(re_geng));
     err_op = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
     if (err_op)
     {

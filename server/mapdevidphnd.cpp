@@ -58,7 +58,7 @@ void XibDevicePHandle::destroy_device_h()
     if (_uhandle != nullptr)
     {
         ZF_LOGD("Urpc device handle %lu.", (unsigned long int)_uhandle);
-        xib_com_device_destroy(&_uhandle);
+        xib_com_device_destroy(_uhandle);
         _uhandle = nullptr;
     }
 }

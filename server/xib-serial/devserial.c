@@ -12,12 +12,6 @@
 
 #define PORT_TIMEOUT 500
 
-struct device_serial_t
-{
-   // xib_handle_t handle;
-   struct sp_port * handle_port;
-};
-
 // when urpc-server emulating
 static uint8_t errv_cid[URPC_CID_SIZE] = { 'e', 'r', 'r', 'v' };
 static uint8_t errd_cid[URPC_CID_SIZE] = { 'e', 'r', 'r', 'd' };
@@ -201,40 +195,28 @@ static xib_result_t receive(struct sp_port *handle_port, uint8_t *response, size
     return result;
 }
 
-struct device_serial_t *
+struct sp_port *
 device_serial_create(
     const char *path
 )
 {
     enum sp_return result;
-    struct device_serial_t *device = malloc(sizeof(struct device_serial_t));
-    if (device == NULL)
-    {
-        goto malloc_failed;
-    }
-    result = sp_get_port_by_name(path, & (device -> handle_port));
+    struct sp_port *psp;
+    result = sp_get_port_by_name(path, &psp);
     if (result != SP_OK)
     {
-        goto serial_port_open_failed;
+        return NULL;
     }
-    if (sp_open(device->handle_port, SP_MODE_READ_WRITE) != SP_OK)
+    if (sp_open(psp, SP_MODE_READ_WRITE) != SP_OK)
     {
-        sp_free_port(device->handle_port);
-        goto serial_port_open_failed;
+        sp_free_port(psp);
+        return NULL;
     }
-
-    return device;
-
-serial_port_open_failed:
-    
-    free(device);
-
-malloc_failed:
-    return NULL;
+    return psp;
 }
 
 xib_result_t device_serial_send_request_base(
-struct device_serial_t *device,
+struct sp_port *device,
     const uint8_t *request,
     uint8_t request_len,
     uint8_t *response,
@@ -242,8 +224,7 @@ struct device_serial_t *device,
     )
 {
     assert(device != NULL);
-
-    struct sp_port * handle_port = device->handle_port;
+        
     if (request_len != 0 && !request)
     {
         ZF_LOGE("can't read from an empty buffer");
@@ -259,7 +240,7 @@ struct device_serial_t *device,
     // send command
     if (request_len != 0)
     {
-        result = command_port_send(handle_port, request, request_len);
+        result = command_port_send(device, request, request_len);
         if (result != xib_result_ok)
         {
             return result;
@@ -270,7 +251,7 @@ struct device_serial_t *device,
     if (response_len != 0)
     {
         // receive remaining uint8_ts
-        if ((result = command_port_receive(handle_port, response, response_len)) != xib_result_ok)
+        if ((result = command_port_receive(device, response, response_len)) != xib_result_ok)
         {
             return result;
         }
@@ -280,7 +261,7 @@ struct device_serial_t *device,
 
 // urpcserver emulating response-request
 xib_result_t urpc_device_serial_send_request(
-struct device_serial_t *device,
+struct sp_port *device,
     const char request_cid[URPC_CID_SIZE],
     const uint8_t *request,
     uint8_t request_len,
@@ -290,7 +271,6 @@ struct device_serial_t *device,
 {
     assert(device != NULL);
 
-    struct sp_port * handle_port = device->handle_port;
     if (request_len != 0 && !request)
     {
         ZF_LOGE("can't read from an empty buffer");
@@ -306,7 +286,7 @@ struct device_serial_t *device,
 
 
         // send command
-        result = command_port_send(handle_port, (const uint8_t *)request_cid, URPC_CID_SIZE);
+        result = command_port_send(device, (const uint8_t *)request_cid, URPC_CID_SIZE);
         if (result != xib_result_ok)
         {
             return result;
@@ -314,13 +294,13 @@ struct device_serial_t *device,
 
         if (request_len != 0)
         {
-            result = command_port_send(handle_port, request, request_len);
+            result = command_port_send(device, request, request_len);
             if (result != xib_result_ok)
             {
                 return result;
             }
             uint16_t request_crc = get_crc(request, request_len);
-            result = command_port_send(handle_port, (const uint8_t *)&request_crc, URPC_CRC_SIZE);
+            result = command_port_send(device, (const uint8_t *)&request_crc, URPC_CRC_SIZE);
             if (result != xib_result_ok)
             {
                 return result;
@@ -336,14 +316,14 @@ struct device_serial_t *device,
         // read first uint8_t until it's non-zero
         do
         {
-            if ((result = receive(handle_port, response_cid, 1)) != xib_result_ok)
+            if ((result = receive(device, response_cid, 1)) != xib_result_ok)
             {
                 return result;
             }
         } while (response_cid[0] == 0);
 
         // read three uint8_ts
-        if ((result = receive(handle_port, response_cid + 1, 3)) != xib_result_ok)
+        if ((result = receive(device, response_cid + 1, 3)) != xib_result_ok)
         {
             return result;
         }
@@ -352,7 +332,7 @@ struct device_serial_t *device,
         if (memcmp(errv_cid, response_cid, URPC_CID_SIZE) == 0)
         {
             ZF_LOGW("Response 'errv' received");
-            sp_flush(handle_port, SP_BUF_BOTH);
+            sp_flush(device, SP_BUF_BOTH);
             return xib_result_value_error;
         }
 
@@ -361,8 +341,8 @@ struct device_serial_t *device,
         {
             ZF_LOGW("Response 'errd' received");
             // flood the controller with zeroes
-            zerosync(handle_port);
-            sp_flush(handle_port, SP_BUF_BOTH);
+            zerosync(device);
+            sp_flush(device, SP_BUF_BOTH);
             return xib_result_error;
         }
 
@@ -370,20 +350,20 @@ struct device_serial_t *device,
         if (memcmp(request_cid, response_cid, URPC_CID_SIZE) != 0)
         {
             // flood the controller with zeroes
-            zerosync(handle_port);
-            sp_flush(handle_port, SP_BUF_BOTH);
+            zerosync(device);
+            sp_flush(device, SP_BUF_BOTH);
             return xib_result_error;
         }
 
         if (response_len != 0)
         {
             // receive remaining uint8_ts
-            if ((result = receive(handle_port, response, response_len)) != xib_result_ok)
+            if ((result = receive(device, response, response_len)) != xib_result_ok)
             {
                 return result;
             }
 
-            if ((result = receive(handle_port, (uint8_t *)&response_crc, URPC_CRC_SIZE)) != xib_result_ok)
+            if ((result = receive(device, (uint8_t *)&response_crc, URPC_CRC_SIZE)) != xib_result_ok)
             {
                 return result;
             }
@@ -398,22 +378,11 @@ struct device_serial_t *device,
 }
 
 xib_result_t device_serial_destroy(
-    struct device_serial_t **device_ptr
+    struct sp_port* device
 )
 {
-    struct device_serial_t *device = *device_ptr;
-    assert(device != NULL);
-
-    enum sp_return result = sp_close(device->handle_port);
-    if (result != SP_OK)
-    {
-       sp_free_port(device->handle_port);
-       return xib_result_error;
-    }
-    sp_free_port(device->handle_port);
-    free(device);
-
-    *device_ptr = NULL;
-
-    return xib_result_ok;
+    if (device == NULL) return xib_result_nodevice;;
+    enum sp_return result = sp_close(device);
+    sp_free_port(device);
+    return result == SP_OK ? xib_result_ok : xib_result_error;
 }

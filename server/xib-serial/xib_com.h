@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-struct xib_device_t;
-typedef struct xib_device_t *xib_device_handle_t;
+struct sp_port;
+typedef struct sp_port *xib_device_handle_t;
 typedef int xib_result_t;
 
 
@@ -26,17 +26,12 @@ extern "C" {
 
 /* Open a port by URI
  * examples:
-*   com:///COM3
-*   com:///\\.\COM12
-*   com:COM3
-*   com:\\.\COM12
-*   com:///dev/tty/ttyACM34
-*   emu:///var/lib/ximc/virtual56.dat
-*   emu:///c:/temp/virtual56.dat
-*   emu:///c:/temp/virtual56.dat?serial_impl=123
-*   xi-net://127.0.0.1/7890ABCD
-*   xi-net://remote.ximc.ru/7890ABCD
- */
+*   //COM3
+*   \\.\COM12
+*   COM3
+*   /dev/tty/ttyACM34
+*/
+
 xib_device_handle_t
 xib_com_device_create(
     const char *uri
@@ -63,11 +58,10 @@ uint8_t response_len
 
 xib_result_t
 xib_com_device_destroy(
-    xib_device_handle_t *device_ptr
+    xib_device_handle_t device
 );
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif //URPC_H
+#endif 

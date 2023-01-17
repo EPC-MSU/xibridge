@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
     zf_log_set_output_level(ZF_LOG_WARN);
     
     device_conf_style dcs = dcs_urpc;
-    ADevId2UsbConfor *pdevid_usb_conf;
+    ADevId2UsbConfor *pdevid_usb_conf = nullptr;
     // checking for urpc or ximc or ximc_ext presents in cmd and processing  
     if (argc > 1)
     {
@@ -462,8 +462,11 @@ int main(int argc, char *argv[])
             argc--;
             pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(s);
         }
-        else
-            pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator("urpc");
+    }
+
+    if (pdevid_usb_conf == nullptr)
+    {
+        pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator("urpc");
     }
 
     MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);

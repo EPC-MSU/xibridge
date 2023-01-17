@@ -18,7 +18,8 @@ enum device_conf_style {
 */
 class ADevId2UsbConfor {
 public:
-    virtual ~ADevId2UsbConfor() { free_sp_ports; }
+    virtual ~ADevId2UsbConfor() 
+    { free_sp_ports(); }
     // pure virtual funcs
     virtual DevId get_devid_from_sp_port(
         const struct sp_port *psp,
@@ -26,7 +27,10 @@ public:
     virtual device_conf_style get_configure_type() const = 0;
     virtual std::string port_name_by_devid(const DevId& devid) const = 0;
     // non virtual funcs   
-    bool is_devid_matchs_sp_port(const DevId& devid, const struct sp_port *psp) const;
+    bool is_devid_matchs_sp_port(
+        const DevId& devid, 
+        const struct sp_port *psp
+        ) const;
     std::vector<DevId> enumerate_dev() const;
     // static member funcs
     static void list_sp_ports();
@@ -34,14 +38,16 @@ public:
     static void print_sp_ports();
 
 protected:
-    ADevId2UsbConfor() { list_sp_ports(); }
+    ADevId2UsbConfor() 
+    { list_sp_ports(); }
     static struct sp_port **pport_list;
 };
 
 class DevId2UsbUrpc : public ADevId2UsbConfor
 {
 public:
-    DevId2UsbUrpc() :ADevId2UsbConfor() { }
+    DevId2UsbUrpc():
+        ADevId2UsbConfor() { }
 
     DevId get_devid_from_sp_port(
         const struct sp_port *psp,

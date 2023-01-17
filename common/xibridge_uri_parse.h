@@ -22,6 +22,7 @@ uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_u
     p += strspn(p, " \t");
     const char *end_s = strstr(p, "://");
     int l = 0;
+    size_t len;
     if (end_s != 0 && (l = ((int)(end_s - p))) < XI_URI_SCHEMA_LEN)
     {
         memcpy(parsed_uri->uri_schema, p, l);
@@ -38,20 +39,22 @@ uint32_t xibridge_parse_uri_dev12(const char *uri, xibridge_parsed_uri *parsed_u
                 if (end_s == 0) return 1;
                 char sdev[24 + 1];  // hex-symbols;
                 memset(sdev, '0', 24);
-                strcpy(sdev + (24 - strlen(p)), p);
+                if ((len = strlen(p)) <= 24) // aligning shorter record left to find out vid, pid, id
                 {
-                    unsigned int vid, pid, id, reserved;
-                    if (sscanf(sdev, "%8x%4x%4x%8x", &reserved, &vid, &pid, &id)
-                        == 4)
+                    strcpy(sdev + (24 - (int)len), p);
                     {
-                        parsed_uri->uri_device_id.reserve = (uint16_t)reserved;
-                        parsed_uri->uri_device_id.VID = (uint16_t)vid;
-                        parsed_uri->uri_device_id.PID = (uint16_t)pid;
-                        parsed_uri->uri_device_id.id = (uint32_t)id;
-                        return 0;
+                        unsigned int vid, pid, id, reserved;
+                        if (sscanf(sdev, "%8x%4x%4x%8x", &reserved, &vid, &pid, &id)
+                            == 4)
+                        {
+                            parsed_uri->uri_device_id.reserve = (uint16_t)reserved;
+                            parsed_uri->uri_device_id.VID = (uint16_t)vid;
+                            parsed_uri->uri_device_id.PID = (uint16_t)pid;
+                            parsed_uri->uri_device_id.id = (uint32_t)id;
+                            return 0;
+                        }
                     }
                 }
-
             }
         }
     }

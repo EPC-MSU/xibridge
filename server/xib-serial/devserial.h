@@ -3,16 +3,14 @@
 
 #include "xib_com.h"
 
-struct device_serial_t;
-
-struct device_serial_t *
+struct sp_port*
 device_serial_create(
     const char *path
 );
 
 // urpcserver emulating response-request
 xib_result_t urpc_device_serial_send_request(
-struct device_serial_t *device,
+struct sp_port *device,
     const char request_cid[URPC_CID_SIZE],
     const uint8_t *request,
     uint8_t request_len,
@@ -22,7 +20,7 @@ struct device_serial_t *device,
 
 xib_result_t
 device_serial_send_request_base(
-    struct device_serial_t *device,
+    struct sp_port *device,
         const uint8_t *request,
         uint8_t request_len,
         uint8_t *response,
@@ -31,7 +29,7 @@ device_serial_send_request_base(
 
 xib_result_t
 device_serial_destroy(
-    struct device_serial_t **device_ptr
+    struct sp_port *device
 );
 
 #endif //URPC_DEVSERIAL_DEVSERIAL_H

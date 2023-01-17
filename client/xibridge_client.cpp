@@ -198,7 +198,7 @@ bool Xibridge_client::exec_enumerate(char **result,
         int num_devs = proto->get_result_error();
         if (num_devs != 0)
         {
-            MBuf res(((int)(strlen(_host) + sizeof(xibridge_device_t)) * 2 + 16) * num_devs); // xi-net://<>/<>
+            MBuf res(((int)(strlen(_host) + sizeof(xibridge_device_t) * 2 + 16)) * num_devs); // xi-net://<>/<>
             xi_net_dev_uris(res, _host, data, num_devs);
             *result = (char *)malloc(res.realSize());
             memcpy(*result, (const uint8_t *)res, res.realSize());
@@ -363,6 +363,7 @@ bool Xibridge_client::open_connection()
     _conn_id = Bindy_helper::instance() -> connect(this);
     if (_conn_id == conn_id_invalid)
     {
+        _last_error = ERR_NO_CONNECTION;
         return false;
     }
     return true;

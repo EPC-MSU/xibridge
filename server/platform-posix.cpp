@@ -3,7 +3,7 @@
 
 std::string serial_to_address(uint32_t serial)
 {
-    static const std::string addr_prefix = "com:///dev/ximc/";
+    static const std::string addr_prefix = "/dev/ximc/";
 
     char devstr[9]; // large enough to hold a uint32_t serial in hex + terminating null, so 9 bytes
     sprintf(devstr, "%08X", serial);

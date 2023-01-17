@@ -30,7 +30,6 @@ void ADevId2UsbConfor::print_sp_ports()
 #endif
 }
 
-
 void ADevId2UsbConfor::free_sp_ports()
 {
     if (pport_list != nullptr) sp_free_port_list(pport_list);
@@ -50,7 +49,8 @@ DevId DevId2UsbUrpc::get_devid_from_sp_port(
 #if WIN32
     id = 0;
     char *pname = sp_get_port_name(psp);
-    if (pname == nullptr || strlen(pname) < 256)
+    // anyway, we need just usb with non-null serial
+    if (sp_get_port_usb_serial(psp) != nullptr && pname != nullptr && strlen(pname) < 256 )
     {
         memcpy(portname, pname, strlen(pname));
         strlwr_portable(portname);
@@ -82,11 +82,8 @@ DevId DevId2UsbXimc::get_devid_from_sp_port(
     {
         int pos = (int)strlen(serial_s);
         if (pos < 4) ok = false;
-        for (int k = 4; k > 0; k--)
-        {
-            id *= 16;
-            id += serial_s[pos - k];
-        }
+        else if (sscanf((serial_s + pos - 4), "%4x", &id) != 1)
+            ok = false;
     }
     return DevId(id);
 }
@@ -103,6 +100,7 @@ DevId DevId2UsbXimcExt::get_devid_from_sp_port(
     if (sp_get_port_usb_vid_pid(psp, &vid, &pid) != SP_OK) ok = false;
     return DevId(ret.id(), (uint16_t)pid, (uint16_t)vid);
 }
+
 /*
 * checks if the device with given devid is same as one defined by the sp_port
 */
