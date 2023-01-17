@@ -42,10 +42,9 @@ xib_result_t urpc_device_send_request(
         return xib_result_nodevice;
     }
 
-    xib_result_t result;
-    result = urpc_device_serial_send_request(device, cid, request, request_len, response, response_len);
-    return result;
+    return urpc_device_serial_send_request(device, cid, request, request_len, response, response_len);
 }
+
 // can be called from any thread;
 // calling this function after xib_device_destroy is undefined behaviour (where 'after' is defined by languages' memory model)
 xib_result_t xib_com_device_send_request(
