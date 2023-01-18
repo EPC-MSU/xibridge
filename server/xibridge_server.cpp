@@ -10,6 +10,7 @@
 #include "../common/utils.h"
 #include "../common/protocols.h"
 #include "../client/xibridge_client.h" // ERROR CODES
+#include "../inc/client/version.h"
 
 #ifndef _WIN32 
 #include <execinfo.h>
@@ -408,10 +409,12 @@ int main(int argc, char *argv[])
 #ifndef _WIN32
     signal(SIGSEGV, handler);   // install our handler  
 #endif
+
+    xibridge_version_t ver = XIBRIDGE_VERSION;
     std::cout << "=== Xibridge Server "
-        << 1 << "."
-        << 0 << "."
-        << 0 << " "
+        << (int) ver.major << "."
+        << (int) ver.minor << "."
+        << (int) ver.bagfix << " "
         << "===" << std::endl;
 
     std::cout << "=== xi-net protocols v.2 and v.3 supported ===" << std::endl;

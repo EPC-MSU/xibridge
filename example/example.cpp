@@ -65,7 +65,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
         else if (controller_type == "urpc")
         {
             ret = xinet_xibridge_usage_example_urpc(ip_s.data(), dev_num);
-            if (ret) xinet_xibridge_threads_urpc();
+            //if (ret) xinet_xibridge_threads_urpc();
         }
         else
         {
