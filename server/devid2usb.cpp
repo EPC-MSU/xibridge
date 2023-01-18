@@ -24,8 +24,8 @@ void ADevId2UsbConfor::print_sp_ports()
         struct sp_port *port = pport_list[i];
         int bus, addr;
         sp_get_port_usb_bus_address(port, &bus, &addr);
-        ZF_LOGD("Found port: %s, serial %s, usb bus %x, usb address %x.", sp_get_port_name(port), sp_get_port_usb_serial(port),
-            bus, addr);
+        ZF_LOGD("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s.", sp_get_port_name(port), sp_get_port_usb_serial(port),
+            bus, addr, sp_get_port_description(port));
     }
 #endif
 }

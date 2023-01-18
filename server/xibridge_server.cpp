@@ -291,7 +291,7 @@ void print_help(char *argv[])
         << argv[0] << " debug urpc" << std::endl
         << argv[0] << " ~/keyfile.sqlite ximc" << std::endl
         << argv[0] << " ~/keyfile.sqlite debug urpc" << std::endl
-        << "Debug logging will be disabled by default, urpc-style protocol usb-naming configuration selected by default" << std::endl;
+        << "Debug logging will be disabled by default, urpc-style usb port matching configuration selected by default" << std::endl;
 #else
     std::cout << "Usage: " << argv[0] << " keyfile"
         << std::endl
@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
         << 0 << " "
         << "===" << std::endl;
 
-    std::cout << "=== Protocol v.2 and v.3 supported ===" << std::endl;
+    std::cout << "=== xi-net protocols v.2 and v.3 supported ===" << std::endl;
 
     bool exit = false;
     if (argc > 1)
@@ -454,20 +454,23 @@ int main(int argc, char *argv[])
     device_conf_style dcs = dcs_urpc;
     ADevId2UsbConfor *pdevid_usb_conf = nullptr;
     // checking for urpc or ximc or ximc_ext presents in cmd and processing  
+    const char *susb_m = "urpc";
     if (argc > 1)
     {
         char * s = argv[argc - 1];
         if (strcmp(s, "urpc") == 0 || strcmp(s, "ximc") == 0 || strcmp(s, "ximc_ext") == 0)
         {
             argc--;
+            susb_m = s;
             pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(s);
         }
     }
 
     if (pdevid_usb_conf == nullptr)
     {
-        pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator("urpc");
+        pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(susb_m);
     }
+    std::cout << "=== The " << susb_m << " style configuration is selected as the usb port matching configuration ===" << std::endl;
 
     MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);
     bool is_keyfile_supplied = false;

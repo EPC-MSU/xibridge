@@ -136,9 +136,13 @@ static void thread_body_urpc(int thread_num)
     printf("Thread %u: openning connection... \n", thread_num);
     xibridge_open_device_connection(_DEV_IP, &conn);
     printf("Thread %u: connection opened, conn_id: %u \n", thread_num, conn.conn_id);
-    unsigned char resp[sizeof(urmc_get_identity_information_t) + CID_SIZE];
+    uint8_t req_urpc[CID_SIZE + CRC_SIZE];
+    memcpy(req_urpc, "ginf", CID_SIZE);
+    uint16_t crc = get_crc(req_urpc, CID_SIZE);
+    memcpy(req_urpc + CID_SIZE, (void *)&crc, CRC_SIZE);
+    unsigned char resp[sizeof(urmc_get_identity_information_t) + CID_SIZE + CRC_SIZE];
     printf("Thread %u: sending ginf... \n", thread_num);
-    uint32_t ginf_err = xibridge_device_request_response(&conn, (const unsigned char *)"ginf", 4, resp, sizeof(urmc_get_identity_information_t)+sizeof(uint32_t));
+    uint32_t ginf_err = xibridge_device_request_response(&conn, req_urpc, CID_SIZE + CRC_SIZE, resp, sizeof(urmc_get_identity_information_t) + CID_SIZE + CRC_SIZE);
     
     printf("Thread %u: ginf return %s\n", thread_num, 
              ginf_err == 0 ? "true" : "false");
@@ -192,8 +196,9 @@ typedef struct _geng_re re_geng;
 bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
 {
     char  *pdata; uint32_t count;
-
     xibridge_version_t real_server_version;
+
+    sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
 
     uint32_t err = xibridge_get_server_last_protocol_version(ip, &real_server_version);
 
@@ -213,14 +218,12 @@ bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
         return false;
     }
 
-    char first_name[256];
     printf("Count of enumerated devices: %u\n", count);
     if (count)
     {
         const char *p = pdata;
         for (int i = 0; i < (int)count; i++)
         {
-            if (i == 0) memcpy(first_name, p, strlen(p)+1);
             printf("Enumerated device #%d: URI: %s\n", i + 1, p);
             p = strchr(p, 0) + 1;
         }
@@ -229,10 +232,10 @@ bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
 
     xibridge_conn_t conn;
 
-    err = xibridge_open_device_connection(first_name, &conn);
+    err = xibridge_open_device_connection(_DEV_IP, &conn);
     if (err)
     {
-        printf("Cannot open device: %s, error: %s\n", first_name, xibridge_get_err_expl(err));
+        printf("Cannot open device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
         xibridge_close_device_connection(&conn);
         return false;
     }
