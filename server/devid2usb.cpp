@@ -61,7 +61,14 @@ DevId DevId2UsbUrpc::get_devid_from_sp_port(
     else ok = false;
 #else
     int bus, addr;
-    sp_get_port_usb_bus_address(psp, &bus, &addr);
+    if (sp_get_port_usb_serial(psp) == nullptr)
+    {
+        ok = false;
+    }
+    else
+    {
+        sp_get_port_usb_bus_address(psp, &bus, &addr);
+    }
     id = (uint32_t)addr;
 #endif
     return DevId(id);
