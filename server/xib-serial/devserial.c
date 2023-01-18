@@ -246,8 +246,7 @@ struct sp_port *device,
             return result;
         }
     }
-    uint16_t response_crc = 0;
-
+    
     if (response_len != 0)
     {
         // receive remaining uint8_ts

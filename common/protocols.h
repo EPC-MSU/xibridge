@@ -26,6 +26,14 @@ public:
         _dev_id.VID = vid;
         _dev_id.reserve = reserve;
     }
+    
+    DevId(const DevId & devid)
+    {  
+        _dev_id.id = devid.id();
+        _dev_id.PID = devid.PID();
+        _dev_id.VID = devid.VID();
+        _dev_id.reserve = devid.reserve();
+    }
 
     bool operator == (const DevId& devid) const
     {

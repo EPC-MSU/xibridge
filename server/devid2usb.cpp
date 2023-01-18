@@ -61,7 +61,7 @@ DevId DevId2UsbUrpc::get_devid_from_sp_port(
     else ok = false;
 #else
     int bus, addr;
-    psp->sp_get_usb_bus_address(psp, &bus, &addr);
+    sp_get_port_usb_bus_address(psp, &bus, &addr);
     id = (uint32_t)addr;
 #endif
     return DevId(id);
@@ -118,7 +118,18 @@ bool ADevId2UsbConfor::is_devid_matchs_sp_port(const DevId& devid, const struct 
 */
 std::string DevId2UsbUrpc::port_name_by_devid(const DevId& devid) const
 {
+// some different port configure ways on ddifferent OS
+#if WIN32   
    return serial_to_address(devid.id());
+#else   
+   if (pport_list == nullptr) return "";
+    for (int i = 0; pport_list[i] != NULL; i++)
+    {
+        if (is_devid_matchs_sp_port(devid, pport_list[i]))
+            return sp_get_port_name(pport_list[i]);
+    }
+    return "";
+#endif    
 }
 
 std::string DevId2UsbXimc::port_name_by_devid(const DevId& devid) const

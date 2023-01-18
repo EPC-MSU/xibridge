@@ -6,7 +6,6 @@
 #define XIMC_MIN_H
 
 // from ximc.h
-PACK(
 typedef struct
 {
     unsigned int MoveSts;   // flagset_movestate "Flags of move state"
@@ -27,10 +26,8 @@ typedef struct
     unsigned int Flags; // flagset_stateflags "Status flags"
     unsigned int GPIOFlags; // flagset_gpioflags "Status flags of the GPIO outputs"
     unsigned int CmdBufFreeSpace;   // This field is a service field. It shows the amount of free cells buffer synchronization chain.
-} status_t
-);
+} status_t;
 
-PACK(
 typedef struct
 {
     unsigned int NomVoltage;    // Rated voltage in tens of mV. Controller will keep the voltage drop on motor below this value if ENGINE_LIMIT_VOLT flag is set (used with DC only). 
@@ -41,6 +38,6 @@ typedef struct
     int Antiplay;   // Number of pulses or steps for backlash (play) compensation procedure. Used if ENGINE_ANTIPLAY flag is set.
     unsigned int MicrostepMode; // flagset_microstepmode "Flags of microstep mode"
     unsigned int StepsPerRev;   // Number of full steps per revolution(Used with stepper motor only). Range: 1..65535.
-} engine_settings_t
-);
+} engine_settings_t;
+
 #endif

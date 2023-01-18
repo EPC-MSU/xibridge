@@ -20,7 +20,7 @@ xib_device_handle_t  xib_com_device_create(
     struct sp_port * dst = device_serial_create(uri);
     if (dst == NULL)
     {
-        ZF_LOGE("failed to create serial device");
+        ZF_LOGE("failed to create serial device %s", uri);
         return NULL;
     }
     return dst;

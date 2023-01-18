@@ -4,7 +4,6 @@
 #ifndef URMC_MIN_H
 #define URMC_MIN_H
 
-PACK(
 typedef struct
 {
     uint8_t Manufacturer[16]; // Manufacturer name. The name is set by the manufacturer.
@@ -22,9 +21,7 @@ typedef struct
     uint32_t SerialNumber; // Device serial number
     uint8_t reserved[8]; 
 } urmc_get_identity_information_t;
-);
 
-PACK(
 typedef struct
 {
     uint8_t MoveSts; // Move state
@@ -42,6 +39,5 @@ typedef struct
     uint8_t reserved2[6]; 
     uint32_t Flags; //Set of flags specify motor shaft movement algorithm and list of limitations
     uint32_t GPIOFlags; //Set of flags of gpio states
-} urmc_status_impl_t
-);
+} urmc_status_impl_t;
 #endif
