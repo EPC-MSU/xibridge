@@ -2,7 +2,7 @@
 
 Кроссплатформенная библиотека для взаимодействия с устройствами uRPC и XIMС USB по протоколу XiNet.
 
-* `server` - xibridge-сервер (в стадии проектирования и разработки)
+* `server` - xibridge-сервер 
 * `client` - библиотека API xibridge-клиента
 * `common` - общая часть
 * `test` - тесты внутренних функций проекта xibridge
@@ -76,7 +76,7 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 * поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
 * повесить тег vX.X.X на коммит, сделать push;
 * написать changelog xibridge-x.x.x-changelog.txt;
-* собрать библиотеку под всеми архитектурами: win32, win64, debian linux, macos, бинарные результаты сборки добавить в архив в 
+* собрать библиотеку и xibridge-сервер под всеми архитектурами: win32, win64, debian linux, macos, бинарные результаты сборки добавить в архив в 
 соответствующие папки;
 * назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X;
 * выложить xibridge-x.x.x-changelog.txt, xibridge-x.x.x.zip на сетевой диск .

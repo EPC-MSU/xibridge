@@ -453,8 +453,7 @@ int main(int argc, char *argv[])
     }
 
     zf_log_set_output_level(ZF_LOG_WARN);
-    
-    device_conf_style dcs = dcs_urpc;
+        
     ADevId2UsbConfor *pdevid_usb_conf = nullptr;
     // checking for urpc or ximc or ximc_ext presents in cmd and processing  
     const char *susb_m = "urpc";
