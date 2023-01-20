@@ -78,11 +78,11 @@ bool server_simu::is_serial_ok(uint32_t serial)
 // == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
 void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) 
 {
-    ZF_LOGD("From %u received packet of length: %lu.", conn_id, data.size());
+    ZF_LOGD("From %u received packet of length: %lu.", conn_id, (long unsigned int)data.size());
 
     if (data.size() < 16)
     { // We need at least the protocol version and command code... and serial too
-        ZF_LOGE("From %u received incorrect data packet: Size: %lu, expected at least 16.", conn_id, data.size());
+        ZF_LOGE("From %u received incorrect data packet: Size: %lu, expected at least 16.", conn_id, (long unsigned int)data.size());
         throw std::runtime_error("Incorrect data packet");
     }
 

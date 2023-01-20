@@ -2,7 +2,7 @@
 
 Кроссплатформенная библиотека для взаимодействия с устройствами uRPC и XIMС USB по протоколу XiNet.
 
-* `server` - xibridge-сервер 
+* `server` - xibridge-сервер
 * `client` - библиотека API xibridge-клиента
 * `common` - общая часть
 * `test` - тесты внутренних функций проекта xibridge
@@ -18,8 +18,8 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 ## Windows
 
-Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Архив попложить рядом 
-с xibridge.
+Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Разархивированный 
+каталог libserialport_release положить рядом с xibridge.
 
 Библиотеку, сервер. тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
 проектов:
@@ -35,12 +35,11 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 ## Linux, Mac OS
 
-Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Архив попложить рядом 
-с xibridge.
+Если планируется собирать xibridge_server, понадобится библитека libserialport. Разархивированный 
+каталог libserialport_release положить рядом с xibridge.
 
-Для Linux установить пакет из папки с соответствующим именем (deb64 или deb_mips).
+Для Linux-систем установить пакет из папки с соответствующим именем (deb64 или deb_mips).
 
-Нужно взять архив libserialport_release.
 Библиотеку, тесты и пример собрать, как и все наши проекты на CMake\make:
 
 * `mkdir build`
@@ -51,6 +50,9 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 * `make`
 
 Для запуска сервера требуются права на доступ к последовательным портам в директории /dev (пользователь должен входить в группу dialout или быть root).
+Сервер может принимать 3 параметра в следующем порядке: имя файла с ключами (по умолчанию используются встроенные ключи), опцию отладочного вывода (debug), 
+способ  идентификации устройств (интерпретация идентификатора в протоколе) urpc или ximc. По умочанию включается urpc. Все три параметра необязательны.
+Для работы в режиме urpc на unix-системах теперь не нужно создавать ссылки вида '/dev/ximc/<id>'
 
 ### Запуск тестов
 
