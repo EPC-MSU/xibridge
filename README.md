@@ -78,10 +78,10 @@ ximc-сервером, urpc-сервером, xibridge-сервером. Ее м
 * поменять версию (переменные XIBRIGE_VERSION_MAJOR, XIBRIGE_VERSION_MINOR, XIBRIDGE_VERSION_PATCH) в начале CMakeLists.txt;
 * повесить тег vX.X.X на коммит, сделать push;
 * написать changelog xibridge-x.x.x-changelog.txt;
-* собрать библиотеку и xibridge-сервер под всеми архитектурами: win32, win64, debian linux, macos, бинарные результаты сборки добавить в архив в 
-соответствующие папки;
-* назвать этот архив xibridge-x.x.x.zip и выложить на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X;
-* выложить xibridge-x.x.x-changelog.txt, xibridge-x.x.x.zip на сетевой диск .
+* собрать библиотеку и xibridge-сервер под всеми архитектурами: win32, win64, debian linux, macos, бинарные результаты сборки добавить в 
+архивы xibridge-x.x.x.zip и xibridge_server-x.x.x.zip в соответствующие папки;
+* выложить их на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X;
+* выложить xibridge-x.x.x-changelog.txt, xibridge-x.x.x.zip, xibridge_server-x.x.x..zip на сетевой диск.
 
 ## Генерация документации
 
