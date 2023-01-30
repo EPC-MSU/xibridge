@@ -400,7 +400,6 @@ char *strlwr_portable(char *str)
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
 
-
 int main(int argc, char *argv[])
 {
 

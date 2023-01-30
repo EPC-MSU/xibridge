@@ -265,3 +265,86 @@ bool xinet_xibridge_usage_example_ximc(const char *ip, uint32_t dev_num)
     xibridge_close_device_connection(&conn);
     return true;
 }
+
+bool xinet_xibridge_usage_example_ximc_ext(const char *ip, uint32_t dev_num)
+{
+    char  *pdata; uint32_t count;
+    xibridge_version_t real_server_version;
+
+    sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
+    char dev_ip[256];
+
+    uint32_t err = xibridge_get_server_last_protocol_version(ip, &real_server_version);
+
+    if (err)
+    {
+        printf("Cannot get xibridge version (execute version request) %s: %s\n", ip, xibridge_get_err_expl(err));
+        return false;
+    }
+
+    printf("Server last protocol version is %u.%u.%u\n", (unsigned int)real_server_version.major, (unsigned int)real_server_version.minor, (unsigned int)real_server_version.bagfix);
+    xibridge_set_base_protocol_version(real_server_version);
+
+    err = xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
+    if (err)
+    {
+        printf("Cannot enumerare device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        return false;
+    }
+
+    printf("Count of enumerated devices: %u\n", count);
+    if (count)
+    {
+        const char *p = pdata;
+        for (int i = 0; i < (int)count; i++)
+        {
+            if (i == 0)
+            {
+                memcpy(dev_ip, p, strlen(p) + 1);
+            }
+            printf("Enumerated device #%d: URI: %s\n", i + 1, p);
+            p = strchr(p, 0) + 1;
+        }
+    }
+    xibridge_free_enumerate_devices(pdata);
+    if (!count)
+    {
+        printf("No devices found. Exit...\n");
+        return false;
+    }
+
+    xibridge_conn_t conn;
+
+    err = xibridge_open_device_connection(dev_ip, &conn);
+    if (err)
+    {
+        printf("Cannot open device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
+        xibridge_close_device_connection(&conn);
+        return false;
+    }
+
+    re_gets status;
+    memset(&status, 0, sizeof(re_gets));
+    uint32_t err_op = xibridge_device_request_response(&conn, (const uint8_t *)"gets", 4, (uint8_t *)&status, sizeof(re_gets));
+    if (err_op)
+    {
+        printf("Cannot execute gets: %s\n", xibridge_get_err_expl(err_op));
+        xibridge_close_device_connection(&conn);
+        return false;
+    }
+
+    printf("Speed: %d\n", status.status.CurSpeed);
+
+    re_geng settings;
+    memset(&settings, 0, sizeof(re_geng));
+    err_op = xibridge_device_request_response(&conn, (const uint8_t *)"geng", 4, (uint8_t *)&settings, sizeof(re_geng));
+    if (err_op)
+    {
+        printf("Cannot execute geng: %s\n", xibridge_get_err_expl(err_op));
+        xibridge_close_device_connection(&conn);
+        return false;
+    }
+    printf("Nom voltage: %u\n", settings.settings.NomVoltage);
+    xibridge_close_device_connection(&conn);
+    return true;
+}
