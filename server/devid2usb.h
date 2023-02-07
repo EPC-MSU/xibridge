@@ -4,9 +4,10 @@
 #include <vector>
 #include <libserialport.h>
 #include "../common/utils.h"
+#include "rw_lock.h"
 
 /**
-* ADevId2UsbConfor - abstact class to configure matching DevId (given at any server request) to comport/usb entitiy .
+* ADevId2UsbConfor - abstact thread-safe class to configure matching DevId (given at any server request) to comport/usb entitiy .
 * In future, com/usb with definite device type connected to a port 
 * 
 */
@@ -15,22 +16,24 @@ public:
     virtual ~ADevId2UsbConfor() 
     { free_sp_ports(); }
     
-    // pure virtual funcs
+    // pure virtual func
     virtual std::string port_name_by_devid(const DevId& devid) const = 0;
-    // non virtual funcs   
-    bool is_devid_matchs_sp_port(
-        const DevId& devid, 
-        const struct sp_port *psp
-        ) const;
+    
     std::vector<DevId> enumerate_dev() const;
 
     static void print_sp_ports();
+    static void list_sp_ports();
 
 protected:
     ADevId2UsbConfor()
     {
         list_sp_ports();
     }
+    // non virtual funcs   
+    bool is_devid_matchs_sp_port(
+        const DevId& devid,
+        const struct sp_port *psp
+        ) const;
 
 // pure virtual funcs
     virtual DevId get_devid_from_sp_port(
@@ -39,12 +42,16 @@ protected:
 
 // static data member
     static struct sp_port **pport_list;
-
+    static ReadWriteLock rwlock;
 private:
-    static void list_sp_ports();
-    static void free_sp_ports();
+     static void free_sp_ports();
 };
 
+/**
+* DevId2UsbUrpc - thread-safe class to configure as urpc-style matching DevId (given at any server request) to comport/usb entitiy .
+* In future, com/usb with definite device type connected to a port
+*
+*/
 class DevId2UsbUrpc : public ADevId2UsbConfor
 {
 public:
@@ -58,6 +65,11 @@ protected:
         bool &ok) const;
 };
 
+/**
+* DevId2UsbXimc - thread-safe class to configure as ximc-style matching DevId (given at any server request) to comport/usb entitiy .
+* In future, com/usb with definite device type connected to a port
+*
+*/
 class DevId2UsbXimc : public ADevId2UsbConfor
 {
 public:
@@ -70,6 +82,11 @@ protected:
         bool &ok) const;
 };
 
+/**
+* DevId2UsbXimc - thread-safe class to configure as ximc_ext-style matching DevId (given at any server request) to comport/usb entitiy .
+* In future, com/usb with definite device type connected to a port
+*
+*/
 class DevId2UsbXimcExt : public DevId2UsbXimc
 {
 public:

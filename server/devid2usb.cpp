@@ -3,36 +3,44 @@
 #include "devid2usb.h"
 
 struct sp_port ** ADevId2UsbConfor::pport_list = nullptr;
+ReadWriteLock ADevId2UsbConfor::rwlock;
 
 void ADevId2UsbConfor::list_sp_ports()
 {
+    if (rwlock.is_write_lock_requested()) return; // if already locked for write - either other scan or destructor had been already called - new enumerate not needed so soon
+    rwlock.write_lock();
+    if (pport_list != nullptr) sp_free_port_list(pport_list);
     enum sp_return result = sp_list_ports(&pport_list);
-
     if (result != SP_OK)
     {
-        ZF_LOGE("sp_list_port retuned negative result!");
+        ZF_LOGE("sp_list_port returned negative result!");
         pport_list = nullptr;
     }
+    rwlock.write_unlock();
 }
 
 void ADevId2UsbConfor::print_sp_ports()
 {
 #if(ZF_LOG_ENABLED_DEBUG)    
-    ZF_LOGD("Found ports:");
+    printf("Found ports:\n");
+    rwlock.read_lock();
     for (int i = 0; pport_list[i] != NULL; i++)
     {
         struct sp_port *port = pport_list[i];
         int bus, addr;
         sp_get_port_usb_bus_address(port, &bus, &addr);
-        ZF_LOGD("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s.", sp_get_port_name(port), sp_get_port_usb_serial(port),
+        printf("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s.\n", sp_get_port_name(port), sp_get_port_usb_serial(port),
             bus, addr, sp_get_port_description(port));
     }
+    rwlock.read_unlock();
 #endif
 }
 
 void ADevId2UsbConfor::free_sp_ports()
 {
+    rwlock.write_lock();
     if (pport_list != nullptr) sp_free_port_list(pport_list);
+    rwlock.write_unlock();
 }
 
 /*
@@ -125,35 +133,47 @@ bool ADevId2UsbConfor::is_devid_matchs_sp_port(const DevId& devid, const struct 
 */
 std::string DevId2UsbUrpc::port_name_by_devid(const DevId& devid) const
 {
-// some different port configure ways on ddifferent OS
+    // some different port configure ways on ddifferent OS
 #if WIN32   
-   return serial_to_address(devid.id());
+    return serial_to_address(devid.id());
 #else   
-   if (pport_list == nullptr) return "";
-    for (int i = 0; pport_list[i] != NULL; i++)
+    std::string s = "";
+    rwlock.read_lock();
+    if (pport_list != nullptr)
     {
-        if (is_devid_matchs_sp_port(devid, pport_list[i]))
-            return sp_get_port_name(pport_list[i]);
+        for (int i = 0; pport_list[i] != NULL; i++)
+        {
+            if (is_devid_matchs_sp_port(devid, pport_list[i]))
+                s = sp_get_port_name(pport_list[i]);
+        }
     }
-    return "";
+    rwlock.read_unlock();
+    return s;
 #endif    
 }
 
 std::string DevId2UsbXimc::port_name_by_devid(const DevId& devid) const
 {
-    if (pport_list == nullptr) return "";
-    for (int i = 0; pport_list[i] != NULL; i++)
+    std::string s = "";
+    rwlock.read_lock();
+    if (pport_list != nullptr)
     {
-        if (is_devid_matchs_sp_port(devid, pport_list[i]))
-            return sp_get_port_name(pport_list[i]);
+
+        for (int i = 0; pport_list[i] != NULL; i++)
+        {
+            if (is_devid_matchs_sp_port(devid, pport_list[i]))
+                s = sp_get_port_name(pport_list[i]);
+        }
     }
-    return "";
+    rwlock.read_unlock();
+    return s;
 }
 
 std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
 {
     std::vector<DevId> devids;
-
+    list_sp_ports();
+    rwlock.read_lock();
     for (int i = 0; pport_list[i] != NULL; i++)
     {
         struct sp_port *pport = pport_list[i];
@@ -164,6 +184,8 @@ std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
             devids.push_back(DevId(ret));
         }
     }
+    rwlock.read_unlock();
+
     return devids;
 }
 

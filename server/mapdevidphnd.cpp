@@ -14,6 +14,7 @@ const ADevId2UsbConfor * MapDevIdPHandle::_pdev2_usb_confor = nullptr;
 
 xib_device_handle_t XibDevicePHandle::create_device_h(const DevId& devid)
 {
+    ADevId2UsbConfor::list_sp_ports();
     const std::string addr = MapDevIdPHandle::get_devid_2_usb_confor()->port_name_by_devid(devid);
         
     ZF_LOGD("Open device with id %u.", devid.id());

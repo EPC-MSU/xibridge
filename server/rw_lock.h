@@ -49,6 +49,12 @@ public:
         else if (_nread_waiters)
             _rcond.notify_all();
     }
+    // added to let to know if write operation has been requested at this moment
+    bool is_write_lock_requested()
+    {
+        std::unique_lock<std::mutex> lck(_mtx);
+        return _nwrite != 0 || _nwrite_waiters != 0;
+    }
 
 private:
     std::mutex _mtx;
