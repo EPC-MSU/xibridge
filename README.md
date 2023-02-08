@@ -38,7 +38,7 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 Если планируется собирать xibridge_server, понадобится библитека libserialport. Разархивированный 
 каталог libserialport_release положить рядом с xibridge.
 
-Для Linux-систем установить пакет из папки с соответствующим именем (deb64 или deb_mips).
+Для Linux-систем (debian и debian mipsel) установить пакет из папки с соответствующим именем (deb64 или deb_mips).
 
 Библиотеку, тесты и пример собрать, как и все наши проекты на CMake\make:
 
