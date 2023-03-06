@@ -70,10 +70,9 @@ bool xinet_xibridge_usage_example_urpc(const char * ip, uint32_t dev_num)
 
     uint8_t req_urpc[CID_SIZE + CRC_SIZE];
     memcpy(req_urpc, "ginf", CID_SIZE);
-    uint16_t crc = get_crc(req_urpc, CID_SIZE);
-    memcpy(req_urpc+CID_SIZE, (void *)&crc, CRC_SIZE);
    
-    uint32_t ginf_err = xibridge_device_request_response(&conn, req_urpc, CID_SIZE + CRC_SIZE, resp, sizeof(urmc_get_identity_information_t) + CID_SIZE + CRC_SIZE);
+     
+    uint32_t ginf_err = xibridge_device_request_response(&conn, req_urpc, CID_SIZE, resp, sizeof(urmc_get_identity_information_t) + CID_SIZE + CRC_SIZE);
     if (ginf_err)
     {
         printf ("Cannot execute ginf: %s\n", xibridge_get_err_expl(ginf_err));
@@ -81,6 +80,15 @@ bool xinet_xibridge_usage_example_urpc(const char * ip, uint32_t dev_num)
         return false;
     }
          
+    uint16_t crc = get_crc(resp + CID_SIZE, sizeof(urmc_get_identity_information_t));
+    uint16_t crc_given = *(uint16_t *)(resp + CID_SIZE + sizeof(urmc_get_identity_information_t));
+    if (crc != crc_given)
+    {
+        printf("ginf response crc is wrong!\n");
+        xibridge_close_device_connection(&conn);
+        return false;
+    }
+
     urmc_get_identity_information_t  &info = *(urmc_get_identity_information_t *)(resp + CID_SIZE);
    
     printf("Manufacture: %s\n", (char *)info.Manufacturer);
@@ -92,13 +100,20 @@ bool xinet_xibridge_usage_example_urpc(const char * ip, uint32_t dev_num)
     memset(resp_st, 0, sizeof(urmc_status_impl_t)+CID_SIZE + CRC_SIZE);
 
     memcpy(req_urpc, "gets", CID_SIZE);
-    crc = get_crc(req_urpc, CID_SIZE);
-    memcpy(req_urpc + CID_SIZE, (void *)&crc, CRC_SIZE);
-
-    uint32_t gets_err = xibridge_device_request_response(&conn, req_urpc, CID_SIZE + CRC_SIZE, resp_st, sizeof(urmc_status_impl_t) + CID_SIZE + CRC_SIZE);
+    
+    uint32_t gets_err = xibridge_device_request_response(&conn, req_urpc, CID_SIZE, resp_st, sizeof(urmc_status_impl_t) + CID_SIZE + CRC_SIZE);
     if (gets_err)
     {
         printf("Cannot execute gets: %s\n", xibridge_get_err_expl(gets_err));
+        xibridge_close_device_connection(&conn);
+        return false;
+    }
+
+    crc = get_crc(resp_st + CID_SIZE, sizeof(urmc_status_impl_t));
+    crc_given = *(uint16_t *)(resp_st + CID_SIZE + sizeof(urmc_status_impl_t));
+    if (crc != crc_given)
+    {
+        printf("gets response crc is wrong!\n");
         xibridge_close_device_connection(&conn);
         return false;
     }
