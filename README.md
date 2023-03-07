@@ -14,7 +14,7 @@
 git clone https://github.com/EPC-MSU/xibridge --recurse-submodules  
 ```
 
-или скачать исходники (Windows) c помощью скрипта get_src.bat, запускать лучше всего в отдельном (новом) каталоге. 
+или скачать полный набор исходников(xibridge-src.zip) в разделе Releases. 
 
 ## Windows
 

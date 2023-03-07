@@ -250,7 +250,7 @@ struct sp_port *device,
     if (response_len != 0)
     {
         // receive remaining uint8_ts
-        if ((result = command_port_receive(device, response, response_len)) != xib_result_ok)
+        if ((result = receive(device, response, response_len)) != xib_result_ok)
         {
             return result;
         }
