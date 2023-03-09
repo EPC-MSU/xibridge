@@ -14,7 +14,7 @@ endif()
 #set the right version here !
 SET (XIBRIDGE_VERSION_MAJOR 1)
 SET (XIBRIDGE_VERSION_MINOR 1)
-SET (XIBRIDGE_VERSION_PATCH 0) 
+SET (XIBRIDGE_VERSION_PATCH 1)
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     # It is required to build a rpath framework
