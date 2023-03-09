@@ -83,9 +83,10 @@ ximc_ext - там выбирается первое из списка устро
 * повесить тег vX.X.X на коммит, сделать push;
 * написать changelog xibridge-x.x.x-changelog.txt;
 * собрать библиотеку и xibridge-сервер под всеми архитектурами: win32, win64, debian linux, macos, бинарные результаты сборки добавить в 
-архивы xibridge-x.x.x.zip и xibridge_server-x.x.x.zip в соответствующие папки;
+архивы xibridge.zip и xibridge_server.zip в соответствующие папки;
 * выложить их на github https://github.com/EPC-MSU/xibridge в разделе релизов с тегом vX.X.X;
-* выложить xibridge-x.x.x-changelog.txt, xibridge-x.x.x.zip, xibridge_server-x.x.x..zip на сетевой диск.
+* выложить xibridge-x.x.x-changelog.txt, xibridge.zip, xibridge_server.zip на сетевой диск, переименовав при этом xibridge.zip в xibridge-x.x.x.zip,
+xibridge_server.zip в xibridge_server-x.x.x.zip.
 
 ## Генерация документации
 

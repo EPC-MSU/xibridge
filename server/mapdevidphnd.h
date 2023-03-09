@@ -14,7 +14,7 @@
  * XibDevicePHandle - class to contain some xibridge-compatible (request with known response len and response) usb/com device handle pointer.
  * A device handle represents some internal resource associated with the xibridge-compatible device communcation via COM
  */
- class XibDevicePHandle {
+class XibDevicePHandle {
 public:
     XibDevicePHandle() : _uhandle(nullptr){ }
     /*
@@ -104,7 +104,8 @@ public:
         const uint8_t *request,
         uint8_t request_len,
         uint8_t *response,
-        uint8_t response_len);
+        uint8_t response_len
+    );
 
     /*
      * Removes connection if any, check if any of the rest of active connections matches the given serial,
@@ -114,12 +115,18 @@ public:
      * Choose UINT32_MAX for unknown conn_id or unknown devid, the devid can be evaluated
      * while their connection id is known
      */
-    void remove_conn_or_remove_device(conn_id_t conn_id, const DevId &devid_known, bool force_remove = false);
+    void remove_conn_or_remove_device(
+        conn_id_t conn_id, 
+        const DevId &devid_known, 
+        bool force_remove = false
+    );
     void log();
-    static void set_devid_2_usb_confor(const ADevId2UsbConfor *pdev2usb) { _pdev2_usb_confor = pdev2usb; }
-    static const ADevId2UsbConfor *get_devid_2_usb_confor() { return _pdev2_usb_confor; }
+    static void set_devid_2_usb_confor(const ADevId2UsbConfor *pdev2usb) 
+        {_pdev2_usb_confor = pdev2usb;}
+    static const ADevId2UsbConfor *get_devid_2_usb_confor() 
+        {return _pdev2_usb_confor;}
 
- private:
+private:
     ReadWriteLock _rwlock;
      // spy for tcp-connections
     std::list<conn_serial> _conns;

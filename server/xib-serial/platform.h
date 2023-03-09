@@ -23,16 +23,10 @@
 // system timeout for port functions
 #define URPC_PORT_TIMEOUT 500
 
-/*
- * Misc
- */
-void
-urpc_msec_sleep(
-    unsigned int msec
-);
+ 
+void urpc_msec_sleep(unsigned int msec);
 
-void
-urpc_get_wallclock(
+void urpc_get_wallclock(
     time_t *sec,
     int *msec
 );

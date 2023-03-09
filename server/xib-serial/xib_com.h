@@ -23,43 +23,26 @@ typedef int xib_result_t;
 extern "C" {
 #endif
 
+xib_device_handle_t xib_com_device_create(const char *uri);
 
-/* Open a port by URI
- * examples:
-*   //COM3
-*   \\.\COM12
-*   COM3
-*   /dev/tty/ttyACM34
-*/
-
-xib_device_handle_t
-xib_com_device_create(
-    const char *uri
+xib_result_t urpc_device_send_request(
+    xib_device_handle_t device,
+    const char cid[URPC_CID_SIZE],
+    const uint8_t *request,
+    uint8_t request_len,
+    uint8_t *response,
+    uint8_t response_len
 );
 
-xib_result_t
-urpc_device_send_request(
-xib_device_handle_t device,
-const char cid[URPC_CID_SIZE],
-const uint8_t *request,
-uint8_t request_len,
-uint8_t *response,
-uint8_t response_len
+xib_result_t xib_com_device_send_request(
+    xib_device_handle_t device,
+    const uint8_t *request,
+    uint8_t request_len,
+    uint8_t *response,
+    uint8_t response_len
 );
 
-xib_result_t
-xib_com_device_send_request(
-xib_device_handle_t device,
-const uint8_t *request,
-uint8_t request_len,
-uint8_t *response,
-uint8_t response_len
-);
-
-xib_result_t
-xib_com_device_destroy(
-    xib_device_handle_t device
-);
+xib_result_t xib_com_device_destroy(xib_device_handle_t device);
 
 #ifdef __cplusplus
 }

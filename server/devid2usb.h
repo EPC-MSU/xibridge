@@ -14,7 +14,7 @@
 class ADevId2UsbConfor {
 public:
     virtual ~ADevId2UsbConfor() 
-    { free_sp_ports(); }
+        { free_sp_ports(); }
     
     // pure virtual func
     virtual std::string port_name_by_devid(const DevId& devid) const = 0;
@@ -33,12 +33,13 @@ protected:
     bool is_devid_matchs_sp_port(
         const DevId& devid,
         const struct sp_port *psp
-        ) const;
+    ) const;
 
 // pure virtual funcs
     virtual DevId get_devid_from_sp_port(
         const struct sp_port *psp,
-        bool &ok) const = 0;
+        bool &ok
+    ) const = 0;
 
 // static data member
     static struct sp_port **pport_list;
@@ -79,7 +80,8 @@ public:
 protected:
     DevId get_devid_from_sp_port(
         const struct sp_port *psp,
-        bool &ok) const;
+        bool &ok
+    ) const;
 };
 
 /**
