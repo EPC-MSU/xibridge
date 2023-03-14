@@ -29,8 +29,11 @@ void ADevId2UsbConfor::print_sp_ports()
         struct sp_port *port = pport_list[i];
         int bus, addr;
         sp_get_port_usb_bus_address(port, &bus, &addr);
-        printf("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s.\n", sp_get_port_name(port), sp_get_port_usb_serial(port),
-            bus, addr, sp_get_port_description(port));
+        char *pname = sp_get_port_name(port);
+        bool ok;
+        uint32_t location = get_id_from_usb_location(pname, ok);
+        printf("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s, location bvvu naumber if any - %x.\n", sp_get_port_name(port), sp_get_port_usb_serial(port),
+            bus, addr, sp_get_port_description(port), location);
     }
     rwlock.read_unlock();
 #endif
@@ -43,10 +46,23 @@ void ADevId2UsbConfor::free_sp_ports()
     rwlock.write_unlock();
 }
 
+
 /*
-* gets urpc-understandable DevId (with serial number) from sp_port data
+* gets bvvu-understandable DevId (with serial number) from sp_port data
 */
-DevId DevId2UsbUrpc::get_devid_from_sp_port(
+DevId DevId2UsbBvvu::get_devid_from_sp_port(
+    const struct sp_port *psp,
+    bool &ok) const
+{
+    char *port_name = sp_get_port_name(psp);
+    uint32_t id = get_id_from_usb_location(port_name, ok);
+    return DevId(id);
+}
+
+/*
+* gets DevId by com (windows) and bus address (linux), masos - to do from sp_port data
+*/
+DevId DevId2UsbByComOrAddr::get_devid_from_sp_port(
     const struct sp_port *psp,
     bool &ok) const
 {
@@ -85,7 +101,7 @@ DevId DevId2UsbUrpc::get_devid_from_sp_port(
 /*
 * gets ximc-understandable DevId (with serial number) from sp_port data
 */
-DevId DevId2UsbXimc::get_devid_from_sp_port(
+DevId DevId2UsbBySerial::get_devid_from_sp_port(
     const struct sp_port *psp,
     bool &ok) const
 {
@@ -106,11 +122,11 @@ DevId DevId2UsbXimc::get_devid_from_sp_port(
 /*
 * gets ximc-understandable serial number from sp_port data
 */
-DevId DevId2UsbXimcExt::get_devid_from_sp_port(
+DevId DevId2UsbBySerialPidVid::get_devid_from_sp_port(
     const struct sp_port *psp,
     bool &ok) const
 {
-    DevId ret = DevId2UsbXimc::get_devid_from_sp_port(psp, ok);
+    DevId ret = DevId2UsbBySerial::get_devid_from_sp_port(psp, ok);
     int vid, pid;
     if (sp_get_port_usb_vid_pid(psp, &vid, &pid) != SP_OK) ok = false;
     return DevId(ret.id(), (uint16_t)pid, (uint16_t)vid);
@@ -128,10 +144,26 @@ bool ADevId2UsbConfor::is_devid_matchs_sp_port(const DevId& devid, const struct 
     return devid == did;
 }
 
+std::string DevId2UsbBvvu::port_name_by_devid(const DevId& devid) const
+{
+    std::string s = "";
+    rwlock.read_lock();
+    if (pport_list != nullptr)
+    {
+        for (int i = 0; pport_list[i] != NULL; i++)
+        {
+            if (is_devid_matchs_sp_port(devid, pport_list[i]))
+                s = sp_get_port_name(pport_list[i]);
+        }
+    }
+    rwlock.read_unlock();
+    return s;
+}
+
 /*
 * gets port name which could be opened by system from devid
 */
-std::string DevId2UsbUrpc::port_name_by_devid(const DevId& devid) const
+std::string DevId2UsbByComOrAddr::port_name_by_devid(const DevId& devid) const
 {
     // some different port configure ways on ddifferent OS
 #if WIN32   
@@ -152,13 +184,12 @@ std::string DevId2UsbUrpc::port_name_by_devid(const DevId& devid) const
 #endif    
 }
 
-std::string DevId2UsbXimc::port_name_by_devid(const DevId& devid) const
+std::string DevId2UsbBySerial::port_name_by_devid(const DevId& devid) const
 {
     std::string s = "";
     rwlock.read_lock();
     if (pport_list != nullptr)
     {
-
         for (int i = 0; pport_list[i] != NULL; i++)
         {
             if (is_devid_matchs_sp_port(devid, pport_list[i]))
@@ -192,8 +223,9 @@ std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
 // virtual constructor from cmd line param
 ADevId2UsbConfor *create_appropriate_dev_id_2_usb_configurator(const char *cmd_par)
 {
-    if (strcmp(cmd_par, "urpc") == 0) return new DevId2UsbUrpc();
-    else if (strcmp(cmd_par, "ximc") == 0) return new DevId2UsbXimc();
-    else if (strcmp(cmd_par, "ximc_ext") == 0) return new DevId2UsbXimcExt();
+    if (strcmp(cmd_par, "bvvu") == 0) return new DevId2UsbBvvu();
+    else if (strcmp(cmd_par, "by_com_addr") == 0) return new DevId2UsbByComOrAddr();
+    else if (strcmp(cmd_par, "by_serial") == 0) return new DevId2UsbBySerial();
+    else if (strcmp(cmd_par, "by_serialpidvid") == 0) return new DevId2UsbBySerialPidVid();
     return nullptr;
 }

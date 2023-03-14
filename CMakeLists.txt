@@ -154,6 +154,11 @@ IF(BUILD_XIBRIDGE_SERVER)
         set(SRV_SOURCES ${SRV_SOURCES} server/platform-win32.cpp)
    else()
         set(SRV_SOURCES ${SRV_SOURCES} server/platform-posix.cpp)
+       if (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+           set(SRV_SOURCES ${SRV_SOURCES} server/platform-macos.cpp)
+       else()
+           set(SRV_SOURCES ${SRV_SOURCES} server/platform-linux.cpp)
+       endif()
    endif()
    ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
 
@@ -164,8 +169,11 @@ IF(BUILD_XIBRIDGE_SERVER)
    include_directories(${LIBSERIALPORT_INCLUDE_DIR})
 
    include_directories(server)
-
    TARGET_LINK_LIBRARIES(xibridge_server zf_log xib-serial bindy)
+   IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+       TARGET_LINK_LIBRARIES(xibridge_server LINK_PRIVATE setupapi)
+   endif()
+
 
    IF (MSVC)
         add_custom_command(TARGET  xibridge_server POST_BUILD

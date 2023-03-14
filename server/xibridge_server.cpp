@@ -284,15 +284,15 @@ void print_help(char *argv[])
 {
 #if ZF_LOG_LEVEL <= ZF_LOG_DEBUG
     std::cout <<
-        "Usage: " << argv[0] << " [keyfile] [debug] [urpc|ximc|ximc_ext]"
+        "Usage: " << argv[0] << " [keyfile] [debug] [bvvu|by_com_addr|by_serial|by_serialpidvid]"
         << std::endl
         << "Examples: " << std::endl
         << argv[0] << std::endl
         << argv[0] << " ximc" << std::endl
-        << argv[0] << " debug urpc" << std::endl
-        << argv[0] << " ~/keyfile.sqlite ximc" << std::endl
-        << argv[0] << " ~/keyfile.sqlite debug urpc" << std::endl
-        << "Debug logging will be disabled by default, urpc-style usb port matching configuration selected by default" << std::endl;
+        << argv[0] << " debug bvvu" << std::endl
+        << argv[0] << " ~/keyfile.sqlite by_serial" << std::endl
+        << argv[0] << " ~/keyfile.sqlite debug by_com_addr" << std::endl
+        << "Debug logging will be disabled by default, bvvu-style usb port matching configuration selected by default" << std::endl;
 #else
     std::cout << "Usage: " << argv[0] << " keyfile"
         << std::endl
@@ -455,14 +455,25 @@ int main(int argc, char *argv[])
         
     ADevId2UsbConfor *pdevid_usb_conf = nullptr;
     // checking for urpc or ximc or ximc_ext presents in cmd and processing  
-    const char *susb_m = "urpc";
+    const char *susb_m = "bvvu";
     if (argc > 1)
     {
         char * s = argv[argc - 1];
-        if (strcmp(s, "urpc") == 0 || strcmp(s, "ximc") == 0 || strcmp(s, "ximc_ext") == 0)
+        bool urpc = false; 
+        bool ximc = false;
+        bool ximc_ext = false;
+        if ((urpc = strcmp(s, "urpc") == 0) || (ximc == strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
+            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") // new option vals
+            || strcmp(s, "bvvu") == 0)
         {
             argc--;
+            
+            if (urpc) s = "by_com_addr";
+            if (ximc) s = "by_serial";
+            if (ximc) s = "by_serialpidvid";
+
             susb_m = s;
+
             pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(s);
         }
     }

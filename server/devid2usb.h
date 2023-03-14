@@ -49,14 +49,14 @@ private:
 };
 
 /**
-* DevId2UsbUrpc - thread-safe class to configure as urpc-style matching DevId (given at any server request) to comport/usb entitiy .
+* DevId2UsbByComOrAddr - thread-safe class to configure as urpc-style matching DevId (given at any server request) to comport/usb entitiy .
 * In future, com/usb with definite device type connected to a port
 *
 */
-class DevId2UsbUrpc : public ADevId2UsbConfor
+class DevId2UsbBvvu : public ADevId2UsbConfor
 {
 public:
-    DevId2UsbUrpc():
+    DevId2UsbBvvu() :
         ADevId2UsbConfor() { }
     virtual std::string port_name_by_devid(const DevId& devid) const;
 
@@ -67,14 +67,32 @@ protected:
 };
 
 /**
-* DevId2UsbXimc - thread-safe class to configure as ximc-style matching DevId (given at any server request) to comport/usb entitiy .
+* DevId2UsbByComOrAddr - thread-safe class to configure as urpc-style matching DevId (given at any server request) to comport/usb entitiy .
 * In future, com/usb with definite device type connected to a port
 *
 */
-class DevId2UsbXimc : public ADevId2UsbConfor
+class DevId2UsbByComOrAddr : public ADevId2UsbConfor
 {
 public:
-    DevId2UsbXimc() :ADevId2UsbConfor() { }
+    DevId2UsbByComOrAddr():
+        ADevId2UsbConfor() { }
+    virtual std::string port_name_by_devid(const DevId& devid) const;
+
+protected:
+    DevId get_devid_from_sp_port(
+        const struct sp_port *psp,
+        bool &ok) const;
+};
+
+/**
+* DevId2UsbBySerial - thread-safe class to configure as ximc-style matching DevId (given at any server request) to comport/usb entitiy .
+* In future, com/usb with definite device type connected to a port
+*
+*/
+class DevId2UsbBySerial : public ADevId2UsbConfor
+{
+public:
+    DevId2UsbBySerial() :ADevId2UsbConfor() { }
     virtual std::string port_name_by_devid(const DevId& devid) const;
 
 protected:
@@ -85,14 +103,14 @@ protected:
 };
 
 /**
-* DevId2UsbXimc - thread-safe class to configure as ximc_ext-style matching DevId (given at any server request) to comport/usb entitiy .
+* DevId2UsbBySerial - thread-safe class to configure as ximc_ext-style matching DevId (given at any server request) to comport/usb entitiy .
 * In future, com/usb with definite device type connected to a port
 *
 */
-class DevId2UsbXimcExt : public DevId2UsbXimc
+class DevId2UsbBySerialPidVid : public DevId2UsbBySerial
 {
 public:
-    DevId2UsbXimcExt():DevId2UsbXimc() { }
+    DevId2UsbBySerialPidVid():DevId2UsbBySerial() { }
 
 protected:
     DevId get_devid_from_sp_port(

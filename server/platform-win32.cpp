@@ -1,6 +1,7 @@
 #include "platform.h"
 #include "zf_log.h"
 #include <WinSock2.h>
+#include <setupapi.h>
 
 
 std::string serial_to_address(uint32_t serial)
@@ -27,4 +28,59 @@ int initialization()
         return 1;
     }
     return 0;
+}
+
+uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
+{
+    char description[128];
+    SP_DEVINFO_DATA device_info_data;
+    device_info_data.cbSize = sizeof(device_info_data);
+    HDEVINFO device_info;
+    int i;
+    uint32_t id = 0;
+    ok = false;
+    char location[256];
+    
+    device_info = SetupDiGetClassDevs(NULL, 0, 0,
+        DIGCF_PRESENT | DIGCF_ALLCLASSES);
+    if (device_info != INVALID_HANDLE_VALUE)
+    {
+        for (i = 0; SetupDiEnumDeviceInfo(device_info, i, &device_info_data); i++)
+        {
+            HKEY device_key;
+            char value[8];
+            DWORD size, type;
+
+            /* Check if this is the device we are looking for. */
+            device_key = SetupDiOpenDevRegKey(device_info, &device_info_data,
+                DICS_FLAG_GLOBAL, 0,
+                DIREG_DEV, KEY_QUERY_VALUE);
+            if (device_key == INVALID_HANDLE_VALUE)
+                continue;
+            size = sizeof(value);
+            if (RegQueryValueExA(device_key, "PortName", NULL, &type, (LPBYTE)value,
+                &size) != ERROR_SUCCESS || type != REG_SZ) {
+                RegCloseKey(device_key);
+                continue;
+            }
+            RegCloseKey(device_key);
+            value[sizeof(value)-1] = 0;
+            if (strcmp(value, sp_port_name))
+                continue;
+
+            if (SetupDiGetDeviceRegistryProperty(
+                device_info,
+                &device_info_data,
+                SPDRP_LOCATION_PATHS,
+                nullptr,
+                (PBYTE)location,
+                255,
+                nullptr))
+            {
+                id = 8;
+                ok = true;
+            }
+
+        }
+    }
 }
