@@ -11,6 +11,7 @@
 #include "../common/protocols.h"
 #include "../client/xibridge_client.h" // ERROR CODES
 #include "../inc/client/version.h"
+#include "platform.h"
 
 #ifndef _WIN32 
 #include <execinfo.h>
@@ -305,83 +306,6 @@ void print_help(char *argv[])
 
 }
 
-#ifndef _WIN32
-void handler(int sig) {
-    void *array[10];
-    size_t size;
-
-    // get void*'s for all entries on the stack
-    size = backtrace(array, 32);
-
-    // print out all the frames to stderr
-    ZF_LOGE("IN SIGNAL HANDLER: signal no %d:\n", sig);
-    ZF_LOGE("Stack trace...");
-    backtrace_symbols_fd(array, size, STDERR_FILENO);
-    ZF_LOGE("End of stack trace.");
-    exit(1);
-}
-
-#ifdef __APPLE__
-
-bool is_already_started()
-{
-    return false;
-}
-
-#else
-
-#define SOCKET_NAME "SOCKET_TO_BE_USED_AS_NAMED_MUTEX"
-#ifndef UNIX_PATH_MAX                                                           
-#define UNIX_PATH_MAX (108)                                                   
-#endif
-#define MIN(A,B) A<B?A:B
-
-bool is_already_started()
-{
-    struct sockaddr_un SockAddr;
-    int AddrLen;
-    int Socket = socket(PF_UNIX, SOCK_STREAM, 0);
-    if (Socket == -1)
-    {
-        std::cout << "Unable to open communication socket because of " << strerror(errno) << ". Exit." << std::endl;
-        return true;
-    }
-    else
-    {
-        SockAddr.sun_family = AF_UNIX;
-        memset(&SockAddr.sun_path, 0, UNIX_PATH_MAX);
-        memcpy(&SockAddr.sun_path[1], SOCKET_NAME, MIN(strlen(SOCKET_NAME), UNIX_PATH_MAX));
-        AddrLen = sizeof (SockAddr);
-        if (bind(Socket, (struct sockaddr *) &SockAddr, AddrLen))
-        {
-            std::cout << "Another process (xxx_xinet_server) already running. Exit." << std::endl;
-            return true;
-        }
-    }
-    return false;
-}
-#endif
-#else
-static HANDLE _h_already_started;
-bool is_already_started()
-{
-    const char szUniqueNamedMutex[] = "xinet_server_m";
-    _h_already_started = CreateMutex(NULL, TRUE, szUniqueNamedMutex);
-    if (ERROR_ALREADY_EXISTS == GetLastError())
-    {
-        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
-        std::cin.get(); // To avoid console closing
-        return true;
-    }
-    return false;
-}
-
-void release_already_started_mutex()
-{
-    ReleaseMutex(_h_already_started); // Explicitly release mutex
-    CloseHandle(_h_already_started); // close handle before terminating
-}
-#endif
 
 //the next function id not C standard, not supported in non win, the next is manual definition  
 char *strlwr_portable(char *str)
@@ -462,16 +386,22 @@ int main(int argc, char *argv[])
         bool urpc = false; 
         bool ximc = false;
         bool ximc_ext = false;
-        if ((urpc = strcmp(s, "urpc") == 0) || (ximc == strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
-            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") // new option vals
+        if ((urpc = strcmp(s, "urpc") == 0) || (ximc = strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
+            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") == 0               // new option vals
             || strcmp(s, "bvvu") == 0)
         {
             argc--;
             
             if (urpc) s = "by_com_addr";
             if (ximc) s = "by_serial";
-            if (ximc) s = "by_serialpidvid";
+            if (ximc_ext) s = "by_serialpidvid";
 
+#ifdef __APPLE__
+            if (s == "bvvu" || s == "by_com_addr")
+            {
+                throw std::runtime_error(s == "'bvvu' |'by_com_addr' modes are not supported no Mac OS!");
+            }
+#endif
             susb_m = s;
 
             pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(s);

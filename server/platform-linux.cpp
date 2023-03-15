@@ -2,6 +2,7 @@
 #include "platform.h"
 #include "devid2usb.h"
 #include <unistd.h>
+#include <iostream>
 
 uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
 {
@@ -35,4 +36,35 @@ uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
     }
     else ok = false;
     return id;
+}
+
+#define SOCKET_NAME "SOCKET_TO_BE_USED_AS_NAMED_MUTEX"
+#ifndef UNIX_PATH_MAX                                                           
+#define UNIX_PATH_MAX (108)                                                   
+#endif
+#define MIN(A,B) A<B?A:B
+
+bool is_already_started()
+{
+    struct sockaddr_un SockAddr;
+    int AddrLen;
+    int Socket = socket(PF_UNIX, SOCK_STREAM, 0);
+    if (Socket == -1)
+    {
+        std::cout << "Unable to open communication socket because of " << strerror(errno) << ". Exit." << std::endl;
+        return true;
+    }
+    else
+    {
+        SockAddr.sun_family = AF_UNIX;
+        memset(&SockAddr.sun_path, 0, UNIX_PATH_MAX);
+        memcpy(&SockAddr.sun_path[1], SOCKET_NAME, MIN(strlen(SOCKET_NAME), UNIX_PATH_MAX));
+        AddrLen = sizeof (SockAddr);
+        if (bind(Socket, (struct sockaddr *) &SockAddr, AddrLen))
+        {
+            std::cout << "Another process (xxx_xinet_server) already running. Exit." << std::endl;
+            return true;
+        }
+    }
+    return false;
 }

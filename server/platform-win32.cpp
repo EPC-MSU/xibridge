@@ -2,6 +2,7 @@
 #include "zf_log.h"
 #include <WinSock2.h>
 #include <setupapi.h>
+#include <iostream>
 
 
 std::string serial_to_address(uint32_t serial)
@@ -77,10 +78,43 @@ uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
                 255,
                 nullptr))
             {
-                id = 8;
-                ok = true;
+                const char *phub, *pnusb;
+                int hub, nusb;
+                if ((phub = strstr(location, "#USBROOT(")) != nullptr && (pnusb = strstr(location, "#USB(")) != nullptr)
+                {
+                    sscanf(phub, "#USBROOT(%d)", &hub);
+                    sscanf(pnusb, "#USB(%d)", &nusb);
+                    // the same logicis on Linux
+                    // hub is already decremented 
+                    id = (uint32_t)((hub + 1 - 1) * 4 + nusb);
+                    if (id > 9) id += 6; // bvvu strange stuff
+                    ok = true;
+                }
+                
             }
 
         }
     }
+    return id;
+}
+
+static HANDLE _h_already_started;
+
+bool is_already_started()
+{
+    const char szUniqueNamedMutex[] = "xinet_server_m";
+    _h_already_started = CreateMutex(NULL, TRUE, szUniqueNamedMutex);
+    if (ERROR_ALREADY_EXISTS == GetLastError())
+    {
+        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
+        std::cin.get(); // To avoid console closing
+        return true;
+    }
+    return false;
+}
+
+void release_already_started_mutex()
+{
+    ReleaseMutex(_h_already_started); // Explicitly release mutex
+    CloseHandle(_h_already_started); // close handle before terminating
 }

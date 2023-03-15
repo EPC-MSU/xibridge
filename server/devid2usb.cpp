@@ -32,7 +32,7 @@ void ADevId2UsbConfor::print_sp_ports()
         char *pname = sp_get_port_name(port);
         bool ok;
         uint32_t location = get_id_from_usb_location(pname, ok);
-        printf("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s, location bvvu naumber if any - %x.\n", sp_get_port_name(port), sp_get_port_usb_serial(port),
+        printf("Found port: %s, serial - %s, usb bus - %x, usb address - %x, description - %s, id based on location(bvvu) if any - %x.\n", sp_get_port_name(port), sp_get_port_usb_serial(port),
             bus, addr, sp_get_port_description(port), location);
     }
     rwlock.read_unlock();
