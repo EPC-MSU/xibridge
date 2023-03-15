@@ -1,5 +1,11 @@
 #include "platform.h"
-#include "signal.h"
+#include <execinfo.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <unistd.h>
+#include <zf_log.h>
+
 
 int initialization()
 {

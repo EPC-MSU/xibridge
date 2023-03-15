@@ -13,17 +13,6 @@
 #include "../inc/client/version.h"
 #include "platform.h"
 
-#ifndef _WIN32 
-#include <execinfo.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
-#else
-//
-#endif
-
-
 /*
 * Supervisor option.
 * It may not work properly on windows now.
@@ -382,12 +371,12 @@ int main(int argc, char *argv[])
     const char *susb_m = "bvvu";
     if (argc > 1)
     {
-        char * s = argv[argc - 1];
+        const char * s = argv[argc - 1];
         bool urpc = false; 
         bool ximc = false;
         bool ximc_ext = false;
         if ((urpc = strcmp(s, "urpc") == 0) || (ximc = strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
-            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") == 0               // new option vals
+            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") == 0                // new option vals
             || strcmp(s, "bvvu") == 0)
         {
             argc--;
@@ -397,7 +386,7 @@ int main(int argc, char *argv[])
             if (ximc_ext) s = "by_serialpidvid";
 
 #ifdef __APPLE__
-            if (s == "bvvu" || s == "by_com_addr")
+            if (strcmp(s, "bvvu") == 0 || strcmp(s, "by_com_addr") == 0)
             {
                 throw std::runtime_error(s == "'bvvu' |'by_com_addr' modes are not supported no Mac OS!");
             }
