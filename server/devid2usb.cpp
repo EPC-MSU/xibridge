@@ -157,8 +157,6 @@ std::string DevId2UsbBvvu::port_name_by_devid(const DevId& devid) const
         }
     }
     rwlock.read_unlock();
-    printf ("!!! Devid id = %d\n", (int)devid.id()); 
-    printf("!!! port name %s\n", s);
     return s;
 }
 

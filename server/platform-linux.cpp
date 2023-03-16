@@ -22,20 +22,29 @@ uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
         const char *dev = sp_port_name + 5;
         snprintf(link_name, sizeof(link_name), "/sys/class/tty/%s/device", dev);
         count = readlink(link_name, link_val, sizeof(link_val));
-        printf ("!!! %s\n", link_val);
         if (count > 0)
         {
             const char *start = strrchr(link_val, '/');
             if (start != nullptr) start++;
             else start = link_val;
-            int l1, l2, l3, l4, l5, hub, ndev;
-            if ((sscanf(start, "%d-%d.%d.%d.%d:%d.%d", &l1, &l2, &l3, &hub, &ndev, &l4, &l5) == 7 && hub > 0)
-                || (sscanf(start, "%d-%d:%d.%d", &hub, &ndev, &l1, &l2) == 4 && hub > 0))
+            int hub = 0;
+            int ndev = 0;
+            char *e;
+            char *phub = nullptr;
+            char *pusb = nullptr;
+            if ((e = (char *)strchr(start, ':')) != nullptr) *e = 0; // trancate :1.0
+            if (strchr(start, '.') == nullptr) pusb = (char *)strchr(start, '-');
+            else
             {
-                id = (uint32_t)((hub - 1) * 4 + ndev);
-                if (id > 9) id += 6; // bvvu strange stuff
-                ok = true;
+                pusb = (char *)strrchr(start, '.');
+                *pusb = 0;
+                phub = (char *)strrchr(start, '.');
             }
+            if (pusb) ok = (sscanf(++pusb, "%d", &ndev) == 1);
+            if (phub && ok) ok = (sscanf(++phub, "%d", &hub) == 1);
+            if (hub) hub--;
+            id = (uint32_t)(hub * 4 + ndev);
+            if (id > 9) id += 6; // bvvu strange stuff
         }
     }
     return id;

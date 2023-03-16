@@ -56,25 +56,25 @@ int main(int /*argc*/, char ** /*argv[]*/)
     std::cin >> ip_s;
     if (!ip_s.empty() && ip_s[0] != 'N' && ip_s[0] != 'n')
     {
-        std::cout << "Enter controller type (urpc or ximc is supported) is  to be used with xibridge-server:\n";
+        std::cout << "Enter controller type (by_serial, by_com_addr or by_serialpidvid is supported) is  to be used with xibridge-server:\n";
         std::cin >> controller_type;
-        if (controller_type != "ximc_ext")
+        if (controller_type != "ximc_ext" && controller_type != "by_serialpidvid")
         {
             std::cout << "Enter device serial number to be used with xibridge-server  (decimal unsigned number):\n";
             std::cin >> dev_num;
         }
 
-        if (controller_type == "ximc")
+        if (controller_type == "ximc" || controller_type == "by_serial")
         {
             ret = xinet_xibridge_usage_example_ximc(ip_s.data(), dev_num);
         }
 
-        else if (controller_type == "urpc")
+        else if (controller_type == "urpc" || controller_type == "by_com_addr")
         {
             ret = xinet_xibridge_usage_example_urpc(ip_s.data(), dev_num);
             //if (ret) xinet_xibridge_threads_urpc();
         }
-        else if (controller_type == "ximc_ext")
+        else if (controller_type == "ximc_ext" || controller_type == "by_serialpidvid")
         {
             ret = xinet_xibridge_usage_example_ximc_ext(ip_s.data(), dev_num);
             //if (ret) xinet_xibridge_threads_urpc();
