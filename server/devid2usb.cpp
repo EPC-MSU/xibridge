@@ -216,7 +216,6 @@ std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
         }
     }
     rwlock.read_unlock();
-
     return devids;
 }
 
