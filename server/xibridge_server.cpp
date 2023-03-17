@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
             if (ximc_ext) s = "by_serialpidvid";
 
 #ifdef __APPLE__
-            if (strcmp(s, "bvvu") == 0 /*|| strcmp(s, "by_com_addr") == 0*/)
+            if (strcmp(s, "bvvu") == 0 || strcmp(s, "by_com_addr") == 0)
             {
                 throw std::runtime_error("'bvvu' and 'by_com_addr' modes are not supported on Mac OS!");
             }
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
     if (pdevid_usb_conf == nullptr)
     {
 #ifdef __APPLE__
-        if (strcmp(susb_m, "bvvu") == 0 /*|| strcmp(susb_m, "by_com_addr") == 0*/)
+        if (strcmp(susb_m, "bvvu") == 0 || strcmp(susb_m, "by_com_addr") == 0)
         {
             throw std::runtime_error("'bvvu' and 'by_com_addr' modes are not supported on Mac OS!");
         }
