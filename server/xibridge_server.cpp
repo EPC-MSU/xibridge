@@ -399,6 +399,13 @@ int main(int argc, char *argv[])
 
     if (pdevid_usb_conf == nullptr)
     {
+#ifdef __APPLE__
+        if (strcmp(susb_m, "bvvu") == 0 || strcmp(susb_m, "by_com_addr") == 0)
+        {
+            throw std::runtime_error("'bvvu' and 'by_com_addr' modes are not supported on Mac OS!");
+        }
+#endif
+
         pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(susb_m);
     }
     std::cout << "=== The " << susb_m << " style configuration is selected as the usb port matching configuration ===" << std::endl;
