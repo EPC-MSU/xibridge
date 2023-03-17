@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
 #ifdef __APPLE__
             if (strcmp(s, "bvvu") == 0 || strcmp(s, "by_com_addr") == 0)
             {
-                throw std::runtime_error(s == "'bvvu' |'by_com_addr' modes are not supported no Mac OS!");
+                throw std::runtime_error("'bvvu' and 'by_com_addr' modes are not supported on Mac OS!");
             }
 #endif
             susb_m = s;
