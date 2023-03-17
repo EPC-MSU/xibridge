@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
 
         pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(susb_m);
     }
-    std::cout << "=== The " << susb_m << " style configuration is selected as the usb port matching configuration ===" << std::endl;
+    std::cout << "=== The " << susb_m << " device identification is selected  ===" << std::endl;
 
     MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);
     bool is_keyfile_supplied = false;

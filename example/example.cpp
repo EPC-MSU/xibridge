@@ -56,11 +56,11 @@ int main(int /*argc*/, char ** /*argv[]*/)
     std::cin >> ip_s;
     if (!ip_s.empty() && ip_s[0] != 'N' && ip_s[0] != 'n')
     {
-        std::cout << "Enter device identification type matching xibridge-server option selected (bvvu, by_serial, by_com_addr or by_serialpidvid is supported) is  to be used with xibridge-server:\n";
+        std::cout << "Enter device identification type matching xibridge-server option selected (bvvu, by_serial, by_com_addr or by_serialpidvid is supported) is to be used with xibridge-server:\n";
         std::cin >> controller_type;
         if (controller_type != "ximc_ext" && controller_type != "by_serialpidvid")
         {
-            std::cout << "Enter device serial number to be used with xibridge-server  (decimal unsigned number):\n";
+            std::cout << "Enter device identifier to be used with xibridge-server according to the selected device identification type (decimal unsigned number):\n";
             std::cin >> dev_num;
         }
 
@@ -70,7 +70,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
             ret = xinet_xibridge_usage_example_ximc(ip_s.data(), dev_num);
         }
 
-        else if (controller_type == "urpc" || controller_type == "by_com_addr")
+        else if (controller_type == "urpc" || controller_type == "by_com_addr" || controller_type == "bvvu")
         {
             std::cout << "URMC-controller commands (with CRC16 added) will be used in the example!\n";
             ret = xinet_xibridge_usage_example_urpc(ip_s.data(), dev_num);
