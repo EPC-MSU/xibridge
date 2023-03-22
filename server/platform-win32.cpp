@@ -106,8 +106,6 @@ bool is_already_started()
     _h_already_started = CreateMutex(NULL, TRUE, szUniqueNamedMutex);
     if (ERROR_ALREADY_EXISTS == GetLastError())
     {
-        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
-        std::cin.get(); // To avoid console closing
         return true;
     }
     return false;

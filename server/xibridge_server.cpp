@@ -312,289 +312,41 @@ char *strlwr_portable(char *str)
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
+#define sm_err_allstarted 1
+#define sm_err_initfailed 2
 
-int main(int argc, char *argv[])
+int server_main(const char *keyfile, const char *debug, const char * supervisor, int sp_limit, const char *dev2usb_mode, bool print_ports)
 {
-
     if (is_already_started())
-        return 0;
+        return sm_err_allstarted;
+
 #ifndef _WIN32
     signal(SIGSEGV, handler);   // install our handler  
 #endif
 
-    xibridge_version_t ver = XIBRIDGE_VERSION;
-    std::cout << "=== Xibridge Server "
-        << (int) ver.major << "."
-        << (int) ver.minor << "."
-        << (int) ver.bagfix << " "
-        << "===" << std::endl;
-
-    std::cout << "=== xi-net protocols v.2 and v.3 supported ===" << std::endl;
-
-    bool exit = false;
-    if (argc > 1)
-    {
-        for (int i = 1; i < argc; i++)
-        {
-            //if any param is something like "help" 
-            char *s = argv[i];
-            strlwr_portable(s);
-            if (strcmp(s, "-help") == 0 || strcmp(s, "help") == 0
-                || strcmp(s, "--help") == 0 || strcmp(s, "-h") == 0
-                || strcmp(s, "--h") == 0)
-                exit = true;
-        }
-    }
-    if (exit)
-    {
-        print_help(argv);
-        std::cin.get(); // To avoid console closing
-#ifdef _WIN32
-        release_already_started_mutex();
-#endif
-        return 0;
-    }
-
     int res = initialization();
     if (res)
     {
+
 #ifdef _WIN32
         release_already_started_mutex();
 #endif
-        return res;
+        return sm_err_initfailed;
     }
 
     zf_log_set_output_level(ZF_LOG_WARN);
-        
-    ADevId2UsbConfor *pdevid_usb_conf = nullptr;
-    // checking for urpc or ximc or ximc_ext presents in cmd and processing  
-    const char *susb_m = "bvvu";
-    if (argc > 1)
-    {
-        const char * s = argv[argc - 1];
-        bool urpc = false; 
-        bool ximc = false;
-        bool ximc_ext = false;
-        if ((urpc = strcmp(s, "urpc") == 0) || (ximc = strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
-            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") == 0                // new option vals
-            || strcmp(s, "bvvu") == 0)
-        {
-            argc--;
-            
-            if (urpc) s = "by_com_addr";
-            if (ximc) s = "by_serial";
-            if (ximc_ext) s = "by_serialpidvid";
-
-#ifdef __APPLE__
-            if (strcmp(s, "bvvu") == 0 || strcmp(s, "by_com_addr") == 0)
-            {
-                throw std::runtime_error("'bvvu' and 'by_com_addr' modes are not supported on Mac OS!");
-            }
-#endif
-            susb_m = s;
-
-            pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(s);
-        }
-    }
-
-    if (pdevid_usb_conf == nullptr)
-    {
-#ifdef __APPLE__
-        if (strcmp(susb_m, "bvvu") == 0 || strcmp(susb_m, "by_com_addr") == 0)
-        {
-            throw std::runtime_error("'bvvu' and 'by_com_addr' modes are not supported on Mac OS!");
-        }
-#endif
-
-        pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(susb_m);
-    }
-    std::cout << "=== The " << susb_m << " device identification is selected  ===" << std::endl;
-
-    MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);
-    bool is_keyfile_supplied = false;
-    if (argc > 1)
-    {
-        strlwr_portable(argv[1]);
-        if (!(is_keyfile_supplied = strcmp(argv[1], "debug") != 0) || (argc > 2 && strcmp(argv[2], "debug") == 0))
-        {
-            zf_log_set_output_level(ZF_LOG_DEBUG);
-        }
-     }
-    ADevId2UsbConfor::print_sp_ports();
-    try
-    {
-
-        bindy::Bindy bindy(is_keyfile_supplied ? argv[1] : "", true, false);
-        pb = &bindy;
 
 #ifdef ENABLE_SUPERVISOR
-        if (argc > 2)
-        {
-            if (strcmp(argv[2], "disable_supervisor") == 0)
-            {
-                supervisor.stop();
-            }
-            else if (strcmp(argv[2], "enable_supervisor") == 0)
-            {
-                ; // already enabled
-            }
-            else
-            {
-                print_help(argv);
-#ifdef _WIN32
-                release_already_started_mutex();
-#endif
-                return 0;
-            }
-        }
-        if (argc == 4)
-        {
-            supervisor.set_limit(std::stoi(argv[3]));
-        }
-#endif
-
-        ZF_LOGI("Starting server...");
-        bindy.connect();
-        bindy.set_handler(&callback_data);
-        bindy.set_discnotify(&callback_disc);
-    }
-    catch (std::exception &ex)
+    if (spurevisor != nullptr && strcmp(supervisor, "disable_supervisor") == 0)
     {
-        std::cout << "Exception catched: " << ex.what() << std::endl
-            << "Server stopped" << std::endl;
-    }
-#ifdef _WIN32
-    release_already_started_mutex();
-#endif
-    if (pdevid_usb_conf != nullptr) delete pdevid_usb_conf;
-    return 0;
-}
-
-int server_main(const char *keyfile, const char *debug, const char *dev2usb_mode);
-int main1(int argc, char *argv[])
-{
-
-    if (is_already_started())
-        return 0;
-
-    xibridge_version_t ver = XIBRIDGE_VERSION;
-    std::cout << "=== Xibridge Server "
-        << (int)ver.major << "."
-        << (int)ver.minor << "."
-        << (int)ver.bagfix << " "
-        << "===" << std::endl;
-
-    std::cout << "=== xi-net protocols v.2 and v.3 supported ===" << std::endl;
-
-    bool exit = false;
-    if (argc > 1)
-    {
-        for (int i = 1; i < argc; i++)
-        {
-            //if any param is something like "help" 
-            char *s = argv[i];
-            strlwr_portable(s);
-            if (strcmp(s, "-help") == 0 || strcmp(s, "help") == 0
-                || strcmp(s, "--help") == 0 || strcmp(s, "-h") == 0
-                || strcmp(s, "--h") == 0)
-                exit = true;
-        }
-    }
-    if (exit)
-    {
-        print_help(argv);
-        std::cin.get(); // To avoid console closing
-#ifdef _WIN32
-        release_already_started_mutex();
-#endif
-        return 0;
+        supervisor.stop();
     }
 
-    const char *debug = nullptr;
-    const char *mode = "bvvu";
-    const char *keyfile = nullptr;
-
-    if (argc > 1)
-    {
-        const char * s = argv[argc - 1];
-        bool urpc = false;
-        bool ximc = false;
-        bool ximc_ext = false;
-        if ((urpc = strcmp(s, "urpc") == 0) || (ximc = strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
-            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") == 0                // new option vals
-            || strcmp(s, "bvvu") == 0)
-        {
-            argc--;
-
-            if (urpc) s = "by_com_addr";
-            if (ximc) s = "by_serial";
-            if (ximc_ext) s = "by_serialpidvid";
-            mode = s;
-        }
-    }
-
-    std::cout << "=== The " << mode << " device identification is selected  ===" << std::endl;
-    ADevId2UsbConfor::print_sp_ports();
-
-    bool is_keyfile_supplied = false;
-    if (argc > 1)
-    {
-        strlwr_portable(argv[1]);
-        if (!(is_keyfile_supplied = strcmp(argv[1], "debug") != 0) || (argc > 2 && strcmp(argv[2], "debug") == 0))
-        {
-            debug = "debug";
-        }
-    }
-
-#ifdef ENABLE_SUPERVISOR
-    if (argc > 2)
-    {
-        if (strcmp(argv[2], "disable_supervisor") == 0)
-        {
-            supervisor.stop();
-        }
-        else if (strcmp(argv[2], "enable_supervisor") == 0)
-        {
-            ; // already enabled
-        }
-        else
-        {
-            print_help(argv);
-#ifdef _WIN32
-            release_already_started_mutex();
-#endif
-            return 0;
-        }
-    }
-    if (argc == 4)
+    if (sp_limit > = 0 )
     {
         supervisor.set_limit(std::stoi(argv[3]));
     }
 #endif
-
-    int ret  = server_main(keyfile, debug, mode);
-
-#ifdef _WIN32
-    release_already_started_mutex();
-#endif
-    
-    return ret;
-}
-
-int server_main(const char *keyfile, const char *debug, const char *dev2usb_mode)
-{
-
-#ifndef _WIN32
-    signal(SIGSEGV, handler);   // install our handler  
-#endif
-
-    int res = initialization();
-    if (res)
-    {
-        return res;
-    }
-
-    zf_log_set_output_level(ZF_LOG_WARN);
 
     ADevId2UsbConfor *pdevid_usb_conf = nullptr;
     // checking for urpc or ximc or ximc_ext presents in cmd and processing  
@@ -624,8 +376,12 @@ int server_main(const char *keyfile, const char *debug, const char *dev2usb_mode
 
         pdevid_usb_conf = create_appropriate_dev_id_2_usb_configurator(susb_m);
     }
- 
+
     MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);
+    if (print_ports)
+    {
+        ADevId2UsbConfor::print_sp_ports();
+    }
     bool is_keyfile_supplied = false;
     if (debug != nullptr)
     {
@@ -646,33 +402,6 @@ int server_main(const char *keyfile, const char *debug, const char *dev2usb_mode
         if (keyfile == nullptr) keyfile = "";
         bindy::Bindy bindy(keyfile, true, false);
         pb = &bindy;
-
-#ifdef ENABLE_SUPERVISOR
-        if (argc > 2)
-        {
-            if (strcmp(argv[2], "disable_supervisor") == 0)
-            {
-                supervisor.stop();
-            }
-            else if (strcmp(argv[2], "enable_supervisor") == 0)
-            {
-                ; // already enabled
-            }
-            else
-            {
-                print_help(argv);
-#ifdef _WIN32
-                release_already_started_mutex();
-#endif
-                return 0;
-            }
-        }
-        if (argc == 4)
-        {
-            supervisor.set_limit(std::stoi(argv[3]));
-        }
-#endif
-
         ZF_LOGI("Starting server...");
         bindy.connect();
         bindy.set_handler(&callback_data);
@@ -683,5 +412,121 @@ int server_main(const char *keyfile, const char *debug, const char *dev2usb_mode
         ZF_LOGE("Exception catched: %s.\n Server stopped", ex.what());
         
     }
+
+#ifdef _WIN32
+    release_already_started_mutex();
+#endif
+
     return 0;
+}
+
+
+int main(int argc, char *argv[])
+{
+
+    xibridge_version_t ver = XIBRIDGE_VERSION;
+    std::cout << "=== Xibridge Server "
+        << (int)ver.major << "."
+        << (int)ver.minor << "."
+        << (int)ver.bagfix << " "
+        << "===" << std::endl;
+
+    std::cout << "=== xi-net protocols v.2 and v.3 supported ===" << std::endl;
+
+    bool exit = false;
+    if (argc > 1)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            //if any param is something like "help" 
+            char *s = argv[i];
+            strlwr_portable(s);
+            if (strcmp(s, "-help") == 0 || strcmp(s, "help") == 0
+                || strcmp(s, "--help") == 0 || strcmp(s, "-h") == 0
+                || strcmp(s, "--h") == 0)
+                exit = true;
+        }
+    }
+    if (exit)
+    {
+        print_help(argv);
+        std::cin.get(); // To avoid console closing
+        return 0;
+    }
+
+    const char *debug = nullptr;
+    const char *mode = "bvvu";
+    const char *keyfile = nullptr;
+    const char *svisor = nullptr;
+    int slimit = -1;
+
+    if (argc > 1)
+    {
+        const char * s = argv[argc - 1];
+        bool urpc = false;
+        bool ximc = false;
+        bool ximc_ext = false;
+        if ((urpc = strcmp(s, "urpc") == 0) || (ximc = strcmp(s, "ximc") == 0) || (ximc_ext = strcmp(s, "ximc_ext") == 0) || // for compatibility
+            strcmp(s, "by_com_addr") == 0 || strcmp(s, "by_serial") == 0 || strcmp(s, "by_serialpidvid") == 0                // new option vals
+            || strcmp(s, "bvvu") == 0)
+        {
+            argc--;
+
+            if (urpc) s = "by_com_addr";
+            if (ximc) s = "by_serial";
+            if (ximc_ext) s = "by_serialpidvid";
+            mode = s;
+        }
+    }
+
+    std::cout << "=== The " << mode << " device identification is selected  ===" << std::endl;
+   
+    bool is_keyfile_supplied = false;
+    if (argc > 1)
+    {
+        strlwr_portable(argv[1]);
+        if (!(is_keyfile_supplied = strcmp(argv[1], "debug") != 0) || (argc > 2 && strcmp(argv[2], "debug") == 0))
+        {
+            debug = "debug";
+        }
+    }
+
+#ifdef ENABLE_SUPERVISOR
+    if (argc > 3)
+    {
+        if (strcmp(argv[3], "disable_supervisor") == 0)
+        {
+            svisor =  disable_supervisor
+        }
+        else if (strcmp(argv[2], "enable_supervisor") == 0)
+        {
+            ; // already enabled
+        }
+        else
+        {
+            print_help(argv);
+            return 0;
+        }
+    }
+    if (argc > 4)
+    {
+        slimit = std::stoi(argv[4]);
+    }
+#endif
+
+    int ret = server_main(keyfile, debug, svisor, slimit,  mode, true);
+    switch (ret)
+    {
+    case sm_err_allstarted:
+
+        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
+        std::cin.get(); //
+        break;
+    case sm_err_initfailed:
+        std::cout << "Server initialization failed. Press a key to exit!" << std::endl;
+        std::cin.get(); //
+        break;
+    }
+
+    return ret;
 }
