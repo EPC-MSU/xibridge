@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional>
 #include <ctype.h>
+#include <thread>
 #include "../common/utils.h"
 #include "../common/protocols.h"
 #include "../client/xibridge_client.h" // ERROR CODES
@@ -315,6 +316,7 @@ ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 #define sm_err_allstarted 1
 #define sm_err_initfailed 2
 
+
 int server_main(const char *keyfile, const char *debug, const char * supervisor, int sp_limit, const char *dev2usb_mode, bool print_ports)
 {
     if (is_already_started())
@@ -420,6 +422,25 @@ int server_main(const char *keyfile, const char *debug, const char * supervisor,
     return 0;
 }
 
+void server_main_as_dev2usb_by_spv_min()
+{
+    server_main(nullptr, nullptr, nullptr, 0, "by_serialpidvid", false);
+}
+
+static std::thread *_pserver_thread;
+
+void start_server_thread()
+{
+   _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min);
+}
+
+void stop_server_thread()
+{
+    (_pserver_thread->get_id());
+    delete(_pserver_thread);
+
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -514,7 +535,12 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    int ret = server_main(keyfile, debug, svisor, slimit,  mode, true);
+    //int ret = server_main(keyfile, debug, svisor, slimit,  mode, true);
+
+    start_server_thread();
+    Sleep(10000);
+    stop_server_thread();
+    /*
     switch (ret)
     {
     case sm_err_allstarted:
@@ -527,6 +553,6 @@ int main(int argc, char *argv[])
         std::cin.get(); //
         break;
     }
-
-    return ret;
+    */
+    return /*ret*/0;
 }
