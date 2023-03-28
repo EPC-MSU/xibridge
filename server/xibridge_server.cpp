@@ -535,12 +535,13 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    //int ret = server_main(keyfile, debug, svisor, slimit,  mode, true);
-
+    int ret = server_main(keyfile, debug, svisor, slimit,  mode, true);
+    /*
     start_server_thread();
     Sleep(10000);
     stop_server_thread();
-    /*
+    */
+    
     switch (ret)
     {
     case sm_err_allstarted:
@@ -553,6 +554,6 @@ int main(int argc, char *argv[])
         std::cin.get(); //
         break;
     }
-    */
+    
     return /*ret*/0;
 }
