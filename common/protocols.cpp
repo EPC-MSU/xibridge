@@ -705,7 +705,10 @@ bool Protocol3::translate_response(uint32_t pckt,
 
 bvector Protocol3::create_enum_response(const std::vector<DevId>& vdevs)
 {
-    if (vdevs.size() == 0) return bvector();
+    if (vdevs.size() == 0)
+    {
+        return create_server_response(pkt3_enum_resp, 0, nullptr, nullptr);
+    }
     MBuf enumbuf((int)(vdevs.size() * sizeof(xibridge_device_t)));
     
     for (auto v : vdevs)
