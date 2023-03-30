@@ -142,8 +142,8 @@ IF(BUILD_XIBRIDGE_EXAMPLE)
 ENDIF()
 
 IF(BUILD_XIBRIDGE_SERVER)
-   set(SRV_SOURCES 
-        server/xibridge_server.cpp
+   set(SRV_LIB_SOURCES 
+        server/xibridge_server_lib.cpp
         server/mapdevidphnd.cpp
         server/devid2usb.cpp
         ${COMMON_SOURCES})
@@ -151,16 +151,16 @@ IF(BUILD_XIBRIDGE_SERVER)
         set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
    endif()
    if (WIN32)
-        set(SRV_SOURCES ${SRV_SOURCES} server/platform-win32.cpp)
+        set(SRV_LIB_SOURCES ${SRV_LIB_SOURCES} server/platform-win32.cpp)
    else()
-        set(SRV_SOURCES ${SRV_SOURCES} server/platform-posix.cpp)
+        set(SRV_LIB_SOURCES ${SRV_LIB_SOURCES} server/platform-posix.cpp)
        if (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-           set(SRV_SOURCES ${SRV_SOURCES} server/platform-macos.cpp)
+           set(SRV_LIB_SOURCES ${SRV_LIB_SOURCES} server/platform-macos.cpp)
        else()
-           set(SRV_SOURCES ${SRV_SOURCES} server/platform-linux.cpp)
+           set(SRV_LIB_SOURCES ${SRV_LIB_SOURCES} server/platform-linux.cpp)
        endif()
    endif()
-   ADD_EXECUTABLE(xibridge_server ${SRV_SOURCES})
+   ADD_LIBRARY(xibridge_server_lib SHARED ${SRV_LIB_SOURCES})
 
    FUNCTION(ADD_SUBDIRECTORY_XIB_SERIAL)
        ADD_SUBDIRECTORY(server/xib-serial)
@@ -169,16 +169,24 @@ IF(BUILD_XIBRIDGE_SERVER)
    include_directories(${LIBSERIALPORT_INCLUDE_DIR})
 
    include_directories(server)
-   TARGET_LINK_LIBRARIES(xibridge_server zf_log xib-serial bindy)
+   TARGET_LINK_LIBRARIES(xibridge_server_lib zf_log xib-serial bindy)
    IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-       TARGET_LINK_LIBRARIES(xibridge_server LINK_PRIVATE setupapi)
+       TARGET_LINK_LIBRARIES(xibridge_server_lib LINK_PRIVATE setupapi)
    endif()
 
-
+   INCLUDE_DIRECTORIES(vendor/zf_log/zf_log)
+   ADD_EXECUTABLE(xibridge_server server/xibridge_server.cpp)
+   TARGET_LINK_LIBRARIES(xibridge_server xibridge_server_lib)
    IF (MSVC)
         add_custom_command(TARGET  xibridge_server POST_BUILD
                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
                        "${LIBSERIALPORT_PATH}/libserialport.dll"
                        $<TARGET_FILE_DIR:xibridge_server>)
+   ENDIF()
+   IF (MSVC)
+        add_custom_command(TARGET  xibridge_server POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                       "${LIBSERIALPORT_PATH}/libserialport.dll"
+                       $<TARGET_FILE_DIR:xibridge_server>)  
    ENDIF()
 ENDIF()  

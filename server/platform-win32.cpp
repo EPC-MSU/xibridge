@@ -33,8 +33,7 @@ int initialization()
 
 uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
 {
-    char description[128];
-    SP_DEVINFO_DATA device_info_data;
+     SP_DEVINFO_DATA device_info_data;
     device_info_data.cbSize = sizeof(device_info_data);
     HDEVINFO device_info;
     int i;

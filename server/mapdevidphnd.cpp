@@ -343,3 +343,19 @@ xib_result_t MapDevIdPHandle::operation_send_request(const DevId &devid,
     }
     return res;
 }
+
+std::vector<DevId> MapDevIdPHandle::enumerate_devs_opened()
+{
+    std::vector<DevId> ret;
+    for (auto &m : *this)
+    {
+        ret.push_back(DevId(m.first.id()));
+    }
+    return ret;
+}
+
+std::vector<DevId> MapDevIdPHandle::enumerate_devs()
+{
+    if (_pdev2_usb_confor == nullptr) return std::vector<DevId>();
+    return _pdev2_usb_confor->enumerate_dev();
+}

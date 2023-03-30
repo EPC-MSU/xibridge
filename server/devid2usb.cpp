@@ -59,6 +59,18 @@ DevId DevId2UsbBvvu::get_devid_from_sp_port(
     return DevId(id);
 }
 
+static char *strlwr_portable(char *str)
+{
+    unsigned char *p = (unsigned char *)str;
+
+    while (*p) {
+        *p = tolower((unsigned char)*p);
+        p++;
+    }
+
+    return str;
+}
+
 /*
 * gets DevId by com (windows) and bus address (linux), masos - to do from sp_port data
 */

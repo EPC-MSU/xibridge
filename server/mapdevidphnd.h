@@ -126,6 +126,9 @@ public:
     static const ADevId2UsbConfor *get_devid_2_usb_confor() 
         {return _pdev2_usb_confor;}
 
+    std::vector<DevId> enumerate_devs_opened();
+    std::vector<DevId> enumerate_devs();
+
 private:
     ReadWriteLock _rwlock;
      // spy for tcp-connections
