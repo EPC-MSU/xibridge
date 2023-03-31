@@ -26,11 +26,12 @@ void print_help(char *argv[])
         << argv[0] << " ~/keyfile.sqlite debug by_com_addr" << std::endl
         << "Debug logging will be disabled by default, bvvu-style usb port matching configuration selected by default" << std::endl;
 #else
-    std::cout << "Usage: " << argv[0] << " keyfile"
+    std::cout << "Usage: " << argv[0] << " keyfile [bvvu|by_com_addr|by_serial|by_serialpidvid]" "
         << std::endl
         << "Examples: " << std::endl
         << argv[0] << std::endl
-        << argv[0] << " ~/keyfile.sqlite" << std::endl;
+        << argv[0] << " ~/keyfile.sqlite" << std::endl
+        << argv[0] << " ~/keyfile.sqlite by_serial" << std::endl;
 #endif
 
     std::cout << "Press a key to exit" << std::endl;
@@ -50,7 +51,7 @@ char *strlwr_portable(char *str)
     return str;
 }
 
-// main function ofthe console app
+// main function of the console app
 int main(int argc, char *argv[])
 {
 
@@ -122,6 +123,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef ENABLE_SUPERVISOR
+    /*
     if (argc > 3)
     {
         if (strcmp(argv[3], "disable_supervisor") == 0)
@@ -142,9 +144,13 @@ int main(int argc, char *argv[])
     {
         slimit = std::stoi(argv[4]);
     }
+    */
+    svisor = "enable_supervisor";
+    slimit = 30;
+
 #endif
 
-    int ret = server_main(keyfile, debug, svisor, slimit, mode, true);
+    int ret = server_main(keyfile, debug, svisor, slimit, mode, true, 0);
 
     switch (ret)
     {

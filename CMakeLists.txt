@@ -7,14 +7,16 @@ OPTION(BUILD_XIBRIDGE_EXAMPLE "Build xibridge example@ project" OFF)
 OPTION(BUILD_XIBRIDGE_SERVER "Build xibridge server" OFF)
 OPTION(XIBRIDGE_SERVER_ENABLE_SUPERVISOR "Enable supervisor when build xibridge server" OFF)
 
-if (WIN32)
-  set(XIBRIDGE_SERVER_ENABLE_SUPERVISOR  OFF CACHE INTERNAL "")
-endif()
+#if (WIN32)
+#  set(XIBRIDGE_SERVER_ENABLE_SUPERVISOR  OFF CACHE INTERNAL "")
+#endif()
 
 #set the right version here !
 SET (XIBRIDGE_VERSION_MAJOR 1)
 SET (XIBRIDGE_VERSION_MINOR 1)
 SET (XIBRIDGE_VERSION_PATCH 1)
+
+SET (XIBRIDGE_SERVER_SUPERVISOR_LIMIT 30)
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     # It is required to build a rpath framework
@@ -53,6 +55,7 @@ ENDIF()
 
 CONFIGURE_FILE(client/version.h.in ${CMAKE_RUNTIME_INC_DIRECTORY}/client/version.h)
 CONFIGURE_FILE(client/version_config.rc.in ${CMAKE_RUNTIME_INC_DIRECTORY}/client/version.rc)
+CONFIGURE_FILE(server/supervisor.h.in ${CMAKE_RUNTIME_INC_DIRECTORY}/server/supervisor.h)
   
 add_definitions( -DZF_LOG_LEVEL=ZF_LOG_DEBUG)
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -148,7 +151,7 @@ IF(BUILD_XIBRIDGE_SERVER)
         server/devid2usb.cpp
         ${COMMON_SOURCES})
    if (XIBRIDGE_SERVER_ENABLE_SUPERVISOR )
-        set(SRV_SOURCES ${SRV_SOURCES} server/supervisor.cpp)
+        set(SRV_LIB_SOURCES ${SRV_LIB_SOURCES} server/supervisor.cpp)
    endif()
    if (WIN32)
         set(SRV_LIB_SOURCES ${SRV_LIB_SOURCES} server/platform-win32.cpp)
@@ -183,10 +186,5 @@ IF(BUILD_XIBRIDGE_SERVER)
                        "${LIBSERIALPORT_PATH}/libserialport.dll"
                        $<TARGET_FILE_DIR:xibridge_server>)
    ENDIF()
-   IF (MSVC)
-        add_custom_command(TARGET  xibridge_server POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                       "${LIBSERIALPORT_PATH}/libserialport.dll"
-                       $<TARGET_FILE_DIR:xibridge_server>)  
-   ENDIF()
+  
 ENDIF()  

@@ -73,6 +73,8 @@ conn_serial;
  * MapDevIdPHandle - class to hold all involved usb_devices_handle pointers in issue of multithreading.
  * Tcp-connections account is made by using of _conns list : to remove device that could not be addressed;
  */
+class ADevId2UsbConfor;
+
 class MapDevIdPHandle : public
     std::map <DevId, XibDevicePHandle> // map : DevId ->  device PHandle
 
@@ -126,8 +128,19 @@ public:
     static const ADevId2UsbConfor *get_devid_2_usb_confor() 
         {return _pdev2_usb_confor;}
 
-    std::vector<DevId> enumerate_devs_opened();
-    std::vector<DevId> enumerate_devs();
+    std::vector<std::string> enumerate_devs_opened();
+    std::vector<std::string> enumerate_devs();
+
+    void set_devsrescanned(void(*cb_devsrescanned_val)())
+    {
+        cb_devsrescanned = cb_devsrescanned_val;
+    }
+
+    static void notify_devs_rescan()
+    {
+          if (cb_devsrescanned)
+            cb_devsrescanned();
+    }
 
 private:
     ReadWriteLock _rwlock;
@@ -147,6 +160,8 @@ private:
     */
     bool _is_actual_connection(conn_id_t conn_id, DevId *devid = nullptr);
     static const ADevId2UsbConfor *_pdev2_usb_confor;
+
+    static void(*cb_devsrescanned)();
 };
 
 #endif

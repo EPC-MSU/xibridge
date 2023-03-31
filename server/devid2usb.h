@@ -5,12 +5,16 @@
 #include <libserialport.h>
 #include "../common/utils.h"
 #include "rw_lock.h"
+//#include "mapdevidphnd.h"
 
 /**
 * ADevId2UsbConfor - abstact thread-safe class to configure matching DevId (given at any server request) to comport/usb entitiy .
 * In future, com/usb with definite device type connected to a port 
 * 
 */
+
+
+
 class ADevId2UsbConfor {
 public:
     virtual ~ADevId2UsbConfor() 
@@ -19,16 +23,14 @@ public:
     // pure virtual func
     virtual std::string port_name_by_devid(const DevId& devid) const = 0;
     
-    std::vector<DevId> enumerate_dev() const;
+    std::vector<DevId> enumerate_dev(bool list_ports) const;
 
     static void print_sp_ports();
     static void list_sp_ports();
 
 protected:
-    ADevId2UsbConfor()
-    {
-        list_sp_ports();
-    }
+    ADevId2UsbConfor();
+    
     // non virtual funcs   
     bool is_devid_matchs_sp_port(
         const DevId& devid,

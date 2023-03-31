@@ -11,6 +11,8 @@
 std::map<DevId, std::mutex *> MapDevIdPHandle::_mutex_pool;
 ReadWriteLock MapDevIdPHandle::_mutex_pool_mutex;
 const ADevId2UsbConfor * MapDevIdPHandle::_pdev2_usb_confor = nullptr;
+void(*MapDevIdPHandle::cb_devsrescanned)() = 0;
+
 
 xib_device_handle_t XibDevicePHandle::create_device_h(const DevId& devid)
 {
@@ -23,6 +25,8 @@ xib_device_handle_t XibDevicePHandle::create_device_h(const DevId& devid)
 	{
         ZF_LOGE("Can\'t open device %s.", addr.c_str());
     }
+
+    MapDevIdPHandle::notify_devs_rescan();
     return handle;
 }
 
@@ -61,6 +65,8 @@ void XibDevicePHandle::destroy_device_h()
         ZF_LOGD("Urpc device handle %lu.", (unsigned long int)_uhandle);
         xib_com_device_destroy(_uhandle);
         _uhandle = nullptr;
+
+        MapDevIdPHandle::notify_devs_rescan();
     }
 }
 
@@ -344,18 +350,27 @@ xib_result_t MapDevIdPHandle::operation_send_request(const DevId &devid,
     return res;
 }
 
-std::vector<DevId> MapDevIdPHandle::enumerate_devs_opened()
+std::vector<std::string> MapDevIdPHandle::enumerate_devs_opened()
 {
-    std::vector<DevId> ret;
+    std::vector<std::string> r;
+    _rwlock.read_lock();
     for (auto &m : *this)
     {
-        ret.push_back(DevId(m.first.id()));
+        r.push_back(m.first.to_string_16hdigs());
     }
-    return ret;
+    _rwlock.read_unlock();
+    return r;
 }
 
-std::vector<DevId> MapDevIdPHandle::enumerate_devs()
+std::vector<std::string> MapDevIdPHandle::enumerate_devs()
 {
-    if (_pdev2_usb_confor == nullptr) return std::vector<DevId>();
-    return _pdev2_usb_confor->enumerate_dev();
+    std::vector<std::string> r;
+    if (_pdev2_usb_confor == nullptr) return r;
+    std::vector<DevId> v = _pdev2_usb_confor->enumerate_dev(false);
+    for (auto &m : v)
+    {
+        r.push_back(m.to_string_16hdigs());
+    }
+
+    return r;
 }

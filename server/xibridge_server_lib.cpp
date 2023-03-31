@@ -11,7 +11,7 @@
 #include "../common/utils.h"
 #include "../common/protocols.h"
 #include "../client/xibridge_client.h" // ERROR CODES
-#include "../inc/client/version.h"
+#include "../inc/server/supervisor.h"
 #include "platform.h"
 #include "xibridge_server_lib.h"
 
@@ -249,7 +249,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         }
         case XIBRIDGE_ENUM_REQUEST_PACKET_TYPE: {
                                                        ZF_LOGD("From %u received enum request packet.", conn_id);
-                                                       std::vector<DevId> sv = MapDevIdPHandle::get_devid_2_usb_confor() ->enumerate_dev();
+                                                       std::vector<DevId> sv = MapDevIdPHandle::get_devid_2_usb_confor() ->enumerate_dev(true);
                                                        bvector answer = p3.create_enum_response(sv);
                                                        pb->send_data(conn_id, answer);
                                                        ZF_LOGD("To connection %u enum response packet sent.", conn_id);
@@ -284,7 +284,8 @@ int server_main(
     const char * supervisor, 
     int sp_limit, 
     const char *dev2usb_mode, 
-    bool is_console_app)
+    bool is_console_app,
+    void(*cb_devsrescanned_val)())
 {
     if (is_already_started())
         return sm_err_allstarted;
@@ -311,9 +312,9 @@ int server_main(
         supervisor.stop();
     }
 
-    if (sp_limit > = 0 )
+    if (sp_limit > 0 )
     {
-        supervisor.set_limit(std::stoi(argv[3]));
+        supervisor.set_limit(sp_limit);
     }
 #endif
 
@@ -346,6 +347,11 @@ int server_main(
     }
 
     MapDevIdPHandle::set_devid_2_usb_confor(pdevid_usb_conf);
+    msu.set_devsrescanned(cb_devsrescanned_val);
+    
+    ADevId2UsbConfor::list_sp_ports();
+    MapDevIdPHandle::notify_devs_rescan();
+
     if (is_console_app)
     {
         ADevId2UsbConfor::print_sp_ports();
@@ -392,14 +398,14 @@ int server_main(
     return 0;
 }
 
-void server_main_as_dev2usb_by_spv_min()
+void server_main_as_dev2usb_by_spv_min(void(*cb_devsrescanned_val)())
 {
-    server_main(nullptr, nullptr, nullptr, 0, "by_serialpidvid", false);
+    server_main(nullptr, nullptr, nullptr, 0, "by_serialpidvid", false, cb_devsrescanned_val);
 }
 
-void start_server_thread_spv()
+void start_server_thread_spv(void(*cb_devsrescanned_val)())
 {
-   _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min);
+    _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min, cb_devsrescanned_val);
 }
 
 void stop_server_thread()
@@ -408,12 +414,12 @@ void stop_server_thread()
     _pserver_thread->join();
 }
 
-std::vector<DevId> enumerate_devs_opened()
+std::vector<std::string> enumerate_devs_opened()
 {
-    return msu.enumerate_devs();
+    return msu.enumerate_devs_opened();
 }
 
-std::vector<DevId> enumerate_devs()
+std::vector<std::string> enumerate_devs()
 {
     return msu.enumerate_devs();
 }

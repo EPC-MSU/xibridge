@@ -22,14 +22,15 @@
         const char * supervisor,
         int sp_limit,
         const char *dev2usb_mode,
-        bool is_console_app);
+        bool is_console_app,
+        void(*cb_devsrescanned_val)());
 
     class DevId;
-    XI_EXPORT std::vector<DevId> enumerate_devs_opened();
+    XI_EXPORT std::vector<std::string> enumerate_devs_opened();
 
-    XI_EXPORT std::vector<DevId> enumerate_devs();
+    XI_EXPORT std::vector<std::string> enumerate_devs();
 
-    XI_EXPORT void start_server_thread_spv();
+    XI_EXPORT void start_server_thread_spv(void(*cb_devsrescanned_val)());
 
     XI_EXPORT void stop_server_thread();
 

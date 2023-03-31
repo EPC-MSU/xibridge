@@ -1,9 +1,14 @@
 #include <zf_log.h>
 #include "platform.h"
 #include "devid2usb.h"
+#include "mapdevidphnd.h"
 
 struct sp_port ** ADevId2UsbConfor::pport_list = nullptr;
 ReadWriteLock ADevId2UsbConfor::rwlock;
+
+ADevId2UsbConfor::ADevId2UsbConfor()
+{
+}
 
 void ADevId2UsbConfor::list_sp_ports()
 {
@@ -212,10 +217,10 @@ std::string DevId2UsbBySerial::port_name_by_devid(const DevId& devid) const
     return s;
 }
 
-std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
+std::vector<DevId> ADevId2UsbConfor::enumerate_dev(bool list_ports) const
 {
     std::vector<DevId> devids;
-    list_sp_ports();
+    if (list_ports) list_sp_ports();
     rwlock.read_lock();
     for (int i = 0; pport_list[i] != NULL; i++)
     {
@@ -228,6 +233,10 @@ std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
         }
     }
     rwlock.read_unlock();
+    if (list_ports)
+    {
+        MapDevIdPHandle::notify_devs_rescan();
+    }
     return devids;
 }
 
