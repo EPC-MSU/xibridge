@@ -23,7 +23,8 @@ public:
     // pure virtual func
     virtual std::string port_name_by_devid(const DevId& devid) const = 0;
     
-    std::vector<DevId> enumerate_dev(bool list_ports) const;
+    std::vector<DevId> list_to_dev_id_vector() const;
+    std::vector<DevId> enumerate_dev() const;
 
     static void print_sp_ports();
     static void list_sp_ports();
@@ -123,7 +124,5 @@ protected:
 
 // virtual constructor to create 
 extern ADevId2UsbConfor *create_appropriate_dev_id_2_usb_configurator(const char *cmd_par);
-
-extern char *strlwr_portable(char *str);
 
 #endif

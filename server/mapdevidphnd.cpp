@@ -25,8 +25,6 @@ xib_device_handle_t XibDevicePHandle::create_device_h(const DevId& devid)
 	{
         ZF_LOGE("Can\'t open device %s.", addr.c_str());
     }
-
-    MapDevIdPHandle::notify_devs_rescan();
     return handle;
 }
 
@@ -65,8 +63,6 @@ void XibDevicePHandle::destroy_device_h()
         ZF_LOGD("Urpc device handle %lu.", (unsigned long int)_uhandle);
         xib_com_device_destroy(_uhandle);
         _uhandle = nullptr;
-
-        MapDevIdPHandle::notify_devs_rescan();
     }
 }
 
@@ -366,7 +362,7 @@ std::vector<std::string> MapDevIdPHandle::enumerate_devs()
 {
     std::vector<std::string> r;
     if (_pdev2_usb_confor == nullptr) return r;
-    std::vector<DevId> v = _pdev2_usb_confor->enumerate_dev(false);
+    std::vector<DevId> v = _pdev2_usb_confor->list_to_dev_id_vector();
     for (auto &m : v)
     {
         r.push_back(m.to_string_16hdigs());

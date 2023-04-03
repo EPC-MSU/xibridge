@@ -26,7 +26,7 @@ void print_help(char *argv[])
         << argv[0] << " ~/keyfile.sqlite debug by_com_addr" << std::endl
         << "Debug logging will be disabled by default, bvvu-style usb port matching configuration selected by default" << std::endl;
 #else
-    std::cout << "Usage: " << argv[0] << " keyfile [bvvu|by_com_addr|by_serial|by_serialpidvid]" "
+    std::cout << "Usage: " << argv[0] << " keyfile [bvvu|by_com_addr|by_serial|by_serialpidvid]" 
         << std::endl
         << "Examples: " << std::endl
         << argv[0] << std::endl
@@ -39,7 +39,7 @@ void print_help(char *argv[])
 }
 
 //the next function id not C standard, not supported in non win, the next is manual definition  
-char *strlwr_portable(char *str)
+static char *strlwr_portable(char *str)
 {
     unsigned char *p = (unsigned char *)str;
 

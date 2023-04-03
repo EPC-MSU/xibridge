@@ -7,9 +7,12 @@ OPTION(BUILD_XIBRIDGE_EXAMPLE "Build xibridge example@ project" OFF)
 OPTION(BUILD_XIBRIDGE_SERVER "Build xibridge server" OFF)
 OPTION(XIBRIDGE_SERVER_ENABLE_SUPERVISOR "Enable supervisor when build xibridge server" OFF)
 
-#if (WIN32)
-#  set(XIBRIDGE_SERVER_ENABLE_SUPERVISOR  OFF CACHE INTERNAL "")
-#endif()
+#enable supervisor only in case of Debian Linux mipsel
+IF (NOT ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+  set(XIBRIDGE_SERVER_ENABLE_SUPERVISOR  OFF CACHE INTERNAL "")
+ELSEIF (NOT  ${CMAKE_SYSTEM_PROCESSOR} STREQUAL mips)
+  set(XIBRIDGE_SERVER_ENABLE_SUPERVISOR  OFF CACHE INTERNAL "")
+ENDIF()
 
 #set the right version here !
 SET (XIBRIDGE_VERSION_MAJOR 1)

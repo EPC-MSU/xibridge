@@ -15,11 +15,6 @@
 #include "platform.h"
 #include "xibridge_server_lib.h"
 
-/*
-* Supervisor option.
-* It may not work properly on windows now.
-*/
-// #define ENABLE_SUPERVISOR
 
 #include <zf_log.h>
 
@@ -227,6 +222,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                                ZF_LOGD("New connection added conn_id=%u + ...", conn_id);
                                                            }
                                                            msu.log();
+                                                           MapDevIdPHandle::notify_devs_rescan();
                                                            break;
         }
         case XIBRIDGE_CLOSE_DEVICE_REQUEST_PACKET_TYPE: {
@@ -237,6 +233,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
                                                             bvector answer = p3.create_close_response(dev_id, 0);
                                                             pb->send_data(conn_id, answer);
                                                             ZF_LOGD("To connection %u close device response packet sent.", conn_id);
+                                                            MapDevIdPHandle::notify_devs_rescan();
                                                             break;
         }
 
@@ -249,9 +246,11 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         }
         case XIBRIDGE_ENUM_REQUEST_PACKET_TYPE: {
                                                        ZF_LOGD("From %u received enum request packet.", conn_id);
-                                                       std::vector<DevId> sv = MapDevIdPHandle::get_devid_2_usb_confor() ->enumerate_dev(true);
+                                                       std::vector<DevId> sv = MapDevIdPHandle::get_devid_2_usb_confor() ->enumerate_dev();
                                                        bvector answer = p3.create_enum_response(sv);
                                                        pb->send_data(conn_id, answer);
+
+                                                       MapDevIdPHandle::notify_devs_rescan();
                                                        ZF_LOGD("To connection %u enum response packet sent.", conn_id);
                                                        break;
 
