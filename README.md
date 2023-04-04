@@ -24,7 +24,7 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Разархивированный 
 каталог libserialport_release положить рядом с xibridge.
 
-Библиотеку, сервер. тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
+Библиотеку, сервер, тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
 проектов:
 
 * cкачать и установить cmake (https://cmake.org) и MS Visual Studio (13 и выше);
