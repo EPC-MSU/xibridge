@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     {
     case sm_err_allstarted:
 
-        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
+        std::cout << "Error! Another process (xxx_xinet_server) already running. Exitting...\nPress a key to exit!" << std::endl;
         std::cin.get(); //
         break;
     case sm_err_initfailed:

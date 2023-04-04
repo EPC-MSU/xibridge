@@ -11,10 +11,8 @@
 #include "../common/utils.h"
 #include "../common/protocols.h"
 #include "../client/xibridge_client.h" // ERROR CODES
-#include "../inc/server/supervisor.h"
 #include "platform.h"
 #include "xibridge_server_lib.h"
-
 
 #include <zf_log.h>
 
@@ -26,6 +24,7 @@
 #include "devid2usb.h"
 #include "mapdevidphnd.h"
 
+#include "../inc/server/supervisor.h"
 #ifdef ENABLE_SUPERVISOR
 #include "supervisor.hpp"
 
@@ -43,6 +42,7 @@ MapDevIdPHandle msu;
 static std::thread *_pserver_thread;
 
 static std::atomic<bool> wait;
+static std::atomic<int> ret_code;
 
 void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
 {
@@ -399,12 +399,16 @@ int server_main(
 
 void server_main_as_dev2usb_by_spv_min(void(*cb_devsrescanned_val)())
 {
-    server_main(nullptr, nullptr, nullptr, 0, "by_serialpidvid", false, cb_devsrescanned_val);
+    int ret = server_main(nullptr, nullptr, nullptr, 0, "by_serialpidvid", false, cb_devsrescanned_val);
+    ret_code.exchange(ret);
+
 }
 
-void start_server_thread_spv(void(*cb_devsrescanned_val)())
+int start_server_thread_spv(void(*cb_devsrescanned_val)())
 {
+    ret_code = 0;
     _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min, cb_devsrescanned_val);
+    return (int)ret_code;
 }
 
 void stop_server_thread()

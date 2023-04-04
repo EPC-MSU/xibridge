@@ -11,10 +11,6 @@
 
 #define sm_err_allstarted 1
 #define sm_err_initfailed 2
-
-//#if defined(__cplusplus)
-//extern "C" {
-//#endif
     
     XI_EXPORT int server_main(
         const char *keyfile,
@@ -25,17 +21,12 @@
         bool is_console_app,
         void(*cb_devsrescanned_val)());
 
-    class DevId;
     XI_EXPORT std::vector<std::string> enumerate_devs_opened();
 
     XI_EXPORT std::vector<std::string> enumerate_devs();
 
-    XI_EXPORT void start_server_thread_spv(void(*cb_devsrescanned_val)());
+    XI_EXPORT int start_server_thread_spv(void(*cb_devsrescanned_val)());
 
     XI_EXPORT void stop_server_thread();
 
-
-//#if defined(__cplusplus)
-//};
-//#endif
 #endif
