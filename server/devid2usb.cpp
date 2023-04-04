@@ -1,9 +1,14 @@
 #include <zf_log.h>
 #include "platform.h"
 #include "devid2usb.h"
+#include "mapdevidphnd.h"
 
 struct sp_port ** ADevId2UsbConfor::pport_list = nullptr;
 ReadWriteLock ADevId2UsbConfor::rwlock;
+
+ADevId2UsbConfor::ADevId2UsbConfor()
+{
+}
 
 void ADevId2UsbConfor::list_sp_ports()
 {
@@ -57,6 +62,18 @@ DevId DevId2UsbBvvu::get_devid_from_sp_port(
     char *port_name = sp_get_port_name(psp);
     uint32_t id = get_id_from_usb_location(port_name, ok);
     return DevId(id);
+}
+
+static char *strlwr_portable(char *str)
+{
+    unsigned char *p = (unsigned char *)str;
+
+    while (*p) {
+        *p = tolower((unsigned char)*p);
+        p++;
+    }
+
+    return str;
 }
 
 /*
@@ -200,10 +217,9 @@ std::string DevId2UsbBySerial::port_name_by_devid(const DevId& devid) const
     return s;
 }
 
-std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
+std::vector<DevId> ADevId2UsbConfor::list_to_dev_id_vector() const
 {
     std::vector<DevId> devids;
-    list_sp_ports();
     rwlock.read_lock();
     for (int i = 0; pport_list[i] != NULL; i++)
     {
@@ -217,6 +233,12 @@ std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
     }
     rwlock.read_unlock();
     return devids;
+}
+
+std::vector<DevId> ADevId2UsbConfor::enumerate_dev() const
+{
+    list_sp_ports();
+    return list_to_dev_id_vector();
 }
 
 // virtual constructor from cmd line param

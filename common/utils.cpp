@@ -415,3 +415,10 @@ bool xi_net_dev_uris(MBuf& result,
 
     return !read_buf.wasBroken() && !result.wasBroken();
 }
+
+std::string DevId::to_string_16hdigs() const
+{
+    uint8_t str_dev_id[(sizeof(uint32_t) + sizeof(uint16_t)+sizeof(uint16_t)) * 2 + 1];
+    portable_snprintf((char *)str_dev_id, (sizeof(uint32_t)+sizeof(uint16_t)+sizeof(uint16_t)) * 2 + 1, "%04X%04X%08X", (uint32_t)VID(), (uint32_t)PID(), id());
+    return std::string((char *)str_dev_id);
+}

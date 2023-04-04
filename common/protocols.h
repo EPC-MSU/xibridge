@@ -82,7 +82,8 @@ public:
     {
         return _dev_id;
     }
-
+    // returns vipidserial - 16 hex digits
+    std::string to_string_16hdigs() const;
 private:
 
     xibridge_device_t _dev_id;

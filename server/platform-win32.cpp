@@ -33,8 +33,7 @@ int initialization()
 
 uint32_t get_id_from_usb_location(const char *sp_port_name, bool& ok)
 {
-    char description[128];
-    SP_DEVINFO_DATA device_info_data;
+     SP_DEVINFO_DATA device_info_data;
     device_info_data.cbSize = sizeof(device_info_data);
     HDEVINFO device_info;
     int i;
@@ -106,8 +105,6 @@ bool is_already_started()
     _h_already_started = CreateMutex(NULL, TRUE, szUniqueNamedMutex);
     if (ERROR_ALREADY_EXISTS == GetLastError())
     {
-        std::cout << "Another process (xxx_xinet_server) already running. Press a key to exit!" << std::endl;
-        std::cin.get(); // To avoid console closing
         return true;
     }
     return false;

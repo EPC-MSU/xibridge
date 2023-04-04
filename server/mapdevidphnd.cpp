@@ -11,6 +11,8 @@
 std::map<DevId, std::mutex *> MapDevIdPHandle::_mutex_pool;
 ReadWriteLock MapDevIdPHandle::_mutex_pool_mutex;
 const ADevId2UsbConfor * MapDevIdPHandle::_pdev2_usb_confor = nullptr;
+void(*MapDevIdPHandle::cb_devsrescanned)() = 0;
+
 
 xib_device_handle_t XibDevicePHandle::create_device_h(const DevId& devid)
 {
@@ -342,4 +344,29 @@ xib_result_t MapDevIdPHandle::operation_send_request(const DevId &devid,
         _rwlock.read_unlock();
     }
     return res;
+}
+
+std::vector<std::string> MapDevIdPHandle::enumerate_devs_opened()
+{
+    std::vector<std::string> r;
+    _rwlock.read_lock();
+    for (auto &m : *this)
+    {
+        r.push_back(m.first.to_string_16hdigs());
+    }
+    _rwlock.read_unlock();
+    return r;
+}
+
+std::vector<std::string> MapDevIdPHandle::enumerate_devs()
+{
+    std::vector<std::string> r;
+    if (_pdev2_usb_confor == nullptr) return r;
+    std::vector<DevId> v = _pdev2_usb_confor->list_to_dev_id_vector();
+    for (auto &m : v)
+    {
+        r.push_back(m.to_string_16hdigs());
+    }
+
+    return r;
 }
