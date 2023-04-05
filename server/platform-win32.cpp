@@ -115,3 +115,10 @@ void release_already_started_mutex()
     ReleaseMutex(_h_already_started); // Explicitly release mutex
     CloseHandle(_h_already_started); // close handle before terminating
 }
+
+void msec_sleep(
+    unsigned int msec
+    )
+{
+    Sleep(msec);
+}

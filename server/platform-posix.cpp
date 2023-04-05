@@ -33,3 +33,17 @@ void handler(int sig)
     ZF_LOGE("End of stack trace.");
     exit(1);
 }
+
+void msec_sleep(
+    unsigned int msec
+    )
+{
+    // POSIX 1.b
+    struct timespec ts;
+    ts.tv_sec = (time_t)(msec / 1E3);
+    ts.tv_nsec = (long)(msec * 1E6 - ts.tv_sec * 1E9);
+    if (nanosleep(&ts, NULL) != 0)
+    {
+        ZF_LOGE("nanosleep failed: ");
+    }
+}

@@ -25,9 +25,9 @@
 #include "mapdevidphnd.h"
 
 #include "../inc/server/supervisor.h"
-#ifdef ENABLE_SUPERVISOR
-#include "supervisor.hpp"
 
+#ifdef XIBRIDGE_SERVER_ENABLE_SUPERVISOR
+#include "supervisor.hpp"
 Supervisor supervisor;
 #endif
 
@@ -96,19 +96,19 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
     uint32_t resp_len;
     DevId dev_id;
 
+#ifdef XIBRIDGE_SERVER_ENABLE_SUPERVISOR
+    /*
+    * Capture and release (in destructor) serial number
+    * if it is captured many times, but never freed, the supervisor will kill this device
+    */
+    SupervisorLock _s = SupervisorLock(&supervisor, std::to_string(dev_id.id()));
+#endif
+
     if (protocol_ver == URPC_XINET_PROTOCOL_VERSION)
     {
         Protocol2 p2(&err_p, true);
         bvector cid;
         p2.get_data_from_request(mbuf, cid, req_data, dev_id, resp_len);
-#ifdef ENABLE_SUPERVISOR
-        /*
-        * Capture and release (in destructor) serial number
-        * if it is captured many times, but never freed, the supervisor will kill this device
-        */
-        SupervisorLock _s = SupervisorLock(&supervisor, std::to_string(dev_id.id()));
-#endif
-
         switch (command_code) {
         case URPC_COMMAND_REQUEST_PACKET_TYPE: {
                                                    ZF_LOGD("From %u received command Protocol2 request packet.", conn_id);
@@ -175,15 +175,7 @@ void callback_data(conn_id_t conn_id, std::vector<uint8_t> data) {
         switch (command_code)
         {
 
-#ifdef ENABLE_SUPERVISOR
-            /*
-            * Capture and release (in destructor) serial number
-            * if it is captured many times, but never freed, the supervisor will kill this device
-            */
-            SupervisorLock _s = SupervisorLock(&supervisor, std::to_string(serial));
-#endif
-
-        case XIBRIDGE_COMMAND_REQUEST_PACKET_TYPE: {
+         case XIBRIDGE_COMMAND_REQUEST_PACKET_TYPE: {
                                                        ZF_LOGD("From %u received Protocol3 command request packet.", conn_id);
                                                        // !!! to do - error processing
                                                        resp_data.resize(resp_len);
@@ -280,8 +272,6 @@ ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 int server_main(
     const char *keyfile, 
     const char *debug, 
-    const char * supervisor, 
-    int sp_limit, 
     const char *dev2usb_mode, 
     bool is_console_app,
     void(*cb_devsrescanned_val)())
@@ -305,16 +295,8 @@ int server_main(
 
     zf_log_set_output_level(ZF_LOG_WARN);
 
-#ifdef ENABLE_SUPERVISOR
-    if (spurevisor != nullptr && strcmp(supervisor, "disable_supervisor") == 0)
-    {
-        supervisor.stop();
-    }
-
-    if (sp_limit > 0 )
-    {
-        supervisor.set_limit(sp_limit);
-    }
+#ifdef XIBRIDGE_SERVER_ENABLE_SUPERVISOR
+     supervisor.set_limit(XIBRIDGE_SERVER_SUPERVISOR_LIMIT);
 #endif
 
     ADevId2UsbConfor *pdevid_usb_conf = nullptr;
@@ -399,7 +381,7 @@ int server_main(
 
 void server_main_as_dev2usb_by_spv_min(void(*cb_devsrescanned_val)())
 {
-    int ret = server_main(nullptr, nullptr, nullptr, 0, "by_serialpidvid", false, cb_devsrescanned_val);
+    int ret = server_main(nullptr, nullptr, "by_serialpidvid", false, cb_devsrescanned_val);
     ret_code.exchange(ret);
 
 }
@@ -408,6 +390,7 @@ int start_server_thread_spv(void(*cb_devsrescanned_val)())
 {
     ret_code = 0;
     _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min, cb_devsrescanned_val);
+    msec_sleep(50); // to set ret code if need
     return (int)ret_code;
 }
 

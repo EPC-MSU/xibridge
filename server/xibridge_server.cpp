@@ -8,7 +8,7 @@
 
 #include "xibridge_server_lib.h"
 
-#ifdef ENABLE_SUPERVISOR
+#ifdef XIBRIDGE_SERVER_ENABLE_SUPERVISOR
 #include "supervisor.hpp"
 #endif
 
@@ -122,35 +122,7 @@ int main(int argc, char *argv[])
         }
     }
 
-#ifdef ENABLE_SUPERVISOR
-    /*
-    if (argc > 3)
-    {
-        if (strcmp(argv[3], "disable_supervisor") == 0)
-        {
-            svisor = disable_supervisor
-        }
-        else if (strcmp(argv[2], "enable_supervisor") == 0)
-        {
-            ; // already enabled
-        }
-        else
-        {
-            print_help(argv);
-            return 0;
-        }
-    }
-    if (argc > 4)
-    {
-        slimit = std::stoi(argv[4]);
-    }
-    */
-    svisor = "enable_supervisor";
-    slimit = 30;
-
-#endif
-
-    int ret = server_main(keyfile, debug, svisor, slimit, mode, true, 0);
+    int ret = server_main(keyfile, debug, mode, true, 0);
 
     switch (ret)
     {

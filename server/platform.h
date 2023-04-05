@@ -8,3 +8,4 @@ int initialization();
 void handler(int sig);
 bool is_already_started();
 void release_already_started_mutex();
+void msec_sleep(unsigned int msec);

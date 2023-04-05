@@ -15,8 +15,6 @@
     XI_EXPORT int server_main(
         const char *keyfile,
         const char *debug,
-        const char * supervisor,
-        int sp_limit,
         const char *dev2usb_mode,
         bool is_console_app,
         void(*cb_devsrescanned_val)());
