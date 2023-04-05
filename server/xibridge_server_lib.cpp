@@ -41,7 +41,7 @@ MapDevIdPHandle msu;
 
 static std::thread *_pserver_thread;
 
-static std::atomic<bool> wait;
+static std::atomic<bool> wait_st;
 static std::atomic<int> ret_code;
 
 void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
@@ -362,9 +362,9 @@ int server_main(
         bindy.set_discnotify(&callback_disc);
         if (!is_console_app)
         {
-            wait = true;
+            wait_st = true;
 
-            while (wait);
+            while (wait_st);
         }
     }
     catch (std::exception &ex)
@@ -396,7 +396,7 @@ int start_server_thread_spv(void(*cb_devsrescanned_val)())
 
 void stop_server_thread()
 {
-    wait = false;
+    wait_st = false;
     _pserver_thread->join();
 }
 
