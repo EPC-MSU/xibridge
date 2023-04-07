@@ -19,35 +19,40 @@ static uint8_t errd_cid[URPC_CID_SIZE] = { 'e', 'r', 'r', 'd' };
 static xib_result_t command_port_send(struct sp_port *handle_port, const uint8_t *command, size_t command_len)
 {
     enum sp_return result;
+    ZF_LOGD("try sp_blocking_write...");
     result = sp_blocking_write(handle_port, command, command_len, PORT_TIMEOUT);
     if (result < 0)
     {
         if (result == SP_ERR_FAIL)
         {
+            ZF_LOGD("sp_blocking_write return SP_ERR_FAIL");
             return xib_result_nodevice;
         }
         else
         {
+            ZF_LOGD("at write sp_flush");
             return sp_flush(handle_port, SP_BUF_OUTPUT) != SP_OK ? xib_result_nodevice : xib_result_timeout;
         }
     }
-
+    ZF_LOGD("sp_blocking_write returned OK");
     return xib_result_ok;
 }
 
 static int command_port_receive(struct sp_port *handle_port, uint8_t *response, size_t response_len)
 {
     enum sp_return result;
-   
+    ZF_LOGD("try sp_blocking_read...");
     result = sp_blocking_read(handle_port, response, response_len, PORT_TIMEOUT);
     if (result < 0)
     {
         if (result == SP_ERR_FAIL )
         {
+            ZF_LOGD("sp_blocking_read returned SP_ERR_FAIL");
             return xib_result_nodevice;
         }
         else
         {
+            ZF_LOGD("at read sp_flush");
             return sp_flush(handle_port, SP_BUF_INPUT) != SP_OK ? xib_result_nodevice : xib_result_timeout;
         }
     }
