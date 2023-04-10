@@ -164,7 +164,7 @@ bool MapDevIdPHandle::_is_actual_connection(conn_id_t conn_id, DevId *pserial)
     }
     _rwlock.read_lock();
 
-    bool ret = false;
+    bool ret = true;
     // first, glance, if any is already in list
     std::list<conn_serial>::const_iterator it;
     if ((it = std::find_if(_conns.cbegin(), _conns.cend(), std::bind(_find_conn, std::placeholders::_1, conn_id))) !=
@@ -236,10 +236,11 @@ void MapDevIdPHandle::remove_conn_or_remove_device(conn_id_t conn_id, const DevI
     DevId devid_real(UINT32_MAX);
     bool destroy_serial = false;
     DevId devid_known = devid_kn;
-    if (force_remove == true || _is_actual_connection(conn_id, &devid_real)) return;
+    //if (!_is_actual_connection(conn_id, &devid_real)) return;
+    _is_actual_connection(conn_id, &devid_real);
     if (devid_known.id() == UINT32_MAX) devid_known = devid_real;
     if (devid_known.id() == UINT32_MAX) return;
-    lock_create_device_mutex(devid_real);
+    lock_create_device_mutex(devid_known);
     _rwlock.write_lock();
 
     std::list<conn_serial>::const_iterator it;

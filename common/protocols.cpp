@@ -495,6 +495,10 @@ bool Protocol3::get_spec_data(MBuf&  mbuf,
             }
             mbuf >> r;
             _res_err = r;
+            if (pckt == pkt3_error_resp)
+            {
+                *_perror = r;
+            }
             return true;
         case pkt3_enum_resp:
             mbuf.mseek(8);

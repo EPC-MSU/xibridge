@@ -212,6 +212,9 @@ device_serial_create(
     {
         return NULL;
     }
+
+    ZF_LOGD("At serial device opening (sp_get_port_by_name) ptr%u", (unsigned int)psp);
+
     if (sp_open(psp, SP_MODE_READ_WRITE) != SP_OK)
     {
         sp_free_port(psp);
@@ -385,7 +388,8 @@ xib_result_t device_serial_destroy(
     struct sp_port* device
 )
 {
-    if (device == NULL) return xib_result_nodevice;;
+    if (device == NULL) return xib_result_nodevice;
+    ZF_LOGD("At serial device destroying (sp_close) ptr%u", (unsigned int)device);
     enum sp_return result = sp_close(device);
     sp_free_port(device);
     return result == SP_OK ? xib_result_ok : xib_result_error;
