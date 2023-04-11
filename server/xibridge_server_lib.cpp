@@ -36,6 +36,7 @@ bindy::Bindy * pb = NULL;
 
 
 #define SEND_WAIT_TIMEOUT_MS 5000
+#define LOG_BUFFER_SIZE 10 * 1024
 
 MapDevIdPHandle msu;
 
@@ -43,6 +44,10 @@ static std::thread *_pserver_thread;
 
 static std::atomic<bool> wait_st;
 static std::atomic<int> ret_code;
+
+static char * log_buffer = nullptr; // buffer for zf_log lîg when used in interface of calling gui 
+
+static void(*cb_log_message)(const char *, size_t) = nullptr;
 
 void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
 {
@@ -386,9 +391,37 @@ void server_main_as_dev2usb_by_spv_min(void(*cb_devsrescanned_val)())
 
 }
 
-int start_server_thread_spv(void(*cb_devsrescanned_val)())
+
+
+// from zf_log.c -- some defs 
+
+#define VAR_UNUSED(var) (void)var
+#define RETVAL_UNUSED(expr) do { while(expr) break; } while(0)
+#ifndef ZF_LOG_EOL
+#define ZF_LOG_EOL "\n"
+#endif
+//
+
+enum { ZF_LOG_OUT_BUFFER_MASK = ( 1 << 16)};
+void zf_log_out_buffer_callback(const zf_log_message *const msg, void *arg)
+{
+    VAR_UNUSED(arg);
+    const size_t eol_len = sizeof(ZF_LOG_EOL)-1;
+    memcpy(msg->p, ZF_LOG_EOL, eol_len);
+    
+    // callback call to emit signal for gui
+    cb_log_message(msg->buf, (size_t)(msg->p - msg->buf + eol_len));
+}
+
+#define ZF_LOG_OUT_BUFFER ZF_LOG_OUT_BUFFER_MASK, 0, zf_log_out_stderr_callback
+
+int start_server_thread_spv(void(*cb_devsrescanned_val)(), void(*cb_logmes_val)(const char *, size_t ))
 {
     ret_code = 0;
+    ZF_LOG_DEFINE_GLOBAL_OUTPUT = { ZF_LOG_OUT_BUFFER };
+    zf_log_set_output_v(ZF_LOG_OUT_BUFFER);
+    log_buffer = (char *)malloc(sizeof(char *) * LOG_BUFFER_SIZE);
+    cb_log_message = cb_logmes_val;
     _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min, cb_devsrescanned_val);
     msec_sleep(50); // to set ret code if need
     return (int)ret_code;
@@ -398,6 +431,7 @@ void stop_server_thread()
 {
     wait_st = false;
     _pserver_thread->join();
+    free(log_buffer);
 }
 
 std::vector<std::string> enumerate_devs_opened()

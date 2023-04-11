@@ -23,7 +23,7 @@
 
     XI_EXPORT std::vector<std::string> enumerate_devs();
 
-    XI_EXPORT int start_server_thread_spv(void(*cb_devsrescanned_val)());
+    XI_EXPORT int start_server_thread_spv(void(*cb_devsrescanned_val)(), void(*cb_logmes_val)(const char *, size_t));
 
     XI_EXPORT void stop_server_thread();
 
