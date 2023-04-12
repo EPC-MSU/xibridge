@@ -23,8 +23,10 @@
 
     XI_EXPORT std::vector<std::string> enumerate_devs();
 
-    XI_EXPORT int start_server_thread_spv(void(*cb_devsrescanned_val)(), void(*cb_logmes_val)(const char *, size_t));
+    XI_EXPORT int start_server_thread_spv(void(*cb_devsrescanned_val)(), void(*cb_logmes_val)(), void (*cb_exprc_val)(const char *, const char *));
 
     XI_EXPORT void stop_server_thread();
+
+    XI_EXPORT std::string get_last_log();
 
 #endif

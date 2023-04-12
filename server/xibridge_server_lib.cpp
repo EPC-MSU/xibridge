@@ -37,6 +37,8 @@ bindy::Bindy * pb = NULL;
 
 #define SEND_WAIT_TIMEOUT_MS 5000
 #define LOG_BUFFER_SIZE 10 * 1024
+#define EXCEPT_BUFFER_SIZE 1024
+#define STACK_TRACE_BUFFER_SIZE 4096
 
 MapDevIdPHandle msu;
 
@@ -47,7 +49,25 @@ static std::atomic<int> ret_code;
 
 static char * log_buffer = nullptr; // buffer for zf_log lîg when used in interface of calling gui 
 
-static void(*cb_log_message)(const char *, size_t) = nullptr;
+static void(*cb_log_message)() = nullptr;
+
+static char except_buffer[EXCEPT_BUFFER_SIZE];
+
+static char stack_trace_buffer[STACK_TRACE_BUFFER_SIZE];
+
+ReadWriteLock _log_lock;
+std::string _actual_log_data;
+
+//thread-safe reading log_data
+std::string get_last_log()
+{
+    std::string ret;
+    _log_lock.read_lock();
+    ret = _actual_log_data;
+    _log_lock.read_unlock();
+    return ret;
+}
+
 
 void send_error_pckt_proto3(conn_id_t conn_id, uint32_t err)
 {
@@ -274,6 +294,37 @@ void callback_disc(conn_id_t conn_id) {
 
 ZF_LOG_DEFINE_GLOBAL_OUTPUT_LEVEL;
 
+
+// from zf_log.c -- some defs 
+
+#define VAR_UNUSED(var) (void)var
+#define RETVAL_UNUSED(expr) do { while(expr) break; } while(0)
+#ifndef ZF_LOG_EOL
+#define ZF_LOG_EOL "\n"
+#endif
+//
+
+enum { ZF_LOG_OUT_BUFFER_MASK = ZF_LOG_PUT_STD };
+void zf_log_out_buffer_callback(const zf_log_message *const msg, void *arg)
+{
+    VAR_UNUSED(arg);
+    const size_t eol_len = sizeof(ZF_LOG_EOL)-1;
+    memcpy(msg->p, ZF_LOG_EOL, eol_len);
+
+    // callback call to emit signal for gui
+    _log_lock.write_lock();
+    _actual_log_data = std::string(msg->buf, msg->buf + eol_len);
+    _log_lock.write_unlock();
+
+    if (cb_log_message != nullptr)
+       // cb_log_message(msg->buf, (size_t)(msg->p - msg->buf + eol_len));
+       cb_log_message();
+
+}
+
+#define ZF_LOG_OUT_BUFFER ZF_LOG_OUT_BUFFER_MASK, 0, zf_log_out_buffer_callback
+
+
 int server_main(
     const char *keyfile, 
     const char *debug, 
@@ -281,13 +332,23 @@ int server_main(
     bool is_console_app,
     void(*cb_devsrescanned_val)())
 {
+    memset(except_buffer, 0, EXCEPT_BUFFER_SIZE);
+    memset(stack_trace_buffer, 0, STACK_TRACE_BUFFER_SIZE);
+
+    //ZF_LOG_DEFINE_GLOBAL_OUTPUT = { ZF_LOG_OUT_BUFFER };
+    zf_log_set_output_v(ZF_LOG_OUT_BUFFER);
+    log_buffer = (char *)malloc(sizeof(char *)* LOG_BUFFER_SIZE);
+
+
+
     if (is_already_started())
         return sm_err_allstarted;
 
 #ifndef _WIN32
     signal(SIGSEGV, handler);   // install our handler  
 #endif
-
+    const char *ex_text;
+    size_t ex_len;
     int res = initialization();
     if (res)
     {
@@ -374,8 +435,12 @@ int server_main(
     }
     catch (std::exception &ex)
     {
-        ZF_LOGE("Exception catched: %s.\n Server stopped", ex.what());
-     }
+        ZF_LOGE("Exception catched: %s.\n Server stopped", ex_text = ex.what());
+        ex_len = strlen(ex_text);
+        if (ex_len > EXCEPT_BUFFER_SIZE - 1)
+            ex_len = EXCEPT_BUFFER_SIZE - 1;
+        memcpy(except_buffer, ex_text, ex_len);
+    }
 
 #ifdef _WIN32
     release_already_started_mutex();
@@ -386,44 +451,23 @@ int server_main(
 
 void server_main_as_dev2usb_by_spv_min(void(*cb_devsrescanned_val)())
 {
-    int ret = server_main(nullptr, nullptr, "by_serialpidvid", false, cb_devsrescanned_val);
+    int ret = server_main(nullptr, "debug", "by_serialpidvid", false, cb_devsrescanned_val);
     ret_code.exchange(ret);
-
 }
 
 
 
-// from zf_log.c -- some defs 
-
-#define VAR_UNUSED(var) (void)var
-#define RETVAL_UNUSED(expr) do { while(expr) break; } while(0)
-#ifndef ZF_LOG_EOL
-#define ZF_LOG_EOL "\n"
-#endif
-//
-
-enum { ZF_LOG_OUT_BUFFER_MASK = ( 1 << 16)};
-void zf_log_out_buffer_callback(const zf_log_message *const msg, void *arg)
-{
-    VAR_UNUSED(arg);
-    const size_t eol_len = sizeof(ZF_LOG_EOL)-1;
-    memcpy(msg->p, ZF_LOG_EOL, eol_len);
-    
-    // callback call to emit signal for gui
-    cb_log_message(msg->buf, (size_t)(msg->p - msg->buf + eol_len));
-}
-
-#define ZF_LOG_OUT_BUFFER ZF_LOG_OUT_BUFFER_MASK, 0, zf_log_out_stderr_callback
-
-int start_server_thread_spv(void(*cb_devsrescanned_val)(), void(*cb_logmes_val)(const char *, size_t ))
+int start_server_thread_spv(void(*cb_devsrescanned_val)(), void(*cb_logmes_val)(), void(*cb_exprc_val)(const char *, const char *))
 {
     ret_code = 0;
-    ZF_LOG_DEFINE_GLOBAL_OUTPUT = { ZF_LOG_OUT_BUFFER };
-    zf_log_set_output_v(ZF_LOG_OUT_BUFFER);
-    log_buffer = (char *)malloc(sizeof(char *) * LOG_BUFFER_SIZE);
+   // ZF_LOG_DEFINE_GLOBAL_OUTPUT = { ZF_LOG_OUT_BUFFER };
+   // zf_log_set_output_v(ZF_LOG_OUT_BUFFER);
+   // log_buffer = (char *)malloc(sizeof(char *) * LOG_BUFFER_SIZE);
     cb_log_message = cb_logmes_val;
     _pserver_thread = new std::thread(server_main_as_dev2usb_by_spv_min, cb_devsrescanned_val);
     msec_sleep(50); // to set ret code if need
+    if (*except_buffer != 0)
+        cb_exprc_val(except_buffer, stack_trace_buffer);
     return (int)ret_code;
 }
 
