@@ -30,8 +30,7 @@ static xib_result_t command_port_send(struct sp_port *handle_port, const uint8_t
         }
         else
         {
-            ZF_LOGD("at write sp_flush");
-            return sp_flush(handle_port, SP_BUF_OUTPUT) != SP_OK ? xib_result_nodevice : xib_result_timeout;
+             return sp_flush(handle_port, SP_BUF_OUTPUT) != SP_OK ? xib_result_nodevice : xib_result_timeout;
         }
     }
     ZF_LOGD("sp_blocking_write returned OK");
@@ -52,7 +51,6 @@ static int command_port_receive(struct sp_port *handle_port, uint8_t *response, 
         }
         else
         {
-            ZF_LOGD("at read sp_flush");
             return sp_flush(handle_port, SP_BUF_INPUT) != SP_OK ? xib_result_nodevice : xib_result_timeout;
         }
     }
@@ -212,8 +210,6 @@ device_serial_create(
     {
         return NULL;
     }
-
-    ZF_LOGD("At serial device opening (sp_get_port_by_name) ptr%u", (unsigned int)psp);
 
     if (sp_open(psp, SP_MODE_READ_WRITE) != SP_OK)
     {
