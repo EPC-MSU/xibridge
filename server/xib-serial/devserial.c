@@ -385,7 +385,7 @@ xib_result_t device_serial_destroy(
 )
 {
     if (device == NULL) return xib_result_nodevice;
-    ZF_LOGD("At serial device destroying (sp_close) ptr%u", (unsigned int)device);
+    ZF_LOGD("At serial device destroying (sp_close) ptr%p", device);
     enum sp_return result = sp_close(device);
     sp_free_port(device);
     return result == SP_OK ? xib_result_ok : xib_result_error;

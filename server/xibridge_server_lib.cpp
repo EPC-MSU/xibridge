@@ -44,7 +44,7 @@ MapDevIdPHandle msu;
 
 static std::thread *_pserver_thread;
 
-static std::atomic<bool> wait_st = false;
+static std::atomic<bool> wait_st;
 static std::atomic<int> ret_code;
 
 static char * log_buffer = nullptr; // buffer for zf_log lîg when used in interface of calling gui 
