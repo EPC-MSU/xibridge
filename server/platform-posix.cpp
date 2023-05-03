@@ -31,7 +31,7 @@ void handler(int sig)
     ZF_LOGE("Stack trace...");
     backtrace_symbols_fd(array, size, STDERR_FILENO);
     ZF_LOGE("End of stack trace.");
-    exit(1);
+    _exit(1);
 }
 
 void msec_sleep(
