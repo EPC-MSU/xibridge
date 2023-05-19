@@ -53,7 +53,7 @@ uint32_t Xibridge_client::_server_base_protocol_version = 3;
 class xbc_init
 {
 private:
-    xbc_init() { _log_level(); Xibridge_client::xbc_set_base_protocol_version({ 1, 0, 0 }); };
+    xbc_init() { _log_level(); Xibridge_client::xbc_set_base_protocol_version({ 3, 0, 0 }); };
     static xbc_init _xbc_i;
 };
 

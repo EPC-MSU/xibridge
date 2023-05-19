@@ -34,7 +34,7 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
     if (err)
     {
         printf("Cannot enumerare device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
-        return false;
+       // return false;
     }     
     printf("Count of enumerated devices: %u\n", count);
     if (count)
