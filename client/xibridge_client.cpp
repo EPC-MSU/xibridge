@@ -357,14 +357,24 @@ bool Xibridge_client::decrement_server_protocol_version()
     return false;
 }
 
-bool Xibridge_client::open_connection()
+bool Xibridge_client::open_connection(bool need_delay)
 {
     clr_errors();
     _conn_id = Bindy_helper::instance() -> connect(this);
     if (_conn_id == conn_id_invalid)
     {
-        _last_error = ERR_NO_CONNECTION;
-        return false;
+        if (need_delay)
+        { 
+            // one more chance
+            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+            _conn_id = Bindy_helper::instance()->connect(this);
+        }
+        if (_conn_id == conn_id_invalid)
+        {
+
+            _last_error = ERR_NO_CONNECTION;
+            return false;
+        }
     }
     return true;
 }

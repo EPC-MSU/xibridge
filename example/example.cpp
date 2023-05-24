@@ -16,6 +16,7 @@ extern void xinet_xibridge_threads_urpc();
 int main(int /*argc*/, char ** /*argv[]*/)
 {
     bool ret = true;
+    char key;
     std::cout << "Starting..." << std::endl;
 
     std::cout << "Enter ip-address for ximc xinet-server if you intend to test xibridge with it (or type 'N' if not):\n";
@@ -33,6 +34,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
         {
             ret = false;
         }    
+       
         if (!ret) return 1;
         //xinet_ximc_threads();
     }
@@ -93,7 +95,7 @@ int main(int /*argc*/, char ** /*argv[]*/)
     }
     
     std::cout << "All is done OK. Press some char key, <-| to exit\n";
-    char key;
+    
     std::cin >> key;
     return 0;
 }

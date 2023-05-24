@@ -252,7 +252,7 @@ public:
 
     bool exec_enumerate( char **result, uint32_t *pcount);
 
-    bool open_connection();
+    bool open_connection(bool need_delay = false);
 
     bool is_connected();
 

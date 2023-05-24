@@ -31,19 +31,20 @@ uint32_t xibridge_open_device_connection(const char *xi_net_uri,
     *pconn = xibridge_conn_invalid;
     Xibridge_client * cl = new Xibridge_client(xi_net_uri);
 
-    
+    bool need_delay = false;
     // making opening logic more complex
     uint32_t ncount = xibridge_get_last_protocol_version().major;
     while (ncount--)
     {
 
-        if (!cl->open_connection())
+        if (!cl->open_connection(need_delay))
         {
 label_noconn:
             res_err = cl->get_last_error();
             delete cl;
             return res_err;
         }
+        need_delay = true;
         cl->clr_errors();
         cl->open_device();
         res_err = cl->get_last_error();
@@ -53,7 +54,7 @@ label_noconn:
             // if (ncount) ncount--;
             cl->clr_errors();
             cl->disconnect();
-            if (!cl->open_connection()) goto label_noconn;
+            if (!cl->open_connection(need_delay)) goto label_noconn;
             cl->open_device();
             res_err = cl->get_last_error();
             break;
@@ -110,14 +111,14 @@ uint32_t xibridge_enumerate_adapter_devices(const char *addr,
     if (pcount != nullptr) *pcount = 0;
     if (ppresult == nullptr || pcount == nullptr) return ERR_NULLPTR_PARAM;
     Xibridge_client * cl = new Xibridge_client(addr, adapter == nullptr ? "" : adapter);
-   
+    bool need_delay = false;
     // making opening logic more complex
     uint32_t ncount = xibridge_get_last_protocol_version().major;
     while (ncount--)
     {
         cl->clr_errors();
 
-        if (!cl->open_connection())
+        if (!cl->open_connection(need_delay))
         {
 label_noconn:
             res_err = cl->get_last_error();
@@ -126,14 +127,14 @@ label_noconn:
         }
         cl->exec_enumerate(ppresult, pcount);
         res_err = cl->get_last_error();
-        
+        need_delay = true;
         if (res_err == ERR_ANOTHER_PROTOCOL)  // another protocol required
         {
             // second and final chance
             // if (ncount) ncount--;
             cl->clr_errors();
             cl->disconnect();
-            if (!cl->open_connection()) goto label_noconn;
+            if (!cl->open_connection(need_delay)) goto label_noconn;
             cl->exec_enumerate(ppresult, pcount);
             res_err = cl->get_last_error();
             break;  

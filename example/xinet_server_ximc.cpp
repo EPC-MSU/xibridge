@@ -28,13 +28,14 @@ typedef struct _geng_re re_geng;
 bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
 {
     sprintf(_DEV_IP, "xi-net://%s/%x", ip, dev_num);
-    char  *pdata; uint32_t count;
+    char  *pdata;  uint32_t count;
 
     uint32_t err = xibridge_enumerate_adapter_devices(ip, "", &pdata, &count);
+    
     if (err)
     {
         printf("Cannot enumerare device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
-       // return false;
+        return false;
     }     
     printf("Count of enumerated devices: %u\n", count);
     if (count)
@@ -47,7 +48,7 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
         }
     }
     xibridge_free_enumerate_devices(pdata);
-
+    
     xibridge_conn_t conn;
 
     err = xibridge_open_device_connection(_DEV_IP, &conn);
