@@ -55,7 +55,7 @@ bool xinet_ximc_usage_example(const char *ip, uint32_t dev_num)
     if (err)
     {
         printf("Cannot open device: %s, error: %s\n", _DEV_IP, xibridge_get_err_expl(err));
-        xibridge_close_device_connection(&conn);
+       // xibridge_close_device_connection(&conn);
         return false;
     }
    

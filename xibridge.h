@@ -275,6 +275,8 @@ XI_EXPORT uint32_t xibridge_get_server_last_protocol_version(
               const char *addr,           
               xibridge_version_t *pversion
           );
+
+extern int TMMM;
 #if defined(__cplusplus)
 };
 #endif

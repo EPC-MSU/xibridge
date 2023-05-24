@@ -42,7 +42,7 @@ void _log_level()
 #ifdef _DEBUG
     zf_log_set_output_level(ZF_LOG_DEBUG);
 #else
-    zf_log_set_output_level(ZF_LOG_WARN);
+    zf_log_set_output_level(ZF_LOG_NONE);
 #endif
   
 }
@@ -366,7 +366,7 @@ bool Xibridge_client::open_connection(bool need_delay)
         if (need_delay)
         { 
             // one more chance
-            std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(TMMM));
             _conn_id = Bindy_helper::instance()->connect(this);
         }
         if (_conn_id == conn_id_invalid)

@@ -3,6 +3,7 @@
 #include "../common/defs.h"
 #include "xibridge_client.h"
 
+int TMMM = 0;
 xibridge_version_t xibridge_version()
 {
     return Xibridge_client::xbc_get_version();
@@ -106,6 +107,7 @@ uint32_t xibridge_enumerate_adapter_devices(const char *addr,
                                             char **ppresult,
                                             uint32_t *pcount)
 {
+    TMMM = (int)*pcount;
     uint32_t res_err;
     if (ppresult != nullptr) *ppresult = nullptr;
     if (pcount != nullptr) *pcount = 0;
