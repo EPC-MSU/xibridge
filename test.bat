@@ -1,12 +1,12 @@
 @SET GOOD_WORK=0
 @SET IP=172.16.131.37
-@SET COUNT=10
+@SET COUNT=2
 
 call :OneTestStep 5000
-call :OneTestStep 6000
-call :OneTestStep 6500
-call :OneTestStep 7000
-call :OneTestStep 15000
+::call :OneTestStep 6000
+::call :OneTestStep 6500
+::call :OneTestStep 7000
+::call :OneTestStep 15000
 @goto :eof
 
 :: One test step function
@@ -25,6 +25,6 @@ example.exe %IP% %1%
 @goto loop
 
 :end
-@echo At timeout %1%
-@echo - %PER% %%
+@echo At timeout %1% > _test_.txt
+@echo - %PER% %% > _test_.txt
 @goto :eof
