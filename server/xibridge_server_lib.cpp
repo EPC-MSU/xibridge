@@ -445,7 +445,7 @@ void zf_log_out_buffer_callback(const zf_log_message *const msg, void *arg)
 
     // callback call to emit signal for gui
     _log_lock.write_lock();
-    _actual_log_data += std::string(msg->buf, (msg->p - msg->buf + eol_len));
+    _actual_log_data += "\n" + std::string(msg->buf, (msg->p - msg->buf + eol_len));
     _log_lock.write_unlock();
 
     if (cb_log_message != nullptr)
