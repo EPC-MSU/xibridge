@@ -8,7 +8,7 @@
 #include "mapdevidphnd.h"
 #include "devid2usb.h"
 
-std::map<DevId, std::mutex *> MapDevIdPHandle::_mutex_pool;
+std::map<DevId, std::mutex> MapDevIdPHandle::_mutex_pool;
 ReadWriteLock MapDevIdPHandle::_mutex_pool_mutex;
 const ADevId2UsbConfor * MapDevIdPHandle::_pdev2_usb_confor = nullptr;
 void(*MapDevIdPHandle::cb_devsrescanned)() = 0;
@@ -68,14 +68,16 @@ void XibDevicePHandle::destroy_device_h()
 
 void MapDevIdPHandle::free_mutex_pool()
 {
+    /*
     // some strange iterator behavior when it's container is empty
     if (_mutex_pool.size() == 0) return;
-    std::map<DevId, std::mutex *>::const_iterator mpli = _mutex_pool.cbegin();
+    std::map<DevId, std::mutex>::const_iterator mpli = _mutex_pool.cbegin();
  
     for (; mpli != _mutex_pool.cend(); mpli++)
     {
         delete mpli -> second;
     } 
+    */
 }
 
 void MapDevIdPHandle::log()
@@ -123,28 +125,33 @@ static bool _find_serial(const conn_serial &item, const DevId &devid)
 
 void MapDevIdPHandle::lock_create_device_mutex(const DevId &devid)
 {
-    std::mutex * pm = nullptr;
+    //std::mutex * pm = nullptr;
     _mutex_pool_mutex.read_lock();
     if (_mutex_pool.find(devid) == _mutex_pool.cend())
     {
         _mutex_pool_mutex.read_unlock();
-        pm = new std::mutex();
+        //pm = new std::mutex();
         _mutex_pool_mutex.write_lock();
-        _mutex_pool.insert(std::make_pair(devid, pm));
+        // this will be insertion
+        std::mutex& m = _mutex_pool[devid];
+        //_mutex_pool.insert(std::make_pair(devid, std::mutex()));
         _mutex_pool_mutex.write_unlock();
+        m.lock();
     }
     else
     {
 
-        pm = _mutex_pool[devid];
+        //pm = _mutex_pool[devid];
+        std::mutex& m = _mutex_pool[devid];
         _mutex_pool_mutex.read_unlock();
+        m.lock();
     }
-    pm->lock();
 }
+    
 
 void MapDevIdPHandle::unlock_device_mutex(const DevId &devid)
 {
-    std::mutex * pm = nullptr;
+    //std::mutex * pm = nullptr;
     _mutex_pool_mutex.read_lock();
     bool ret = false;
     if (_mutex_pool.find(devid) == _mutex_pool.cend())
@@ -153,7 +160,7 @@ void MapDevIdPHandle::unlock_device_mutex(const DevId &devid)
     }
     _mutex_pool_mutex.read_unlock();
     if (ret) return;
-    _mutex_pool[devid]->unlock();
+    _mutex_pool[devid].unlock();
 }
 
 bool MapDevIdPHandle::_is_actual_connection(conn_id_t conn_id, DevId *pserial)

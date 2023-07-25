@@ -150,7 +150,7 @@ private:
     * These next four members to simplify synchronization on the given device operations 
     */
     static ReadWriteLock _mutex_pool_mutex;
-    static std::map<DevId, std::mutex *> _mutex_pool;
+    static std::map<DevId, std::mutex> _mutex_pool;
     static void lock_create_device_mutex(const DevId &devid);
     static void unlock_device_mutex(const DevId &devid);
     static void free_mutex_pool();
