@@ -66,20 +66,6 @@ void XibDevicePHandle::destroy_device_h()
     }
 }
 
-void MapDevIdPHandle::free_mutex_pool()
-{
-    /*
-    // some strange iterator behavior when it's container is empty
-    if (_mutex_pool.size() == 0) return;
-    std::map<DevId, std::mutex>::const_iterator mpli = _mutex_pool.cbegin();
- 
-    for (; mpli != _mutex_pool.cend(); mpli++)
-    {
-        delete mpli -> second;
-    } 
-    */
-}
-
 void MapDevIdPHandle::log()
 {
     _rwlock.read_lock();
@@ -110,8 +96,7 @@ MapDevIdPHandle::~MapDevIdPHandle()
             m.second.destroy_device_h();
         }
     }
-   free_mutex_pool();
-}
+ }
 
 static bool _find_conn(const conn_serial &item, conn_id_t conn_id)
 {
@@ -125,30 +110,24 @@ static bool _find_serial(const conn_serial &item, const DevId &devid)
 
 void MapDevIdPHandle::lock_create_device_mutex(const DevId &devid)
 {
-    //std::mutex * pm = nullptr;
     _mutex_pool_mutex.read_lock();
     if (_mutex_pool.find(devid) == _mutex_pool.cend())
     {
         _mutex_pool_mutex.read_unlock();
-        //pm = new std::mutex();
         _mutex_pool_mutex.write_lock();
         // this will be insertion
         std::mutex& m = _mutex_pool[devid];
-        //_mutex_pool.insert(std::make_pair(devid, std::mutex()));
         _mutex_pool_mutex.write_unlock();
         m.lock();
     }
     else
     {
-
-        //pm = _mutex_pool[devid];
         std::mutex& m = _mutex_pool[devid];
         _mutex_pool_mutex.read_unlock();
         m.lock();
     }
 }
-    
-
+  
 void MapDevIdPHandle::unlock_device_mutex(const DevId &devid)
 {
     //std::mutex * pm = nullptr;

@@ -153,8 +153,7 @@ private:
     static std::map<DevId, std::mutex> _mutex_pool;
     static void lock_create_device_mutex(const DevId &devid);
     static void unlock_device_mutex(const DevId &devid);
-    static void free_mutex_pool();
-    
+      
     /**
     * Checks if the given connection is actual and can write the serial corresponding to thic connection
     */
