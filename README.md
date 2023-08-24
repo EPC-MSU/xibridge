@@ -21,8 +21,9 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 ### Windows
 
-Если планируется собирать xibridge_server, понадобится библитека libserialport. Для этого можно взять архив libserialport_release. Разархивированный 
-каталог libserialport_release положить рядом с xibridge.
+Если планируется собирать `xibridge_server`, понадобится библитека `libserialport`. Для этого можно взять архив `libserialport_release` из раздела релизов на сайте 
+(например, https://github.com/EPC-MSU/xibridge/releases/download/v1.1.6/libserialport_release.zip) или с сетевого диска (`Z:\ximc\Xidcusb\Релизы\xibridge`). 
+Разархивированный каталог libserialport_release положить рядом с получившимся каталогом `xibridge`.
 
 Библиотеку, сервер, тесты и пример использования можно собрать, сначала с помощью CMake GUI, потом с помощью Visual Studio 2013, как и большинство наших 
 проектов:
@@ -38,8 +39,9 @@ git clone https://github.com/EPC-MSU/xibridge --recurse-submodules
 
 ### Linux, Mac OS
 
-Если планируется собирать xibridge_server, понадобится библитека `libserialport`. Разархивированный 
-каталог `libserialport_release` положить рядом с `xibridge`.
+Если планируется собирать `xibridge_server`, понадобится библитека `libserialport`. Для этого можно взять архив `libserialport_release` из раздела релизов на сайте 
+(например, https://github.com/EPC-MSU/xibridge/releases/download/v1.1.6/libserialport_release.zip) или с сетевого диска (`Z:\ximc\Xidcusb\Релизы\xibridge`). 
+Разархивированный каталог libserialport_release положить рядом с получившимся каталогом `xibridge`.
 
 Для Linux-систем (debian и debian mipsel) установить пакет из папки с соответствующим именем (deb64 или deb_mips).
 
